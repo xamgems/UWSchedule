@@ -10,35 +10,34 @@
     tools:context=".LoginActivity">
 
 	<ImageView
-		android:id="@+id/huskyLogo"
 		android:layout_width="250dp"
 		android:layout_height="250dp"
 		android:src="@drawable/huskylogo"
 		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"
 		android:paddingBottom="40dp"
-	    android:layout_marginTop="30dp"
-
 		/>
 
-	<EditText
-		android:id="@+id/username"
-	    android:layout_width="match_parent"
-	    android:layout_above="@+id/sync_button"
-	    android:background="@color/gray"
-	    style="@style/TextViewStandard"
+	<Button
+		android:text="@string/login"
+		android:layout_alignParentBottom="true"
+		android:layout_marginLeft="15dp"
+		android:layout_marginBottom="30dp"
+		android:background="@drawable/button_white"
+		style="@style/ButtonStandard"
 
 		/>
 
 	<Button
-		android:id="@id/sync_button"
-		android:text="@string/sync"
-		android:layout_width="match_parent"
-		android:layout_centerHorizontal="true"
+		android:text="@string/register"
 		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_marginRight="15sp"
 		android:layout_marginBottom="30sp"
 		android:background="@drawable/button_gold"
 		style="@style/ButtonStandard"
-
 		/>
+
+
 
 </RelativeLayout>
