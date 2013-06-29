@@ -21,23 +21,21 @@
 	<style name="ButtonStandard">
 		<item name="android:typeface">sans</item>
 		<item name="android:layout_height">40sp</item>
-		<item name="android:textColor">@color/darkGray</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/offwhite</item>
 		<item name="android:shadowColor">@color/black</item>
 		<item name="android:shadowRadius">0.7</item>
 		<item name="android:shadowDx">1</item>
 		<item name="android:shadowDy">1</item>
 	</style>
 
-	<!-- Standard TextView Styles -->
-	<style name="TextViewStandard">
+	<!-- Standard EditView Styles -->
+	<style name="EditTextStandard">
 		<item name="android:typeface">sans</item>
 		<item name="android:layout_height">36sp</item>
-		<item name="android:textColor">@color/darkGray</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:textColorHint">@color/offwhite</item>
 		<item name="android:background">@color/white</item>
-		<item name="android:shadowColor">@color/black</item>
-		<item name="android:shadowRadius">0.7</item>
-		<item name="android:shadowDx">1</item>
-		<item name="android:shadowDy">1</item>
 	</style>
 
 </resources>

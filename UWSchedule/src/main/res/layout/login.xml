@@ -11,8 +11,8 @@
 
 	<ImageView
 		android:id="@+id/huskyLogo"
-		android:layout_width="250dp"
-		android:layout_height="250dp"
+		android:layout_width="225dp"
+		android:layout_height="225dp"
 		android:src="@drawable/huskylogo"
 		android:layout_centerHorizontal="true"
 		android:paddingBottom="40dp"
@@ -22,10 +22,13 @@
 
 	<EditText
 		android:id="@+id/username"
+		android:hint="@string/uw_username_hint"
+		android:singleLine="true"
 	    android:layout_width="match_parent"
 	    android:layout_above="@+id/sync_button"
-	    android:background="@color/gray"
-	    style="@style/TextViewStandard"
+	    android:background="@color/offwhite"
+	    android:layout_marginBottom="30dp"
+	    style="@style/EditTextStandard"
 
 		/>
 
@@ -36,7 +39,7 @@
 		android:layout_centerHorizontal="true"
 		android:layout_alignParentBottom="true"
 		android:layout_marginBottom="30sp"
-		android:background="@drawable/button_gold"
+		android:background="@drawable/button_purple"
 		style="@style/ButtonStandard"
 
 		/>

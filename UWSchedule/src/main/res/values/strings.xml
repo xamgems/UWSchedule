@@ -9,7 +9,7 @@
 	<string name="sync">Sync</string>
 
 	<!-- com.amgems.uwschedule.SyncDialog -->
-	<string name="uw_username_hint">UWNet ID</string>
+	<string name="uw_username_hint">Username</string>
 	<string name="password_hint">Password</string>
 	<string name="sync_title">Sync with UW</string>
 	<string name="cancel">Cancel</string>
