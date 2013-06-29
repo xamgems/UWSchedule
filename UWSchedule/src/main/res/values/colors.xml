@@ -23,6 +23,7 @@
 	<!-- UW Theme Colors -->
 	<color name="darkerUWPurple">#412163</color>
 	<color name="darkUWPurple">#44337C</color>
+	<color name="lighterUWPurple">#DACAFF</color>
 	<color name="lightUWPurple">#8C69FF</color>
 	<color name="darkCream">#DBD9C8</color>
 	<color name="lightCream">#FEFEFD</color>
