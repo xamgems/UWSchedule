@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name" >UWSchedule</string>
+    <string name="action_settings" >Settings</string>
+
+	<!-- LoginActivity -->
+	<string name="login">Log In</string>
+	<string name="sync">Sync</string>
+
+	<!-- com.amgems.uwschedule.SyncDialog -->
+	<string name="uw_username_hint">UWNet ID</string>
+	<string name="password_hint">Password</string>
+	<string name="sync_title">Sync with UW</string>
+	<string name="cancel">Cancel</string>
+
+
+</resources>
