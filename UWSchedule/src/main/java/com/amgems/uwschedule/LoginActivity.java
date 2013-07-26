@@ -30,6 +30,8 @@ public class LoginActivity extends FragmentActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 int visibility = b ? View.VISIBLE : View.GONE;
+                int stringId = b ? R.string.sync : R.string.login;
+                mSyncButton.setText(getString(stringId));
                 mPassword.setVisibility(visibility);
                 mPassword.setText("");
             }
