@@ -49,7 +49,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/res" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/resources" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/build/source/r" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/build/apk" />
       <excludeFolder url="file://$MODULE_DIR$/build/assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/bundles" />
@@ -62,7 +61,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
-    <orderEntry type="jdk" jdkName="Android 4.2.2" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android 4.2.2 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="android-support-v4" level="project" />
   </component>
