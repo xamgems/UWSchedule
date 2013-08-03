@@ -1,5 +1,6 @@
 build/
 UWSchedule/build/
 UWSchedule/gen/
+local.properties
 build-log.*
 build.*
