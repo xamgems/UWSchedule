@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import com.amgems.uwschedule.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +14,7 @@ import java.util.List;
  */
 public class ParserActivity extends Activity {
 
-    protected void onCreate(Bundle savedInstanceState) {
+/*    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         AsyncTask<String, Integer, List<ScheduleParser.ClassInfo>> getScheduleTask = new GetScheduleTask(){
@@ -42,5 +41,5 @@ public class ParserActivity extends Activity {
         }
     }
 
-
+*/
 }
