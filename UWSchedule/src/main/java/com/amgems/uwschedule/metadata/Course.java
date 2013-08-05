@@ -70,7 +70,7 @@ public class Course implements Parcelable {
         }
     }
 
-    /** A {@link Parcelable.Creator} used to generate an instance of a {@code Course}*/
+    /** A {@link android.os.Parcelable.Creator} used to generate an instance of a {@code Course}*/
     public static final Parcelable.Creator<Course> CREATOR = new Parcelable.Creator<Course>() {
         @Override
         public Course createFromParcel(Parcel in) {

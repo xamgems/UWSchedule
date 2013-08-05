@@ -74,7 +74,7 @@ public class Meeting implements Parcelable {
         }
     }
 
-    /** A {@link Parcelable.Creator} used to generate an instance of a {@code Course}*/
+    /** A {@link android.os.Parcelable.Creator} used to generate an instance of a {@code Course}*/
     public static final Parcelable.Creator<Meeting> CREATOR = new Parcelable.Creator<Meeting>() {
 
         @Override
