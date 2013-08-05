@@ -20,8 +20,7 @@
 package com.amgems.uwschedule.api;
 
 import android.util.JsonReader;
-import android.util.Log;
-import com.amgems.uwschedule.metadata.ClassInfo;
+import com.amgems.uwschedule.metadata.Course;
 
 import java.util.*;
 import java.net.*;
@@ -37,7 +36,7 @@ import java.io.*;
 public class ScheduleParser {
     public static final String BASE_URL = "http://students.washington.edu/shermpay/uw_schedule/web_services/schedule.php?name=";
 
-//    public static List<ClassInfo> createSchedule(String name) throws IOException{
+//    public static List<Course> createSchedule(String name) throws IOException{
 //        ScheduleParser parser = new ScheduleParser();
 //        return parser.readJsonStream(parser.getJsonStream(name));
 //    }
@@ -79,13 +78,13 @@ public class ScheduleParser {
     /**
      * Reads the BufferedReader Containing the Json of the Schedule and
      * Returns a List that represents that Schedule
-     * each item of the List is a specific ClassInfo
+     * each item of the List is a specific Course
      *
      * @param in a <code>BufferedReader</code> value
      * @return a <code>List</code> value
      * @exception java.io.IOException if an error occurs
      */
-    public List<ClassInfo> readJsonStream(InputStream in) throws IOException{
+    public List<Course> readJsonStream(InputStream in) throws IOException{
         if (in != null) {
             JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
             reader.setLenient(true);
@@ -106,8 +105,8 @@ public class ScheduleParser {
      * @return a <code>List</code> value
      * @exception java.io.IOException if an error occurs
      */
-    public List<ClassInfo> readSchedule(JsonReader reader) throws IOException{
-        List<ClassInfo> schedule = new ArrayList<ClassInfo>();
+    public List<Course> readSchedule(JsonReader reader) throws IOException{
+        List<Course> schedule = new ArrayList<Course>();
 
         reader.beginArray();
         while (reader.hasNext()) {
@@ -119,17 +118,17 @@ public class ScheduleParser {
     }
 
     /**
-     * Reads an Individual <code>ClassInfo</code> parses and returns it
-     * Each ClassInfo must contain 4 properties
+     * Reads an Individual <code>Course</code> parses and returns it
+     * Each Course must contain 4 properties
      * 1. <code>String</code> course - represents the course name
      * 2. <code>enum</code> days - represents the days of meetings
      * 3. <code>String</code> times - represents the times of meetings
      * 4. <code>String</code> location - represents the location of meetings
      *
      * @param reader a <code>JsonReader</code> value
-     * @return a <code>ClassInfo</code> value
+     * @return a <code>Course</code> value
      */
-    public ClassInfo readClassInfo(JsonReader reader) throws IOException {
+    public Course readClassInfo(JsonReader reader) throws IOException {
         reader.beginObject();
         String course = "";
         List<String> times = new ArrayList<String>();
@@ -149,8 +148,7 @@ public class ScheduleParser {
             }
         }
 
-        ClassInfo info = new ClassInfo(course);
-        info.addAllMeetings(days, times, locations);
+        Course info = null;  //Course.newInstance(sln, code, courseNumber, sectionId, credits, title, type, meetings);
         reader.endObject();
         System.out.println(info);
         return info;

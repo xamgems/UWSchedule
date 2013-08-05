@@ -17,18 +17,18 @@ public class ParserActivity extends Activity {
 /*    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
-        AsyncTask<String, Integer, List<ScheduleParser.ClassInfo>> getScheduleTask = new GetScheduleTask(){
+        AsyncTask<String, Integer, List<ScheduleParser.Course>> getScheduleTask = new GetScheduleTask(){
             @Override
-            protected void onPostExecute(List<ScheduleParser.ClassInfo> classInfos) {
+            protected void onPostExecute(List<ScheduleParser.Course> classInfos) {
 
             }
         }.execute("shermpay");
     }
 
-    private abstract class GetScheduleTask extends AsyncTask<String, Integer, List<ScheduleParser.ClassInfo>> {
+    private abstract class GetScheduleTask extends AsyncTask<String, Integer, List<ScheduleParser.Course>> {
         @Override
-        protected List<ScheduleParser.ClassInfo> doInBackground(String... name) {
-            List<ScheduleParser.ClassInfo> schedule = null;
+        protected List<ScheduleParser.Course> doInBackground(String... name) {
+            List<ScheduleParser.Course> schedule = null;
             try {
                 ScheduleParser parser = new ScheduleParser();
                 InputStream inputStream = parser.getJsonStream(name[0]);
