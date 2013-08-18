@@ -43,7 +43,7 @@ public class Course implements Parcelable {
     private Type mType;
     private List<Meeting> mMeetings;
 
-    private static Map<String, Course> sCourseMap = new HashMap<>();
+    private static Map<String, Course> sCourseMap = new HashMap<String, Course>();
 
     /** Section type of a given course */
     public static enum Type {
@@ -103,7 +103,7 @@ public class Course implements Parcelable {
         mCredits = in.readInt();
         mTitle = in.readString();
         mType = Type.valueOf(in.readString());
-        mMeetings = new ArrayList<>();
+        mMeetings = new ArrayList<Meeting>();
         in.readTypedList(mMeetings, Meeting.CREATOR);
     }
 

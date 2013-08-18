@@ -22,10 +22,7 @@ package com.amgems.uwschedule.metadata;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,8 +94,8 @@ public class Meeting implements Parcelable {
     }
 
     private Meeting (Parcel in) {
-        mMeetingDays = new HashSet<>();
-        List<String> dayNameList = new ArrayList<>();
+        mMeetingDays = EnumSet.noneOf(Day.class);
+        List<String> dayNameList = new ArrayList<String>();
         in.readStringList(dayNameList);
         for (String dayName : dayNameList) {
             mMeetingDays.add(Day.valueOfDayCode(dayName));
@@ -119,7 +116,7 @@ public class Meeting implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel out, int i) {
-        List<String> meetingDayList = new ArrayList<>();
+        List<String> meetingDayList = new ArrayList<String>();
         for (Day day : mMeetingDays) {
             meetingDayList.add(day.name());
         }
