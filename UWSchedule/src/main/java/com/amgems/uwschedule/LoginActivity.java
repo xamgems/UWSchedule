@@ -19,16 +19,23 @@
 
 package com.amgems.uwschedule;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import com.amgems.uwschedule.services.LoginService;
 
 import java.lang.Override;
+import java.lang.ref.WeakReference;
 
 public class LoginActivity extends FragmentActivity {
 
@@ -42,8 +49,13 @@ public class LoginActivity extends FragmentActivity {
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
 
+    private LoginResponseReceiver mResponseReceiver;
+    private LocalBroadcastManager mBroadcastManager;
     private static final String LOGIN_IN_PROGRESS = "mIsInProgress";
     private boolean mIsInProgress;
+
+    private boolean mIsSyncRequest;
+    private static final String IS_SYNC_REQUEST = "mIsSyncRequest";
 
     private RelativeLayout.LayoutParams mLogoParamsInputGone;
     private RelativeLayout.LayoutParams mLogoParamsInputVisible;
@@ -74,6 +86,10 @@ public class LoginActivity extends FragmentActivity {
         mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
+        // Register login service broadcast receiver
+        mBroadcastManager = LocalBroadcastManager.getInstance(this);
+        mResponseReceiver = new LoginResponseReceiver(this);
+
         // Account for keyboard taking up screen space
         mRootGroup.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -93,13 +109,22 @@ public class LoginActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 mIsInProgress = true;
+                String username = mUsernameEditText.getText().toString();
+                String password = mPasswordEditText.getText().toString();
                 disableLoginInput();
+
+                Intent loginServiceIntent = new Intent(LoginActivity.this, LoginService.class);
+                loginServiceIntent.putExtra(LoginService.PARAM_IN_USERNAME, username);
+                loginServiceIntent.putExtra(LoginService.PARAM_IN_PASSWORD, password);
+                startService(loginServiceIntent);
             }
         });
 
         mSyncCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mIsSyncRequest = b;
+                b = b && !mIsInProgress;
                 int visibility = b ? View.VISIBLE : View.GONE;
                 int stringId = b ? R.string.sync : R.string.login;
                 mSyncButton.setText(getString(stringId));
@@ -109,16 +134,11 @@ public class LoginActivity extends FragmentActivity {
         });
 
         // Disable UI controls if currently logging in from orientation change
-        mIsInProgress = (savedInstanceState == null) ? false : savedInstanceState.getBoolean(LOGIN_IN_PROGRESS);
+        mIsInProgress = (savedInstanceState != null) && savedInstanceState.getBoolean(LOGIN_IN_PROGRESS);
+        mIsSyncRequest = (savedInstanceState != null) && savedInstanceState.getBoolean(IS_SYNC_REQUEST);
         if (mIsInProgress) {
             disableLoginInput();
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(LOGIN_IN_PROGRESS, mIsInProgress);
-        super.onSaveInstanceState(outState);
     }
 
     private void disableLoginInput() {
@@ -135,8 +155,35 @@ public class LoginActivity extends FragmentActivity {
     private void enableLoginInput() {
         mProgressBarGroup.setVisibility(View.INVISIBLE);
         mUsernameGroup.setVisibility(View.VISIBLE);
-        mPasswordEditText.setVisibility(View.VISIBLE);
+        mPasswordEditText.setVisibility(mIsSyncRequest ? View.VISIBLE : View.GONE);
         mSyncButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter intentFilter = new IntentFilter(LoginResponseReceiver.ACTION_RESPONSE);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        intentFilter.setPriority(23);
+        mBroadcastManager.registerReceiver(mResponseReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mResponseReceiver != null) {
+            mBroadcastManager.unregisterReceiver(mResponseReceiver);
+            mResponseReceiver = null;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(LOGIN_IN_PROGRESS, mIsInProgress);
+        outState.putBoolean(IS_SYNC_REQUEST, mIsSyncRequest);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -144,6 +191,36 @@ public class LoginActivity extends FragmentActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.login, menu);
         return true;
+    }
+
+    public static class LoginResponseReceiver extends BroadcastReceiver {
+
+        public static final String ACTION_RESPONSE = "com.amgems.uwschedule.LOGIN_PROCESSED";
+        private WeakReference<LoginActivity> mLoginActivity;
+
+        public LoginResponseReceiver(LoginActivity callingActivity) {
+            mLoginActivity = new WeakReference<LoginActivity>(callingActivity);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String username = intent.getStringExtra(LoginService.PARAM_OUT);
+            LoginActivity loginActivity = mLoginActivity.get();
+
+            if (loginActivity != null) {
+                Log.e("WHATTHEFUCK", "Activity is FINE");
+                Toast.makeText(loginActivity, "Username: " + username, Toast.LENGTH_LONG).show();
+                loginActivity.enableLoginInput();
+                loginActivity.mIsInProgress = false;
+                if (loginActivity.isChangingConfigurations()) {
+                    Log.e("WHATTHEFUCK", "SENDING FROM THE THING INSIDE TO ITSELF");
+                    LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
+                    broadcastManager.sendBroadcast(intent);
+                }
+            } else {
+                Log.e("WHATTHEFUCK", "Activity is null");
+            }
+        }
     }
     
 }

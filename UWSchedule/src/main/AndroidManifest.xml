@@ -23,6 +23,11 @@
 		    </intent-filter>
 	    </activity>
 
+	    <service
+		    android:name="com.amgems.uwschedule.services.LoginService"
+	        />
+
+
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 
