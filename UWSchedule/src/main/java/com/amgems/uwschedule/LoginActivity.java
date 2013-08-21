@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
 import android.widget.*;
 import com.amgems.uwschedule.services.LoginService;
 
@@ -48,6 +49,7 @@ public class LoginActivity extends FragmentActivity {
     private CheckBox mSyncCheckbox;
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
+    private WebView mDebugWebview;
 
     private LoginResponseReceiver mResponseReceiver;
     private LocalBroadcastManager mBroadcastManager;
@@ -75,6 +77,7 @@ public class LoginActivity extends FragmentActivity {
         mPasswordEditText = (EditText) findViewById(R.id.password);
         mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
         mUsernameEditText = (EditText) findViewById(R.id.username);
+        mDebugWebview = (WebView) findViewById(R.id.login_debug_webview);
 
         int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 225,
                 getResources().getDisplayMetrics());
@@ -195,7 +198,7 @@ public class LoginActivity extends FragmentActivity {
 
     public static class LoginResponseReceiver extends BroadcastReceiver {
 
-        public static final String ACTION_RESPONSE = "com.amgems.uwschedule.LOGIN_PROCESSED";
+        public static final String ACTION_RESPONSE = "com.amgems.uwschedule.action.LOGIN_PROCESSED";
         private WeakReference<LoginActivity> mLoginActivity;
 
         public LoginResponseReceiver(LoginActivity callingActivity) {
@@ -204,21 +207,20 @@ public class LoginActivity extends FragmentActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String username = intent.getStringExtra(LoginService.PARAM_OUT);
+            String loginData = intent.getStringExtra(LoginService.PARAM_OUT);
             LoginActivity loginActivity = mLoginActivity.get();
 
-            if (loginActivity != null) {
-                Log.e("WHATTHEFUCK", "Activity is FINE");
-                Toast.makeText(loginActivity, "Username: " + username, Toast.LENGTH_LONG).show();
+            // Resend broadcast in case it is missed during orientation change
+            if (loginActivity.isChangingConfigurations()) {
+                LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
+                broadcastManager.sendBroadcast(intent);
+            } else if (loginActivity != null) {
+                //Toast.makeText(loginActivity, "Username: " + loginData, Toast.LENGTH_LONG).show();
                 loginActivity.enableLoginInput();
                 loginActivity.mIsInProgress = false;
-                if (loginActivity.isChangingConfigurations()) {
-                    Log.e("WHATTHEFUCK", "SENDING FROM THE THING INSIDE TO ITSELF");
-                    LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
-                    broadcastManager.sendBroadcast(intent);
-                }
-            } else {
-                Log.e("WHATTHEFUCK", "Activity is null");
+
+                loginActivity.mDebugWebview.setVisibility(View.VISIBLE);
+                loginActivity.mDebugWebview.loadData(loginData, "text/html", "UTF-8");
             }
         }
     }
