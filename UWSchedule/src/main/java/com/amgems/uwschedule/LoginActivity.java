@@ -19,12 +19,10 @@
 
 package com.amgems.uwschedule;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -58,6 +56,9 @@ public class LoginActivity extends FragmentActivity {
 
     private boolean mIsSyncRequest;
     private static final String IS_SYNC_REQUEST = "mIsSyncRequest";
+
+    private LoginService mLoginService;
+    private boolean mIsBounded;
 
     private RelativeLayout.LayoutParams mLogoParamsInputGone;
     private RelativeLayout.LayoutParams mLogoParamsInputVisible;
@@ -142,9 +143,10 @@ public class LoginActivity extends FragmentActivity {
         if (mIsInProgress) {
             disableLoginInput();
         }
+
     }
 
-    private void disableLoginInput() {
+    public void disableLoginInput() {
         mProgressBarGroup.setVisibility(View.VISIBLE);
         mUsernameGroup.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);
@@ -155,7 +157,7 @@ public class LoginActivity extends FragmentActivity {
         imm.hideSoftInputFromWindow(mRootGroup.getWindowToken(), 0);
     }
 
-    private void enableLoginInput() {
+    public void enableLoginInput() {
         mProgressBarGroup.setVisibility(View.INVISIBLE);
         mUsernameGroup.setVisibility(View.VISIBLE);
         mPasswordEditText.setVisibility(mIsSyncRequest ? View.VISIBLE : View.GONE);
@@ -166,19 +168,35 @@ public class LoginActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
 
-        IntentFilter intentFilter = new IntentFilter(LoginResponseReceiver.ACTION_RESPONSE);
+        IntentFilter intentFilter = new IntentFilter(LoginService.ACTION_RESPONSE);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-        intentFilter.setPriority(23);
         mBroadcastManager.registerReceiver(mResponseReceiver, intentFilter);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
+    protected void onPause() {
         if (mResponseReceiver != null) {
             mBroadcastManager.unregisterReceiver(mResponseReceiver);
             mResponseReceiver = null;
+        }
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent loginBindIntent = new Intent(this, LoginService.class);
+        bindService(loginBindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mIsBounded) {
+            unbindService(mServiceConnection);
+            mIsBounded = false;
         }
     }
 
@@ -196,9 +214,29 @@ public class LoginActivity extends FragmentActivity {
         return true;
     }
 
-    public static class LoginResponseReceiver extends BroadcastReceiver {
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            LoginService.LocalLoginBinder loginBinder = (LoginService.LocalLoginBinder) iBinder;
+            mLoginService = loginBinder.getService();
+            mIsBounded = true;
+            if (mLoginService.pollForCookie()) {
+                enableLoginInput();
+                mIsInProgress = false;
 
-        public static final String ACTION_RESPONSE = "com.amgems.uwschedule.action.LOGIN_PROCESSED";
+                mDebugWebview.setVisibility(View.VISIBLE);
+                mDebugWebview.loadData(mLoginService.getCookie().toString(), "text/html", "UTF-8");
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mIsBounded = false;
+        }
+    };
+
+    private static class LoginResponseReceiver extends BroadcastReceiver {
+
         private WeakReference<LoginActivity> mLoginActivity;
 
         public LoginResponseReceiver(LoginActivity callingActivity) {
@@ -207,20 +245,20 @@ public class LoginActivity extends FragmentActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String loginData = intent.getStringExtra(LoginService.PARAM_OUT);
+            String loginResponse = intent.getStringExtra(LoginService.PARAM_OUT);
             LoginActivity loginActivity = mLoginActivity.get();
 
-            // Resend broadcast in case it is missed during orientation change
-            if (loginActivity.isChangingConfigurations()) {
-                LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(context);
-                broadcastManager.sendBroadcast(intent);
-            } else if (loginActivity != null) {
-                //Toast.makeText(loginActivity, "Username: " + loginData, Toast.LENGTH_LONG).show();
+            Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RECEIVE");
+
+            if (loginActivity != null && loginResponse.equals("OK")) {
                 loginActivity.enableLoginInput();
                 loginActivity.mIsInProgress = false;
 
                 loginActivity.mDebugWebview.setVisibility(View.VISIBLE);
-                loginActivity.mDebugWebview.loadData(loginData, "text/html", "UTF-8");
+                if (loginActivity.mIsBounded) {
+                    loginActivity.mDebugWebview.loadData(loginActivity.mLoginService.getCookie().toString(),
+                                                         "text/html", "UTF-8");
+                }
             }
         }
     }

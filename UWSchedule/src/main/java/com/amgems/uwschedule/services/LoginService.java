@@ -1,16 +1,17 @@
 package com.amgems.uwschedule.services;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
+import android.os.*;
+import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
-import com.amgems.uwschedule.LoginActivity;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -21,110 +22,182 @@ import java.util.regex.Pattern;
 /**
  * Created by zac on 8/18/13.
  */
-public class LoginService extends IntentService {
+public class LoginService extends Service {
+
+    public static final String ACTION_RESPONSE = "com.amgems.uwschedule.action.LOGIN_PROCESSED";
 
     public static final String PARAM_IN_USERNAME = "param.in.username";
     public static final String PARAM_IN_PASSWORD = "param.in.password";
     public static final String PARAM_OUT = "param.out";
 
-    public static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
-    public static final String CHARSET = "UTF-8";
-
     private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"hidden\" name=\"(.+)\" value=\"(.*)\">");
+    static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
+    static final String USER_AGENT_STRING = "Mozilla/5.0";
+    static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
+    static final String CHARSET = "UTF-8";
 
-    public LoginService () {
-        super(LoginService.class.getSimpleName());
+    private List<String> mCookies;
+
+    private Looper mServiceLooper;
+    private Handler mHandler;
+
+    public class LoginHandler extends Handler {
+
+        public LoginHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    onHandleIntent((Intent) msg.obj);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private final IBinder mBinder = new LocalLoginBinder();
+
+    public class LocalLoginBinder extends Binder {
+        public LoginService getService() {
+            // Return instance of LoginService for clients to make calls
+            return LoginService.this;
+        }
     }
 
     @Override
+    public void onCreate() {
+        HandlerThread handlerThread = new HandlerThread("HANDLERTHREAD", Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+
+        mServiceLooper = handlerThread.getLooper();
+        mHandler = new LoginHandler(mServiceLooper);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Message msg = mHandler.obtainMessage();
+        msg.obj = intent;
+        msg.what = 0;
+        mHandler.sendMessage(msg);
+
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    public synchronized boolean pollForCookie() {
+        return mCookies != null;
+    }
+
+    public synchronized List<String> getCookie() {
+        List<String> currCookie = mCookies;
+        mCookies = null;
+        return currCookie;
+    }
+
+    public synchronized void setCookie(List<String> cookie) {
+        mCookies = cookie;
+    }
+
     protected void onHandleIntent(Intent intent) {
-        String username = intent.getStringExtra(PARAM_IN_USERNAME);
-        String password = intent.getStringExtra(PARAM_IN_PASSWORD);
-
-        HttpURLConnection connection = null;
-
-        List<NameValuePair> postParameters = null;
-
+        String response;
         try {
+            String username = intent.getStringExtra(PARAM_IN_USERNAME);
+            String password = intent.getStringExtra(PARAM_IN_PASSWORD);
+
             URL loginUrl = new URL(LOGIN_REQUEST_URL);
-            connection = (HttpURLConnection) loginUrl.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
 
-            String line;
-
-            postParameters = new ArrayList<NameValuePair>();
-            postParameters.add(new BasicNameValuePair("user", username));
-            postParameters.add(new BasicNameValuePair("pass", password));
-
-            while ((line = bufferedReader.readLine()) != null) {
-                Matcher parameterMatcher = HIDDEN_PARAMS.matcher(line);
-                if (parameterMatcher.matches()) {
-                    postParameters.add(new BasicNameValuePair(parameterMatcher.group(1), parameterMatcher.group(2)));
-                }
-            }
-
-            connection.disconnect();
-
-        } catch (Exception e) {
-            Log.e(getClass().getSimpleName(), e.toString());
-
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-
-        }
-
-        List<String> cookies = null;
-        StringBuilder postCompletionBuilder = new StringBuilder();
-
-        try {
-            URL loginUrl = new URL(LOGIN_REQUEST_URL);
-            connection = (HttpURLConnection) loginUrl.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setDoOutput(true);
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-            bufferedWriter.write(toRequestBodyString(postParameters));
-            bufferedWriter.flush();
-
+            HttpURLConnection connection = getInputConnection(loginUrl);
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String nextLine;
-            while ((nextLine = reader.readLine()) != null) {
-                postCompletionBuilder.append(nextLine);
+
+            try {
+                postParameters.add(new BasicNameValuePair("user", username));
+                postParameters.add(new BasicNameValuePair("pass", password));
+                captureHiddenParameters(reader, postParameters);
+            } finally {
+                connection.disconnect();
+                reader.close();
             }
 
-            cookies = connection.getHeaderFields().get("Set-Cookie");
+            connection = getOutputConnection(loginUrl);
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
-        }  catch (Exception e) {
-            Log.e(getClass().getSimpleName(), e.getMessage());
-
-        } finally {
-            if (connection != null) {
+            try {
+                List<String> cookie = getAuthCookies(connection, bufferedWriter, postParameters);
+                setCookie(cookie);
+            } finally {
                 connection.disconnect();
             }
 
+            response = "OK";
+
+        } catch (MalformedURLException e) {
+            response = "BAD";
+        } catch (IOException e) {
+            response = "BAD";
         }
+
+        Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RESULT");
 
         Intent broadcastIntent = new Intent();
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        broadcastIntent.setAction(LoginActivity.LoginResponseReceiver.ACTION_RESPONSE);
+        broadcastIntent.setAction(ACTION_RESPONSE);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastIntent.putExtra(PARAM_OUT, cookies.toString());
+        //broadcastIntent.putExtra(PARAM_OUT, mCookies != null ? mCookies.toString() : "Incorrect Username/Password");
+        broadcastIntent.putExtra(PARAM_OUT, response);
         broadcastManager.sendBroadcast(broadcastIntent);
     }
 
-    private static String toRequestBodyString(List<NameValuePair> postParameterPairs) {
-        StringBuilder builder = new StringBuilder();
+    private static HttpURLConnection getInputConnection (URL targetUrl) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
+        return connection;
+    }
 
+    private static HttpURLConnection getOutputConnection (URL targetUrl) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
+        connection.setRequestProperty("Content-Type", CONTENT_TYPE);
+        connection.setDoOutput(true);
+        return connection;
+    }
+
+    private static void captureHiddenParameters (BufferedReader reader,
+                                                 List<? super NameValuePair> destHiddenParams) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            Matcher parameterMatcher = HIDDEN_PARAMS.matcher(line);
+            if (parameterMatcher.matches()) {
+                destHiddenParams.add(new BasicNameValuePair(parameterMatcher.group(1), parameterMatcher.group(2)));
+            }
+        }
+    }
+
+    private static List<String> getAuthCookies (HttpURLConnection connection, BufferedWriter writer,
+                                       List<? extends NameValuePair> postParams) throws IOException {
+        writer.write(toQueryString(postParams));
+        writer.flush();
+
+        return connection.getHeaderFields().get("Set-Cookie");
+    }
+
+    private static String toQueryString (List<? extends NameValuePair> postParameterPairs) {
+        StringBuilder builder = new StringBuilder();
         boolean firstParameter = true;
 
         try {
             for (NameValuePair postParameterPair : postParameterPairs) {
-                if (!firstParameter) {
+                if (!firstParameter)
                     builder.append("&");
-                }
                 firstParameter = false;
 
                 builder.append(URLEncoder.encode(postParameterPair.getName(), CHARSET));
@@ -137,6 +210,5 @@ public class LoginService extends IntentService {
 
         return builder.toString();
     }
-
 
 }
