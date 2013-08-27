@@ -92,7 +92,6 @@ public class LoginActivity extends FragmentActivity {
 
         // Register login service broadcast receiver
         mBroadcastManager = LocalBroadcastManager.getInstance(this);
-        mResponseReceiver = new LoginResponseReceiver(this);
 
         // Account for keyboard taking up screen space
         mRootGroup.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -170,6 +169,7 @@ public class LoginActivity extends FragmentActivity {
 
         IntentFilter intentFilter = new IntentFilter(LoginService.ACTION_RESPONSE);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        mResponseReceiver = new LoginResponseReceiver(this);
         mBroadcastManager.registerReceiver(mResponseReceiver, intentFilter);
     }
 
