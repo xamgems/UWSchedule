@@ -17,7 +17,7 @@
  *
  */
 
-package com.amgems.uwschedule;
+package com.amgems.uwschedule.ui;
 
 import android.content.*;
 import android.content.res.Configuration;
@@ -31,6 +31,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.*;
+import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.services.LoginService;
 
 import java.lang.Override;

@@ -17,7 +17,7 @@
  *
  */
 
-package com.amgems.uwschedule.metadata;
+package com.amgems.uwschedule.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

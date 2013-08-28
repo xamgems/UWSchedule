@@ -6,6 +6,7 @@ import android.os.*;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import com.amgems.uwschedule.util.NetUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -31,10 +32,6 @@ public class LoginService extends Service {
     public static final String PARAM_OUT = "param.out";
 
     private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"hidden\" name=\"(.+)\" value=\"(.*)\">");
-    static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
-    static final String USER_AGENT_STRING = "Mozilla/5.0";
-    static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
-    static final String CHARSET = "UTF-8";
 
     private List<String> mCookies;
 
@@ -113,10 +110,10 @@ public class LoginService extends Service {
             String username = intent.getStringExtra(PARAM_IN_USERNAME);
             String password = intent.getStringExtra(PARAM_IN_PASSWORD);
 
-            URL loginUrl = new URL(LOGIN_REQUEST_URL);
+            URL loginUrl = new URL(NetUtils.LOGIN_REQUEST_URL);
             List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
 
-            HttpURLConnection connection = getInputConnection(loginUrl);
+            HttpURLConnection connection = NetUtils.getInputConnection(loginUrl);
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             try {
@@ -128,7 +125,7 @@ public class LoginService extends Service {
                 reader.close();
             }
 
-            connection = getOutputConnection(loginUrl);
+            connection = NetUtils.getOutputConnection(loginUrl);
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
             try {
@@ -157,19 +154,7 @@ public class LoginService extends Service {
         broadcastManager.sendBroadcast(broadcastIntent);
     }
 
-    private static HttpURLConnection getInputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        return connection;
-    }
 
-    private static HttpURLConnection getOutputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        connection.setRequestProperty("Content-Type", CONTENT_TYPE);
-        connection.setDoOutput(true);
-        return connection;
-    }
 
     private static void captureHiddenParameters (BufferedReader reader,
                                                  List<? super NameValuePair> destHiddenParams) throws IOException {
@@ -200,9 +185,9 @@ public class LoginService extends Service {
                     builder.append("&");
                 firstParameter = false;
 
-                builder.append(URLEncoder.encode(postParameterPair.getName(), CHARSET));
+                builder.append(URLEncoder.encode(postParameterPair.getName(), NetUtils.CHARSET));
                 builder.append("=");
-                builder.append(URLEncoder.encode(postParameterPair.getValue(), CHARSET));
+                builder.append(URLEncoder.encode(postParameterPair.getValue(), NetUtils.CHARSET));
             }
         } catch (UnsupportedEncodingException e) {
             Log.e(LoginService.class.getSimpleName(), e.getMessage());

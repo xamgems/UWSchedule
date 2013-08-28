@@ -20,7 +20,7 @@
 package com.amgems.uwschedule.api;
 
 import android.util.JsonReader;
-import com.amgems.uwschedule.metadata.Course;
+import com.amgems.uwschedule.model.Course;
 
 import java.util.*;
 import java.net.*;
