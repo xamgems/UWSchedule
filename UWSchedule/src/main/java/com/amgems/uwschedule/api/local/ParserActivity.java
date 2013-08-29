@@ -1,4 +1,4 @@
-package com.amgems.uwschedule.api;
+package com.amgems.uwschedule.api.local;
 
 import android.app.Activity;
 import android.os.AsyncTask;

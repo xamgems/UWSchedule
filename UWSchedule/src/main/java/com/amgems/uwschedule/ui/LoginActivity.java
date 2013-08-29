@@ -32,6 +32,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.*;
 import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.api.uw.GetLoginAuthentication;
 import com.amgems.uwschedule.services.LoginService;
 
 import java.lang.Override;
@@ -221,13 +222,6 @@ public class LoginActivity extends FragmentActivity {
             LoginService.LocalLoginBinder loginBinder = (LoginService.LocalLoginBinder) iBinder;
             mLoginService = loginBinder.getService();
             mIsBounded = true;
-            if (mLoginService.pollForCookie()) {
-                enableLoginInput();
-                mIsInProgress = false;
-
-                mDebugWebview.setVisibility(View.VISIBLE);
-                mDebugWebview.loadData(mLoginService.getCookie().toString(), "text/html", "UTF-8");
-            }
         }
 
         @Override
@@ -246,19 +240,25 @@ public class LoginActivity extends FragmentActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String loginResponse = intent.getStringExtra(LoginService.PARAM_OUT);
+            GetLoginAuthentication.LoginResponse loginResponse = (GetLoginAuthentication.LoginResponse) intent.getSerializableExtra(LoginService.PARAM_OUT_RESPONSE);
             LoginActivity loginActivity = mLoginActivity.get();
 
             Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RECEIVE");
 
-            if (loginActivity != null && loginResponse.equals("OK")) {
+            if (loginActivity != null) {
                 loginActivity.enableLoginInput();
                 loginActivity.mIsInProgress = false;
 
                 loginActivity.mDebugWebview.setVisibility(View.VISIBLE);
                 if (loginActivity.mIsBounded) {
-                    loginActivity.mDebugWebview.loadData(loginActivity.mLoginService.getCookie().toString(),
-                                                         "text/html", "UTF-8");
+                    String cookieData;
+                    if (loginResponse == GetLoginAuthentication.LoginResponse.OK) {
+                        cookieData = intent.getStringExtra(LoginService.PARAM_OUT_COOKIE);
+                    } else {
+                        cookieData = "Username or password invalid";
+                    }
+
+                    loginActivity.mDebugWebview.loadData(cookieData, "text/html", "UTF-8");
                 }
             }
         }

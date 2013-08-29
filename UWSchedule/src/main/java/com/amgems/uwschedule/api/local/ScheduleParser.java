@@ -17,7 +17,7 @@
  *
  */
 
-package com.amgems.uwschedule.api;
+package com.amgems.uwschedule.api.local;
 
 import android.util.JsonReader;
 import com.amgems.uwschedule.model.Course;
