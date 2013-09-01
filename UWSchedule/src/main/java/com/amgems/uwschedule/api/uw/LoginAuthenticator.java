@@ -1,6 +1,7 @@
 package com.amgems.uwschedule.api.uw;
 
 import android.util.Log;
+import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.services.LoginService;
 import com.amgems.uwschedule.util.NetUtils;
 import org.apache.http.NameValuePair;
@@ -19,31 +20,47 @@ import java.util.regex.Pattern;
 /**
  * Created by zac on 8/28/13.
  */
-public class GetLoginAuthentication {
+public class LoginAuthenticator {
 
     private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"hidden\" name=\"(.+)\" value=\"(.*)\">");
 
     private List<String> mCookies;
+    private Response mResponse;
     private final String mUsername;
     private final String mPassword;
 
-    public static enum LoginResponse {
-        OK,
-        AUTHENTICATION_ERROR,
-        SERVER_ERROR,
-        NETWORK_ERROR
+    public static enum Response {
+        OK(R.string.login_response_ok),
+        AUTHENTICATION_ERROR(R.string.login_response_auth_error),
+        SERVER_ERROR(R.string.login_response_server_error),
+        TIMEOUT_ERROR(R.string.login_response_timeout_error),
+        NETWORK_ERROR(R.string.login_response_network_error);
+
+        /**
+         * Resource ID for a suitable string corresponding
+         * to the given response
+         */
+        private final int mStringResId;
+
+        Response(int stringResId) {
+            mStringResId = stringResId;
+        }
+
+        public int getStringResId() {
+            return mStringResId;
+        }
     }
 
-    GetLoginAuthentication(String username, String password) {
+    LoginAuthenticator(String username, String password) {
         mUsername = username;
         mPassword = password;
     }
 
-    public static GetLoginAuthentication newInstance(String username, String password) {
-        return new GetLoginAuthentication(username, password);
+    public static LoginAuthenticator newInstance(String username, String password) {
+        return new LoginAuthenticator(username, password);
     }
 
-    public LoginResponse execute() {
+    public void execute() {
 
         try {
             URL loginUrl = new URL(NetUtils.LOGIN_REQUEST_URL);
@@ -76,26 +93,36 @@ public class GetLoginAuthentication {
             }
 
         } catch (MalformedURLException e) {
-            return LoginResponse.SERVER_ERROR;
+            mResponse = Response.SERVER_ERROR;
         } catch (IOException e) {
-            return LoginResponse.NETWORK_ERROR;
+            mResponse = Response.NETWORK_ERROR;
         }
 
-        Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RESULT");
-
-        if (mCookies != null) {
-            return LoginResponse.OK;
-        } else {
-            return LoginResponse.AUTHENTICATION_ERROR;
+        if (mResponse == null) {
+            if (mCookies != null) {
+                mResponse = Response.OK;
+            } else {
+                mResponse = Response.AUTHENTICATION_ERROR;
+            }
         }
     }
 
-    public List<String> getCookie() {
-        synchronized (mCookies) {
-            List<String> currCookie = mCookies;
-            mCookies = null;
-            return currCookie;
+    public String getCookie() {
+        String cookieValue;
+        if (mCookies != null) {
+            synchronized (mCookies) {
+                List<String> currCookie = mCookies;
+                mCookies = null;
+                cookieValue = mCookies.toString();
+            }
+        } else {
+            cookieValue = null;
         }
+        return cookieValue;
+    }
+
+    public Response getResponse() {
+        return mResponse;
     }
 
     private void captureHiddenParameters (BufferedReader reader,

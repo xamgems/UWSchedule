@@ -19,26 +19,25 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.*;
 import com.amgems.uwschedule.R;
-import com.amgems.uwschedule.api.uw.GetLoginAuthentication;
-import com.amgems.uwschedule.services.LoginService;
+import com.amgems.uwschedule.api.uw.LoginAuthenticator;
+import com.amgems.uwschedule.loaders.LoginAuthLoader;
 
 import java.lang.Override;
-import java.lang.ref.WeakReference;
 
-public class LoginActivity extends FragmentActivity {
+public class LoginActivity extends FragmentActivity
+                           implements LoaderManager.LoaderCallbacks<LoginAuthLoader.Result> {
 
     private ViewGroup mRootGroup;
     private ViewGroup mUsernameGroup;
@@ -51,16 +50,11 @@ public class LoginActivity extends FragmentActivity {
     private EditText mUsernameEditText;
     private WebView mDebugWebview;
 
-    private LoginResponseReceiver mResponseReceiver;
-    private LocalBroadcastManager mBroadcastManager;
-    private static final String LOGIN_IN_PROGRESS = "mIsInProgress";
-    private boolean mIsInProgress;
+    private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
+    private boolean mLoginInProgress;
 
     private boolean mIsSyncRequest;
     private static final String IS_SYNC_REQUEST = "mIsSyncRequest";
-
-    private LoginService mLoginService;
-    private boolean mIsBounded;
 
     private RelativeLayout.LayoutParams mLogoParamsInputGone;
     private RelativeLayout.LayoutParams mLogoParamsInputVisible;
@@ -92,8 +86,10 @@ public class LoginActivity extends FragmentActivity {
         mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
-        // Register login service broadcast receiver
-        mBroadcastManager = LocalBroadcastManager.getInstance(this);
+        LoaderManager manager = getLoaderManager();
+        if (manager.getLoader(0) != null) {
+            manager.initLoader(0, null, this);
+        }
 
         // Account for keyboard taking up screen space
         mRootGroup.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -113,15 +109,10 @@ public class LoginActivity extends FragmentActivity {
         mSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mIsInProgress = true;
-                String username = mUsernameEditText.getText().toString();
-                String password = mPasswordEditText.getText().toString();
+                mLoginInProgress = true;
                 disableLoginInput();
 
-                Intent loginServiceIntent = new Intent(LoginActivity.this, LoginService.class);
-                loginServiceIntent.putExtra(LoginService.PARAM_IN_USERNAME, username);
-                loginServiceIntent.putExtra(LoginService.PARAM_IN_PASSWORD, password);
-                startService(loginServiceIntent);
+                getLoaderManager().initLoader(0, null, LoginActivity.this);
             }
         });
 
@@ -129,7 +120,7 @@ public class LoginActivity extends FragmentActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 mIsSyncRequest = b;
-                b = b && !mIsInProgress;
+                b = b && !mLoginInProgress;
                 int visibility = b ? View.VISIBLE : View.GONE;
                 int stringId = b ? R.string.sync : R.string.login;
                 mSyncButton.setText(getString(stringId));
@@ -139,9 +130,9 @@ public class LoginActivity extends FragmentActivity {
         });
 
         // Disable UI controls if currently logging in from orientation change
-        mIsInProgress = (savedInstanceState != null) && savedInstanceState.getBoolean(LOGIN_IN_PROGRESS);
+        mLoginInProgress = (savedInstanceState != null) && savedInstanceState.getBoolean(LOGIN_IN_PROGRESS);
         mIsSyncRequest = (savedInstanceState != null) && savedInstanceState.getBoolean(IS_SYNC_REQUEST);
-        if (mIsInProgress) {
+        if (mLoginInProgress) {
             disableLoginInput();
         }
 
@@ -152,6 +143,7 @@ public class LoginActivity extends FragmentActivity {
         mUsernameGroup.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);
         mSyncButton.setVisibility(View.GONE);
+        mLoginInProgress = true;
 
         // Closes soft keyboard if open
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -163,48 +155,12 @@ public class LoginActivity extends FragmentActivity {
         mUsernameGroup.setVisibility(View.VISIBLE);
         mPasswordEditText.setVisibility(mIsSyncRequest ? View.VISIBLE : View.GONE);
         mSyncButton.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        IntentFilter intentFilter = new IntentFilter(LoginService.ACTION_RESPONSE);
-        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-        mResponseReceiver = new LoginResponseReceiver(this);
-        mBroadcastManager.registerReceiver(mResponseReceiver, intentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        if (mResponseReceiver != null) {
-            mBroadcastManager.unregisterReceiver(mResponseReceiver);
-            mResponseReceiver = null;
-        }
-
-        super.onPause();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Intent loginBindIntent = new Intent(this, LoginService.class);
-        bindService(loginBindIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mIsBounded) {
-            unbindService(mServiceConnection);
-            mIsBounded = false;
-        }
+        mLoginInProgress = false;
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(LOGIN_IN_PROGRESS, mIsInProgress);
+        outState.putBoolean(LOGIN_IN_PROGRESS, mLoginInProgress);
         outState.putBoolean(IS_SYNC_REQUEST, mIsSyncRequest);
         super.onSaveInstanceState(outState);
     }
@@ -216,7 +172,38 @@ public class LoginActivity extends FragmentActivity {
         return true;
     }
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    @Override
+    public Loader<LoginAuthLoader.Result> onCreateLoader(int i, Bundle bundle) {
+        String username = mUsernameEditText.getText().toString();
+        String password = mPasswordEditText.getText().toString();
+
+        Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, username, password);
+        loader.forceLoad();
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<LoginAuthLoader.Result> loginResponseLoader, LoginAuthLoader.Result result) {
+        LoginAuthenticator.Response response = result.getResponse();
+        if (response == LoginAuthenticator.Response.OK) {
+                mDebugWebview.setVisibility(View.VISIBLE);
+                mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
+            mProgressBarGroup.setVisibility(View.GONE);
+        } else {
+            enableLoginInput();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(response.getStringResId())
+                   .setTitle(R.string.login_dialog_title)
+                   .setPositiveButton(R.string.ok, null)
+                   .setCancelable(true);
+            builder.create().show();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<LoginAuthLoader.Result> loginResponseLoader) {  }
+
+    /*    private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             LoginService.LocalLoginBinder loginBinder = (LoginService.LocalLoginBinder) iBinder;
@@ -240,19 +227,19 @@ public class LoginActivity extends FragmentActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            GetLoginAuthentication.LoginResponse loginResponse = (GetLoginAuthentication.LoginResponse) intent.getSerializableExtra(LoginService.PARAM_OUT_RESPONSE);
+            LoginAuthenticator.Response loginResponse = (LoginAuthenticator.Response) intent.getSerializableExtra(LoginService.PARAM_OUT_RESPONSE);
             LoginActivity loginActivity = mLoginActivity.get();
 
             Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RECEIVE");
 
             if (loginActivity != null) {
                 loginActivity.enableLoginInput();
-                loginActivity.mIsInProgress = false;
+                loginActivity.mLoginInProgress = false;
 
                 loginActivity.mDebugWebview.setVisibility(View.VISIBLE);
                 if (loginActivity.mIsBounded) {
                     String cookieData;
-                    if (loginResponse == GetLoginAuthentication.LoginResponse.OK) {
+                    if (loginResponse == LoginAuthenticator.Response.OK) {
                         cookieData = intent.getStringExtra(LoginService.PARAM_OUT_COOKIE);
                     } else {
                         cookieData = "Username or password invalid";
@@ -262,6 +249,6 @@ public class LoginActivity extends FragmentActivity {
                 }
             }
         }
-    }
+    } */
     
 }

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.*;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
-import com.amgems.uwschedule.api.uw.GetLoginAuthentication;
+import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 
 /**
  * Created by zac on 8/18/13.
@@ -76,9 +76,10 @@ public class LoginService extends Service {
 
     protected void onHandleIntent(Intent intent) {
 
-        GetLoginAuthentication command = GetLoginAuthentication.newInstance(intent.getStringExtra(PARAM_IN_USERNAME),
-                                           intent.getStringExtra(PARAM_IN_PASSWORD));
-        GetLoginAuthentication.LoginResponse response = command.execute();
+        LoginAuthenticator command = LoginAuthenticator.newInstance(intent.getStringExtra(PARAM_IN_USERNAME),
+                intent.getStringExtra(PARAM_IN_PASSWORD));
+        command.execute();
+        LoginAuthenticator.Response response = command.getResponse();
 
         Intent broadcastIntent = new Intent();
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -86,7 +87,7 @@ public class LoginService extends Service {
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
 
         broadcastIntent.putExtra(PARAM_OUT_RESPONSE, response);
-        if (response == GetLoginAuthentication.LoginResponse.OK) {
+        if (response == LoginAuthenticator.Response.OK) {
             broadcastIntent.putExtra(PARAM_OUT_COOKIE, command.getCookie().toString());
         }
 
