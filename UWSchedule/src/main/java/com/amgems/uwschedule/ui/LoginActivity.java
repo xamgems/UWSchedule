@@ -51,6 +51,7 @@ public class LoginActivity extends FragmentActivity
     private WebView mDebugWebview;
 
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
+    private static final int LOGIN_LOADER_ID = 0;
     private boolean mLoginInProgress;
 
     private boolean mIsSyncRequest;
@@ -87,8 +88,8 @@ public class LoginActivity extends FragmentActivity
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
         LoaderManager manager = getLoaderManager();
-        if (manager.getLoader(0) != null) {
-            manager.initLoader(0, null, this);
+        if (manager.getLoader(LOGIN_LOADER_ID) != null) {
+            manager.initLoader(LOGIN_LOADER_ID, null, this);
         }
 
         // Account for keyboard taking up screen space
@@ -113,10 +114,10 @@ public class LoginActivity extends FragmentActivity
                 disableLoginInput();
 
                 LoaderManager manager = getLoaderManager();
-                if (manager.getLoader(0) != null) {
-                    manager.restartLoader(0, null, LoginActivity.this);
+                if (manager.getLoader(LOGIN_LOADER_ID) != null) {
+                    manager.restartLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
                 } else {
-                    manager.initLoader(0, null, LoginActivity.this);
+                    manager.initLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
                 }
 
             }
