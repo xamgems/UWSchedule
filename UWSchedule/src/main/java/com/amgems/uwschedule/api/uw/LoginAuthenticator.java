@@ -111,9 +111,8 @@ public class LoginAuthenticator {
         String cookieValue;
         if (mCookies != null) {
             synchronized (mCookies) {
-                List<String> currCookie = mCookies;
-                mCookies = null;
                 cookieValue = mCookies.toString();
+                mCookies = null;
             }
         } else {
             cookieValue = null;

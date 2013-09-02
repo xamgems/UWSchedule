@@ -186,8 +186,8 @@ public class LoginActivity extends FragmentActivity
     public void onLoadFinished(Loader<LoginAuthLoader.Result> loginResponseLoader, LoginAuthLoader.Result result) {
         LoginAuthenticator.Response response = result.getResponse();
         if (response == LoginAuthenticator.Response.OK) {
-                mDebugWebview.setVisibility(View.VISIBLE);
-                mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
+            mDebugWebview.setVisibility(View.VISIBLE);
+            mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
             mProgressBarGroup.setVisibility(View.GONE);
         } else {
             enableLoginInput();
