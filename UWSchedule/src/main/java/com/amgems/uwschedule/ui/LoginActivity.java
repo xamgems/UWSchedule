@@ -149,7 +149,6 @@ public class LoginActivity extends FragmentActivity
         mUsernameGroup.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);
         mSyncButton.setVisibility(View.GONE);
-        mLoginInProgress = true;
 
         // Closes soft keyboard if open
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -161,7 +160,6 @@ public class LoginActivity extends FragmentActivity
         mUsernameGroup.setVisibility(View.VISIBLE);
         mPasswordEditText.setVisibility(mIsSyncRequest ? View.VISIBLE : View.GONE);
         mSyncButton.setVisibility(View.VISIBLE);
-        mLoginInProgress = false;
     }
 
     @Override
@@ -190,19 +188,23 @@ public class LoginActivity extends FragmentActivity
 
     @Override
     public void onLoadFinished(Loader<LoginAuthLoader.Result> loginResponseLoader, LoginAuthLoader.Result result) {
-        LoginAuthenticator.Response response = result.getResponse();
-        if (response == LoginAuthenticator.Response.OK) {
-            mDebugWebview.setVisibility(View.VISIBLE);
-            mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
-            mProgressBarGroup.setVisibility(View.GONE);
-        } else {
-            enableLoginInput();
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(response.getStringResId())
-                   .setTitle(R.string.login_dialog_title)
-                   .setPositiveButton(R.string.ok, null)
-                   .setCancelable(true);
-            builder.create().show();
+        if (mLoginInProgress) {
+            LoginAuthenticator.Response response = result.getResponse();
+            if (response == LoginAuthenticator.Response.OK) {
+                mDebugWebview.setVisibility(View.VISIBLE);
+                mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
+                mProgressBarGroup.setVisibility(View.GONE);
+
+            } else {
+                enableLoginInput();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(response.getStringResId())
+                        .setTitle(R.string.login_dialog_title)
+                        .setPositiveButton(R.string.ok, null)
+                        .setCancelable(true);
+                builder.create().show();
+            }
+            mLoginInProgress = false;
         }
     }
 
