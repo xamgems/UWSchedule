@@ -112,7 +112,13 @@ public class LoginActivity extends FragmentActivity
                 mLoginInProgress = true;
                 disableLoginInput();
 
-                getLoaderManager().initLoader(0, null, LoginActivity.this);
+                LoaderManager manager = getLoaderManager();
+                if (manager.getLoader(0) != null) {
+                    manager.restartLoader(0, null, LoginActivity.this);
+                } else {
+                    manager.initLoader(0, null, LoginActivity.this);
+                }
+
             }
         });
 
@@ -203,52 +209,4 @@ public class LoginActivity extends FragmentActivity
     @Override
     public void onLoaderReset(Loader<LoginAuthLoader.Result> loginResponseLoader) {  }
 
-    /*    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            LoginService.LocalLoginBinder loginBinder = (LoginService.LocalLoginBinder) iBinder;
-            mLoginService = loginBinder.getService();
-            mIsBounded = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mIsBounded = false;
-        }
-    };
-
-    private static class LoginResponseReceiver extends BroadcastReceiver {
-
-        private WeakReference<LoginActivity> mLoginActivity;
-
-        public LoginResponseReceiver(LoginActivity callingActivity) {
-            mLoginActivity = new WeakReference<LoginActivity>(callingActivity);
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            LoginAuthenticator.Response loginResponse = (LoginAuthenticator.Response) intent.getSerializableExtra(LoginService.PARAM_OUT_RESPONSE);
-            LoginActivity loginActivity = mLoginActivity.get();
-
-            Log.d(LoginService.class.getSimpleName(), "SENDING SERVICE RECEIVE");
-
-            if (loginActivity != null) {
-                loginActivity.enableLoginInput();
-                loginActivity.mLoginInProgress = false;
-
-                loginActivity.mDebugWebview.setVisibility(View.VISIBLE);
-                if (loginActivity.mIsBounded) {
-                    String cookieData;
-                    if (loginResponse == LoginAuthenticator.Response.OK) {
-                        cookieData = intent.getStringExtra(LoginService.PARAM_OUT_COOKIE);
-                    } else {
-                        cookieData = "Username or password invalid";
-                    }
-
-                    loginActivity.mDebugWebview.loadData(cookieData, "text/html", "UTF-8");
-                }
-            }
-        }
-    } */
-    
 }
