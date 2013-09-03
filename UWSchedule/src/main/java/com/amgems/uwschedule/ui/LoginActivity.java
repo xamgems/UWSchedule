@@ -19,6 +19,7 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.*;
@@ -40,12 +41,10 @@ public class LoginActivity extends FragmentActivity
                            implements LoaderManager.LoaderCallbacks<LoginAuthLoader.Result> {
 
     private ViewGroup mRootGroup;
-    private ViewGroup mUsernameGroup;
     private ViewGroup mProgressBarGroup;
 
     private ImageView mLogoImage;
     private Button mSyncButton;
-    private CheckBox mSyncCheckbox;
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
     private WebView mDebugWebview;
@@ -53,9 +52,6 @@ public class LoginActivity extends FragmentActivity
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
     private static final int LOGIN_LOADER_ID = 0;
     private boolean mLoginInProgress;
-
-    private boolean mIsSyncRequest;
-    private static final String IS_SYNC_REQUEST = "mIsSyncRequest";
 
     private RelativeLayout.LayoutParams mLogoParamsInputGone;
     private RelativeLayout.LayoutParams mLogoParamsInputVisible;
@@ -66,12 +62,10 @@ public class LoginActivity extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.login);
+        setContentView(R.layout.login_activity);
 
         mRootGroup = (ViewGroup) findViewById(R.id.login_root);
         mLogoImage = (ImageView) findViewById(R.id.husky_logo);
-        mUsernameGroup = (ViewGroup) findViewById(R.id.username_group);
-        mSyncCheckbox = (CheckBox) findViewById(R.id.sync_checkbox);
         mPasswordEditText = (EditText) findViewById(R.id.password);
         mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
         mUsernameEditText = (EditText) findViewById(R.id.username);
@@ -123,22 +117,8 @@ public class LoginActivity extends FragmentActivity
             }
         });
 
-        mSyncCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                mIsSyncRequest = b;
-                b = b && !mLoginInProgress;
-                int visibility = b ? View.VISIBLE : View.GONE;
-                int stringId = b ? R.string.sync : R.string.login;
-                mSyncButton.setText(getString(stringId));
-                mPasswordEditText.setVisibility(visibility);
-                mPasswordEditText.setText("");
-            }
-        });
-
         // Disable UI controls if currently logging in from orientation change
         mLoginInProgress = (savedInstanceState != null) && savedInstanceState.getBoolean(LOGIN_IN_PROGRESS);
-        mIsSyncRequest = (savedInstanceState != null) && savedInstanceState.getBoolean(IS_SYNC_REQUEST);
         if (mLoginInProgress) {
             disableLoginInput();
         }
@@ -146,8 +126,9 @@ public class LoginActivity extends FragmentActivity
     }
 
     public void disableLoginInput() {
+
         mProgressBarGroup.setVisibility(View.VISIBLE);
-        mUsernameGroup.setVisibility(View.GONE);
+        mUsernameEditText.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);
         mSyncButton.setVisibility(View.GONE);
 
@@ -158,15 +139,14 @@ public class LoginActivity extends FragmentActivity
 
     public void enableLoginInput() {
         mProgressBarGroup.setVisibility(View.INVISIBLE);
-        mUsernameGroup.setVisibility(View.VISIBLE);
-        mPasswordEditText.setVisibility(mIsSyncRequest ? View.VISIBLE : View.GONE);
+        mUsernameEditText.setVisibility(View.VISIBLE);
+        mPasswordEditText.setVisibility(View.VISIBLE);
         mSyncButton.setVisibility(View.VISIBLE);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(LOGIN_IN_PROGRESS, mLoginInProgress);
-        outState.putBoolean(IS_SYNC_REQUEST, mIsSyncRequest);
         super.onSaveInstanceState(outState);
     }
 
@@ -192,9 +172,14 @@ public class LoginActivity extends FragmentActivity
         if (mLoginInProgress) {
             LoginAuthenticator.Response response = result.getResponse();
             if (response == LoginAuthenticator.Response.OK) {
-                mDebugWebview.setVisibility(View.VISIBLE);
-                mDebugWebview.loadData(result.getCookieValue(), "text/html", "UTF-8");
-                mProgressBarGroup.setVisibility(View.GONE);
+                Intent homeActivityIntent = new Intent(this, HomeActivity.class);
+                homeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                Bundle translationBundle =
+                        ActivityOptions.makeCustomAnimation(this, R.anim.activity_transition_slide_right_in,
+                                                            R.anim.activity_transition_slide_right_out).toBundle();
+                startActivity(homeActivityIntent, translationBundle);
+                finish();
 
             } else {
                 enableLoginInput();

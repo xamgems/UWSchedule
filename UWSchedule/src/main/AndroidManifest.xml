@@ -3,7 +3,7 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <uses-sdk android:minSdkVersion="13" android:targetSdkVersion="17" />
+    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="17" />
 
 	<uses-permission android:name="android.permission.INTERNET" />
 
@@ -22,6 +22,12 @@
 			    <category android:name="android.intent.category.LAUNCHER" />
 		    </intent-filter>
 	    </activity>
+
+	    <activity
+		    android:name=".ui.HomeActivity"
+		    />
+
+
     </application>
 
 

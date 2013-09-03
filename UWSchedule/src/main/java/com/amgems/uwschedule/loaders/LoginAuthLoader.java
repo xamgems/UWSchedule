@@ -9,9 +9,6 @@ import com.amgems.uwschedule.api.uw.LoginAuthenticator;
  */
 public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
 
-    public static final String PARAM_IN_USERNAME = "param.in.username";
-    public static final String PARAM_IN_PASSWORD = "param.in.password";
-
     LoginAuthenticator mAuthenticator;
 
     public static class Result {
