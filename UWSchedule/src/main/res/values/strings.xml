@@ -10,10 +10,6 @@
 	<string name="uw_username_hint">Username</string>
 	<string name="password_hint">Password</string>
 
-	<!-- Generic strings -->
-	<string name="cancel">Cancel</string>
-	<string name="ok">OK</string>
-
 	<!-- Login Dialog Responses -->
 	<string name="login_dialog_title">Login Error</string>
 	<string name="login_response_ok">Logged in successfully</string>
@@ -22,6 +18,12 @@
 	<string name="login_response_network_error">Error connecting to network. Please check your connection status and try again.</string>
 	<string name="login_response_timeout_error">Login has timed out. Please try again.</string>
 
+	<!-- HomeActivity Drawer Strings -->
+	<string name="drawer_open">Drawer Open</string>
+	<string name="drawer_closed">Drawer Closed</string>
 
+	<!-- Generic Strings -->
+	<string name="cancel">Cancel</string>
+	<string name="ok">OK</string>
 
 </resources>

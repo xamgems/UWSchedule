@@ -1,17 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<DrawerLayout
+<android.support.v4.widget.DrawerLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/home_root_drawer"
+	android:id="@+id/home_drawer_root"
 	android:layout_width="match_parent"
-    android:layout_height="match_parent"
-	>
-	<ViewPager
+    android:layout_height="match_parent" >
+
+	<!-- ViewPager hosting main content fragments -->
+	<android.support.v4.view.ViewPager
+		android:id="@+id/home_pager"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		>
-	</ViewPager>
+		android:orientation="vertical" />
+
+	<!-- Navigation drawer contents -->
+	<ScrollView
+		android:id="@+id/home_drawer_left"
+		android:layout_width="250dp"
+		android:layout_height="match_parent"
+		android:layout_gravity="left"
+		android:background="@color/darkGrayTransparent">
+
+		<!-- Container for navigation drawer contents -->
+		<LinearLayout
+			android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+			android:orientation="vertical" >
+
+			<TextView
+				android:id="@+id/home_drawer_name"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="15dp"
+				android:layout_marginLeft="10dp"
+				android:layout_marginRight="10dp"
+				android:layout_gravity="start"
+			    android:textColor="@color/textLight"
+			    android:text="STUDENT NAME"	/>
+
+			<TextView
+				android:id="@+id/home_drawer_email"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginRight="10dp"
+				android:layout_gravity="start"
+				android:textColor="@color/textLight"
+				android:text="studentemail@gmail.com" />
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="10dp"
+			    android:background="@color/lightGray"
+				/>
 
 
+		</LinearLayout>
 
-</DrawerLayout>
+	</ScrollView>
+
+</android.support.v4.widget.DrawerLayout>

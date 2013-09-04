@@ -7,6 +7,7 @@
 	<color name="red">#FF0000</color>
 	<color name="silver">#C0C0C0</color>
 	<color name="darkGray">#333333</color>
+	<color name="lightGray">#C1BEC5</color>
 	<color name="gray">#808080</color>
 	<color name="olive">#808000</color>
 	<color name="purple">#800080</color>
@@ -27,6 +28,16 @@
 	<color name="lightUWPurple">#8C69FF</color>
 	<color name="darkCream">#DBD9C8</color>
 	<color name="lightCream">#FEFEFD</color>
+
 	<color name="darkGold">#DDBB22</color>
 	<color name="lightGold">#FFEE44</color>
+
+	<!-- Context based colors -->
+	<color name="actionBarWhite">#F2F4F7</color>
+	<color name="textLight">#ACA9B2</color>
+	<color name="textDark">#323036</color>
+	<color name="textWhite">#F2F4F7</color>
+
+	<!-- Colors with alpha variations -->
+	<color name="darkGrayTransparent">#DD3B3737</color>
 </resources>

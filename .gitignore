@@ -3,3 +3,4 @@ UWSchedule/build/
 UWSchedule/gen/
 build-log.*
 build.*
+.gradle/
