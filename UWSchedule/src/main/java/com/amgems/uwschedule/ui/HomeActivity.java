@@ -30,7 +30,6 @@ public class HomeActivity extends Activity {
         mDrawerLayoutRoot.setDrawerListener(mDrawerToggle);
 
         mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
-        mDrawerListView.setAdapter();
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
