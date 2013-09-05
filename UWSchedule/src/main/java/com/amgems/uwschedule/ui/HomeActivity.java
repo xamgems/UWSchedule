@@ -10,6 +10,9 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import com.amgems.uwschedule.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by zac on 9/2/13.
  */
@@ -30,6 +33,13 @@ public class HomeActivity extends Activity {
         mDrawerLayoutRoot.setDrawerListener(mDrawerToggle);
 
         mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
+
+        List<DrawerListAdapter.Group> drawerGroups = new ArrayList<DrawerListAdapter.Group>();
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_home));
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends));
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_favorites));
+
+        mDrawerListView.setAdapter(new DrawerListAdapter(this, drawerGroups));
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);

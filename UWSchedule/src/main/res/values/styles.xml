@@ -6,7 +6,12 @@
     </style>
 
 	<style name="UWTheme.Light.ActionBar" parent="android:Widget.Holo.Light.ActionBar">
-		<item name="android:background">@color/actionBarWhite</item>
+		<item name="android:background">@color/lightUWPurple</item>
+		<item name="android:titleTextStyle">@style/UWTheme.Light.ActionBar.Title</item>
+	</style>
+
+	<style name="UWTheme.Light.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title.Inverse">
+		<item name="android:textColor">@color/textWhite</item>
 	</style>
 
 	<!-- Standard Button Styles -->
