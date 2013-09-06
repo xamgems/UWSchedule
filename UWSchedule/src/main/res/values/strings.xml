@@ -21,6 +21,9 @@
 	<!-- HomeActivity Drawer Strings -->
 	<string name="drawer_open">Drawer Open</string>
 	<string name="drawer_closed">Drawer Closed</string>
+	<string name="drawer_group_home">Home</string>
+	<string name="drawer_group_friends">Friends</string>
+	<string name="drawer_group_favorites">Favorites</string>
 
 	<!-- Generic Strings -->
 	<string name="cancel">Cancel</string>
