@@ -35,9 +35,9 @@ public class HomeActivity extends Activity {
         mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
 
         List<DrawerListAdapter.Group> drawerGroups = new ArrayList<DrawerListAdapter.Group>();
-        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_home));
-        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends));
-        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_favorites));
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_home, R.drawable.ic_nav_home));
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends, R.drawable.ic_nav_friends));
+        drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_favorites, R.drawable.ic_nav_favorites));
 
         mDrawerListView.setAdapter(new DrawerListAdapter(this, drawerGroups));
 

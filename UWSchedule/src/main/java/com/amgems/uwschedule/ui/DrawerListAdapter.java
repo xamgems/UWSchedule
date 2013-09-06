@@ -1,10 +1,14 @@
 package com.amgems.uwschedule.ui;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.amgems.uwschedule.R;
 
@@ -20,19 +24,16 @@ public class DrawerListAdapter extends BaseExpandableListAdapter {
 
     Context mContext;
     LayoutInflater mInflater;
-
-    public DrawerListAdapter(Context context, List<Group> groups) {
-        mContext = context;
-        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mGroups = groups;
-    }
+    Resources mResources;
 
     public static class Group {
         private final int mStringResId;
+        private final int mIconResId;
         private List<String> mChildren;
 
-        public Group(int stringResId) {
+        public Group(int stringResId, int iconResId) {
             mStringResId = stringResId;
+            mIconResId = iconResId;
         }
 
         public void setChildren(List<String> children) {
@@ -42,6 +43,17 @@ public class DrawerListAdapter extends BaseExpandableListAdapter {
         public int getStringResId(){
             return mStringResId;
         }
+
+        public int getIconResId(){
+            return mIconResId;
+        }
+    }
+
+    public DrawerListAdapter(Context context, List<Group> groups) {
+        mContext = context;
+        mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mResources = mContext.getResources();
+        mGroups = groups;
     }
 
     @Override
@@ -86,10 +98,31 @@ public class DrawerListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.drawer_group_item, parent, false);
         }
+        Group itemGroup = (Group) getGroup(groupPosition);
+
+        if (groupPosition == 0) {
+            convertView.setBackgroundColor(Color.parseColor("#FFA300"));
+        }
+
+        // Sets group icon drawable
+        ImageView groupIconImageView = (ImageView) convertView.findViewById(R.id.group_icon);
+        groupIconImageView.setImageDrawable(mResources.getDrawable(itemGroup.getIconResId()));
+
+        // Sets group title text
         TextView groupTitleTextView = (TextView) convertView.findViewById(R.id.group_title);
-        // Gets string pointed to by resource identifier
-        String groupTitleText = mContext.getString(((Group) getGroup(groupPosition)).getStringResId());
-        groupTitleTextView.setText(groupTitleText);
+        groupTitleTextView.setText(mResources.getString(itemGroup.getStringResId()));
+
+        // Sets group expand/collapse icon if children exist
+        ImageView indicatorImageView = (ImageView) convertView.findViewById(R.id.group_expand_indicator);
+        //if (getChildrenCount(groupPosition) > 0) {
+        if (groupPosition >= 2) {
+            indicatorImageView.setVisibility(View.VISIBLE);
+            int indicatorIconResId = isExpanded ? R.drawable.ic_nav_expand : R.drawable.ic_nav_collapse;
+            indicatorImageView.setImageDrawable(mResources.getDrawable(indicatorIconResId));
+        } else {
+            indicatorImageView.setVisibility(View.GONE);
+        }
+
         return convertView;
     }
 

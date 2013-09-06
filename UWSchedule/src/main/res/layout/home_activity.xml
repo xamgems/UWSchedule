@@ -4,7 +4,8 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/home_drawer_root"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent" >
+	android:layout_height="match_parent"
+	android:background="@color/lightGray">
 
 	<!-- ViewPager hosting main content fragments -->
 	<android.support.v4.view.ViewPager
@@ -23,6 +24,7 @@
 		android:background="@color/darkGrayTransparent"
 		>
 
+		<!-- Student Information -->
 		<TextView
 			android:id="@+id/home_drawer_name"
 			android:layout_width="match_parent"
@@ -44,21 +46,20 @@
 			android:textColor="@color/textLight"
 			android:text="studentemail@gmail.com" />
 
+		<!-- Student Info Divider -->
 		<View
 			android:layout_width="match_parent"
 			android:layout_height="1dp"
 			android:layout_marginTop="10dp"
 			android:background="@color/lightGray" />
 
+		<!-- Navigation item list -->
 		<ExpandableListView
 			android:id="@+id/home_drawer_listview"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:indicatorLeft="215dp"
-		    android:choiceMode="singleChoice"
-		    android:listSelector="@color/uwOrange"
-
-			/>
+			android:groupIndicator="@null"
+			android:listSelector="@null" />
 
 	</LinearLayout>
 
