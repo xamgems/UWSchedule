@@ -4,3 +4,5 @@ UWSchedule/gen/
 build-log.*
 build.*
 .gradle/
+.idea/workspace.xml
+local.properties
