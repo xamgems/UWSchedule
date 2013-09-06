@@ -27,22 +27,24 @@ public class HomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
+        // Initialize view references
         mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayoutRoot, R.drawable.ic_drawer,
                                                   R.string.drawer_open, R.string.drawer_closed);
         mDrawerLayoutRoot.setDrawerListener(mDrawerToggle);
-
         mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
 
+        // Set up navigation drawer items
         List<DrawerListAdapter.Group> drawerGroups = new ArrayList<DrawerListAdapter.Group>();
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_home, R.drawable.ic_nav_home));
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends, R.drawable.ic_nav_friends));
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_favorites, R.drawable.ic_nav_favorites));
-
         mDrawerListView.setAdapter(new DrawerListAdapter(this, drawerGroups));
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+
     }
 
     @Override
