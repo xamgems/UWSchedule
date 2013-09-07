@@ -38,8 +38,9 @@
 	<color name="actionBarBackground">#7247FF</color>
 	<color name="navigationDrawerHighlight">#8C8373</color>
 	<color name="textLight">#ACA9B2</color>
-	<color name="textDark">#323036</color>
+	<color name="textDark">#474747</color>
 	<color name="textWhite">#F2F4F7</color>
+	<color name="textBlack">#323036</color>
 
 	<!-- Colors with alpha variations -->
 	<color name="darkGrayTransparent">#DD3B3737</color>
