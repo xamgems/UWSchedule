@@ -19,6 +19,7 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -37,7 +38,7 @@ import com.amgems.uwschedule.loaders.LoginAuthLoader;
 
 import java.lang.Override;
 
-public class LoginActivity extends FragmentActivity
+public class LoginActivity extends Activity
                            implements LoaderManager.LoaderCallbacks<LoginAuthLoader.Result> {
 
     private ViewGroup mRootGroup;
@@ -47,7 +48,6 @@ public class LoginActivity extends FragmentActivity
     private Button mSyncButton;
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
-    private WebView mDebugWebview;
 
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
     private static final int LOGIN_LOADER_ID = 0;
@@ -57,6 +57,8 @@ public class LoginActivity extends FragmentActivity
     private RelativeLayout.LayoutParams mLogoParamsInputVisible;
 
     private static final int MINIMUM_SCREEN_SIZE_CHANGE = 100;
+    private static final int LOGO_PIXSIZE_SMALL = 125;
+    private static final int LOGO_PIXSIZE_LARGE = 225;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +71,13 @@ public class LoginActivity extends FragmentActivity
         mPasswordEditText = (EditText) findViewById(R.id.password);
         mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
         mUsernameEditText = (EditText) findViewById(R.id.username);
-        mDebugWebview = (WebView) findViewById(R.id.login_debug_webview);
 
-        int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 225,
+        int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_LARGE,
                 getResources().getDisplayMetrics());
         mLogoParamsInputGone = new RelativeLayout.LayoutParams(logoPixelSizeSmall, logoPixelSizeSmall);
         mLogoParamsInputGone.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
-        int logoPixelSizeLarge = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 125,
+        int logoPixelSizeLarge = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_SMALL,
                 getResources().getDisplayMetrics());
         mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -91,8 +92,9 @@ public class LoginActivity extends FragmentActivity
             @Override
             public void onGlobalLayout() {
                 int heightDiff = mRootGroup.getRootView().getHeight() - mRootGroup.getHeight();
+                // Keyboard appeared or orientation is landscape
                 if (heightDiff > MINIMUM_SCREEN_SIZE_CHANGE ||
-                    getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { // Keyboard appeared
+                    getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     mLogoImage.setLayoutParams(mLogoParamsInputVisible);
                 } else {
                     mLogoImage.setLayoutParams(mLogoParamsInputGone);
@@ -151,14 +153,7 @@ public class LoginActivity extends FragmentActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.login, menu);
-        return true;
-    }
-
-    @Override
-    public Loader<LoginAuthLoader.Result> onCreateLoader(int i, Bundle bundle) {
+    public Loader<LoginAuthLoader.Result> onCreateLoader(int id, Bundle args) {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
@@ -189,6 +184,7 @@ public class LoginActivity extends FragmentActivity
                         .setPositiveButton(R.string.ok, null)
                         .setCancelable(true);
                 builder.create().show();
+
             }
             mLoginInProgress = false;
         }

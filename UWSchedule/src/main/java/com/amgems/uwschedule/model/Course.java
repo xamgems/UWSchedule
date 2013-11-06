@@ -34,14 +34,14 @@ import java.util.*;
   */
 public class Course implements Parcelable {
 
-    private String mSln;
-    private String mDepartmentCode;
-    private int mCourseNumber;
-    private int mCredits;
-    private String mSectionId;
-    private String mTitle;
-    private Type mType;
-    private List<Meeting> mMeetings;
+    private final String mSln;
+    private final String mDepartmentCode;
+    private final int mCourseNumber;
+    private final int mCredits;
+    private final String mSectionId;
+    private final String mTitle;
+    private final Type mType;
+    private final List<Meeting> mMeetings;
 
     private static Map<String, Course> sCourseMap = new HashMap<String, Course>();
 
@@ -111,8 +111,8 @@ public class Course implements Parcelable {
      * Returns an instance of the {@code Course} object specified by the given SLN.
      *
      * <p>This method guarantees that for any two instances of the same course returned
-     * are unique. For example, given A and B returned by this method, correspoding to a
-     * single SLN,{@code A.equals(B) IFF A == B}</p>
+     * are unique if they do not have the same SLN. For example, given A and B returned
+     * by this method, corresponding to a single SLN,{@code A.equals(B) IFF A == B}</p>
      *
      * @param sln SLN of course to return;
      * @throws AssertionError if the SLN specified does not resolve to an already loaded

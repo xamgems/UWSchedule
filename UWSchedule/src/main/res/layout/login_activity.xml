@@ -66,6 +66,8 @@ p
 		style="@style/ButtonStandard"
 		/>
 
+
+	<!-- For debugging purposes only -->
 	<WebView
 		android:id="@+id/login_debug_webview"
 		android:layout_width="match_parent"

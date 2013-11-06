@@ -103,7 +103,7 @@ public class LoginAuthenticator {
             try {
                 List<String> cookie = getAuthCookies(connection, bufferedWriter, postParameters);
                 if (cookie != null) {
-                    synchronized (cookie) {
+                    synchronized (cookie) { //TODO Reconsider thread-safety implications
                         mCookies = cookie;
                     }
                 }
