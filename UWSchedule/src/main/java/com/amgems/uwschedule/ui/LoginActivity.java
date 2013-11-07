@@ -49,6 +49,8 @@ public class LoginActivity extends Activity
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
 
+    private SharedPreferences mLoginPreferences;
+    private static final String PREFS_LOGIN_USERNAME = "LOGIN_USERNAME";
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
     private static final int LOGIN_LOADER_ID = 0;
     private boolean mLoginInProgress;
@@ -82,6 +84,12 @@ public class LoginActivity extends Activity
         mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
+        // Initialize SharedPreferences for persisting safe login data
+        mLoginPreferences = getPreferences(MODE_PRIVATE);
+        String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME, mUsernameEditText.getText().toString());
+        mUsernameEditText.setText(defaultUsername);
+
+        // Initialize LoaderManager for async authentication
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(LOGIN_LOADER_ID) != null) {
             manager.initLoader(LOGIN_LOADER_ID, null, this);
@@ -156,6 +164,10 @@ public class LoginActivity extends Activity
     public Loader<LoginAuthLoader.Result> onCreateLoader(int id, Bundle args) {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
+
+        SharedPreferences.Editor preferenceEditor = mLoginPreferences.edit();
+        preferenceEditor.putString(PREFS_LOGIN_USERNAME, username);
+        preferenceEditor.commit();
 
         Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, username, password);
         loader.forceLoad();
