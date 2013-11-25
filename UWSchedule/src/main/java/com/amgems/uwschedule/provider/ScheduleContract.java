@@ -30,7 +30,7 @@ public final class ScheduleContract {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "scheduleDatabase";
 
-    static final String CREATE_TABLE_USERS = "CREATE TABLE " + Accounts.TABLE_NAME + " (" +
+    static final String CREATE_TABLE_ACCOUNTS = "CREATE TABLE " + Accounts.TABLE_NAME + " (" +
                                              BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                                              Accounts.COLUMN_STUDENT_NAME + " TEXT NOT NULL, " +
                                              Accounts.COLUMN_STUDENT_USERNAME + " TEXT NOT NULL, " +

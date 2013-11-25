@@ -46,7 +46,9 @@ public class ScheduleDatabase extends SQLiteOpenHelper{
 
     /**
      * Returns an instance of the {@code ScheduleDatabase} object.
-     *
+     * <p>
+     * Ensures that for a given process, only one instance of the ScheduleDatabase
+     * object is returned.
      * @param context Context from which the database will be resolved;
      */
     public static synchronized ScheduleDatabase getInstance(Context context) {
@@ -58,11 +60,11 @@ public class ScheduleDatabase extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_TABLE_USERS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_ACCOUNTS);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         throw new AssertionError(ScheduleContract.DATABASE_VERSION + "is the only supported version at this time.");
     }
 
