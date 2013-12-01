@@ -10,14 +10,17 @@ import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
 
     LoginAuthenticator mAuthenticator;
+    String mUsername;
 
     public static class Result {
         final LoginAuthenticator.Response mResponse;
         final String mCookieValue;
+        final String mUsername;
 
-        Result(LoginAuthenticator.Response response, String cookieValue) {
+        Result(LoginAuthenticator.Response response, String cookieValue, String username) {
             mResponse = response;
             mCookieValue = cookieValue;
+            mUsername = username;
         }
 
         public String getCookieValue() {
@@ -27,16 +30,19 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
         public LoginAuthenticator.Response getResponse() {
             return mResponse;
         }
+
+        public String getUsername() { return mUsername; }
     }
 
     public LoginAuthLoader(Context context, String username, String password) {
         super(context);
+        mUsername = username;
         mAuthenticator = LoginAuthenticator.newInstance(username, password);
     }
 
     @Override
     public Result loadInBackground() {
         mAuthenticator.execute();
-        return new Result(mAuthenticator.getResponse(), mAuthenticator.getCookie());
+        return new Result(mAuthenticator.getResponse(), mAuthenticator.getCookie(), mUsername);
     }
 }

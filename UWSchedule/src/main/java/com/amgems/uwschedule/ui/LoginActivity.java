@@ -26,13 +26,12 @@ import android.app.LoaderManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
 import android.widget.*;
 import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 import com.amgems.uwschedule.loaders.LoginAuthLoader;
 
@@ -50,6 +49,7 @@ public class LoginActivity extends Activity
     private EditText mUsernameEditText;
 
     private SharedPreferences mLoginPreferences;
+    private CookieStore mCookieStore;
     private static final String PREFS_LOGIN_USERNAME = "LOGIN_USERNAME";
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
     private static final int LOGIN_LOADER_ID = 0;
@@ -83,6 +83,9 @@ public class LoginActivity extends Activity
                 getResources().getDisplayMetrics());
         mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+        // Initialize CookieStore for persisting and writing cookie data
+        mCookieStore = CookieStore.getInstance(getApplicationContext());
 
         // Initialize SharedPreferences for persisting safe login data
         mLoginPreferences = getPreferences(MODE_PRIVATE);
@@ -181,6 +184,8 @@ public class LoginActivity extends Activity
             if (response == LoginAuthenticator.Response.OK) {
                 Intent homeActivityIntent = new Intent(this, HomeActivity.class);
                 homeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                homeActivityIntent.putExtra(HomeActivity.EXTRAS_HOME_USERNAME, result.getUsername());
+                mCookieStore.setActiveCookie(result.getCookieValue());
 
                 Bundle translationBundle =
                         ActivityOptions.makeCustomAnimation(this, R.anim.activity_transition_slide_right_in,

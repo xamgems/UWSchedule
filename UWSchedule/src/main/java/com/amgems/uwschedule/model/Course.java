@@ -24,8 +24,6 @@ import android.os.Parcelable;
 
 import java.util.*;
 
-// TODO Factor out static map changes to a callback for linking up to a ContentProvider
-
 /**
  * <p> Class containing a detailed overview of a particular course. </p>
  *
