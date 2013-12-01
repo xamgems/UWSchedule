@@ -86,6 +86,7 @@ public class LoginActivity extends Activity
 
         // Initialize CookieStore for persisting and writing cookie data
         mCookieStore = CookieStore.getInstance(getApplicationContext());
+
         // Initialize SharedPreferences for persisting safe login data
         mLoginPreferences = getPreferences(MODE_PRIVATE);
         String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME, mUsernameEditText.getText().toString());
