@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * Store for cookie and session related data pertaining to the active user.
+ * A thread-safe store for cookie and session related data pertaining to the active user.
  * <p>
  * All session information at a given time is stored as a single cookie
  * string. Although this single cookie maps to a given user for the period of
@@ -38,6 +38,7 @@ public class CookieStore {
     private static final String PREFERENCE_KEY_COOKIE = "mActiveCookie";
 
     private SharedPreferences mCookiePrefrences;
+    private volatile String mActiveCookie;
 
     private CookieStore(Context context) {
         mCookiePrefrences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -53,7 +54,7 @@ public class CookieStore {
      * @param context Context from which the {@link SharedPreferences} for this CookieStore
      *                will be resolved;
      */
-    public static synchronized CookieStore getCookieStore(Context context) {
+    public static synchronized CookieStore getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new CookieStore(context);
         }
@@ -65,10 +66,11 @@ public class CookieStore {
      *
      * @param cookie The string value of the cookie to store.
      */
-    public void setActiveCookie(String cookie) {
+    public synchronized void setActiveCookie(String cookie) {
         SharedPreferences.Editor editor = mCookiePrefrences.edit();
         editor.putString(PREFERENCE_KEY_COOKIE, cookie);
         editor.apply();
+        mActiveCookie = cookie;
     }
 
     /**
@@ -76,8 +78,20 @@ public class CookieStore {
      *
      * @return The cookie String.
      */
-    public String getActiveCookie() {
-        String activeCookie = mCookiePrefrences.getString(PREFERENCE_KEY_COOKIE, null);
-        return activeCookie;
+    public synchronized String getActiveCookie() {
+        if (mActiveCookie == null) {
+            mActiveCookie = mCookiePrefrences.getString(PREFERENCE_KEY_COOKIE, null);
+        }
+        return mActiveCookie;
+    }
+
+    /**
+     * Permanently removes the active cookie.
+     */
+    public synchronized void flushActiveCookie() {
+        SharedPreferences.Editor editor = mCookiePrefrences.edit();
+        editor.remove(PREFERENCE_KEY_COOKIE);
+        editor.commit();
+        mActiveCookie = null;
     }
 }

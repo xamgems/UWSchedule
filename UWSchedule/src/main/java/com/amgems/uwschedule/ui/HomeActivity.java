@@ -1,7 +1,5 @@
 package com.amgems.uwschedule.ui;
 
-import android.app.Activity;
-
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.*;
@@ -32,6 +30,7 @@ public class HomeActivity extends FragmentActivity {
     private String mUsername;
 
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
+    private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +39,7 @@ public class HomeActivity extends FragmentActivity {
 
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
-        mCookieStore = CookieStore.getCookieStore(getApplicationContext());
-        // TODO - Remove debug cookie message
-        Toast.makeText(this, mCookieStore.getActiveCookie(), Toast.LENGTH_SHORT).show();
+        mCookieStore = CookieStore.getInstance(getApplicationContext());
 
         // Initialize view references
         mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);
@@ -59,13 +56,12 @@ public class HomeActivity extends FragmentActivity {
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends, R.drawable.ic_nav_friends));
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_favorites, R.drawable.ic_nav_favorites));
         mDrawerListView.setAdapter(new DrawerListAdapter(this, drawerGroups));
-
         mCoursesViewPager.setAdapter(new CoursesFragmentPagerAdapter(getSupportFragmentManager()));
+
+        mDrawerEmailTextView.setText(mUsername + USER_EMAIL_POSTFIX);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
-
     }
 
     @Override

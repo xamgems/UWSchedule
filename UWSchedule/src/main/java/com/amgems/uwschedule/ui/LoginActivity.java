@@ -85,7 +85,7 @@ public class LoginActivity extends Activity
         mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
 
         // Initialize CookieStore for persisting and writing cookie data
-        mCookieStore = CookieStore.getCookieStore(getApplicationContext());
+        mCookieStore = CookieStore.getInstance(getApplicationContext());
         // Initialize SharedPreferences for persisting safe login data
         mLoginPreferences = getPreferences(MODE_PRIVATE);
         String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME, mUsernameEditText.getText().toString());

@@ -36,6 +36,7 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
 
     public LoginAuthLoader(Context context, String username, String password) {
         super(context);
+        mUsername = username;
         mAuthenticator = LoginAuthenticator.newInstance(username, password);
     }
 
