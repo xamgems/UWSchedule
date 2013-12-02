@@ -1,30 +1,28 @@
 package com.amgems.uwschedule.model;
 
+import android.content.ContentValues;
+import com.amgems.uwschedule.provider.ScheduleContract;
+
 /**
  * Class containing data pertaining to the account of a specific user.
  */
 public class Account {
 
-    private final int mId;
     private final String mUserame;
     private final String mStudentName;
 
     private final long mLastUpdateTime;
 
-    public Account (int id, String username, String studentName, long lastUpdateTime) {
-        mId = id;
+    public Account (String username, String studentName) {
+        mUserame = username;
+        mStudentName = studentName;
+        mLastUpdateTime = 0;
+    }
+
+    public Account (String username, String studentName, long lastUpdateTime) {
         mUserame = username;
         mStudentName = studentName;
         mLastUpdateTime = lastUpdateTime;
-    }
-
-    /**
-     * Returns the database ID for this {@link Account}.
-     *
-     * @return ID for this account.
-     */
-    public int getId() {
-        return mId;
     }
 
     /**
@@ -71,6 +69,36 @@ public class Account {
      */
     public boolean hasPrimaryDataUpdated() {
         return mLastUpdateTime != 0;
+    }
+
+    /**
+     * Returns a brief description of this account. The exact details
+     * of this representation are unspecified and subject to change,
+     * but the following can be regarded as typical:
+     *
+     * "{
+     *     username : zac23
+     *     fullname : Zachary Iqbal
+     *     lastupdate : 2027
+     * }"
+     */
+    public String toString() {
+        return "{\n" + " username : " + mUserame + ",\n" +
+                   " fullname : " + mStudentName + ",\n" +
+                   " lastupdate : " + mLastUpdateTime + "\n" +
+                "}";
+    }
+
+    /**
+     * Returns a representation of this {@link Account} in the
+     * form of a {@link ContentValues}.
+     */
+    public ContentValues toContentValues() {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put(ScheduleContract.Accounts.STUDENT_USERNAME, mUserame);
+        contentValues.put(ScheduleContract.Accounts.STUDENT_NAME, mStudentName);
+        contentValues.put(ScheduleContract.Accounts.USER_LAST_UPDATE, mLastUpdateTime);
+        return contentValues;
     }
 
 }

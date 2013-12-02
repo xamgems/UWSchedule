@@ -19,8 +19,9 @@
 
 package com.amgems.uwschedule.provider;
 
-import static com.amgems.uwschedule.provider.ScheduleContract.*;
+import com.amgems.uwschedule.provider.ScheduleContract.AccountsColumns;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,24 +37,38 @@ import com.amgems.uwschedule.model.Account;
  * {@link com.amgems.uwschedule.model.Course} and {@link com.amgems.uwschedule.model.Meeting}
  * related data for a given user.
  */
-public class ScheduleDatabase extends SQLiteOpenHelper{
+public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
 
-    private static ScheduleDatabase sInstance;
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_NAME = "scheduleDatabase";
 
-    private ScheduleDatabase(Context context) {
+    private static ScheduleDatabaseHelper sInstance;
+
+    static class Tables {
+        public static final String ACCOUNTS = "accounts";
+    }
+
+    static final String CREATE_TABLE_ACCOUNTS = "CREATE TABLE " + Tables.ACCOUNTS + " (" +
+            BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            AccountsColumns.STUDENT_NAME + " TEXT NOT NULL, " +
+            AccountsColumns.STUDENT_USERNAME + " TEXT NOT NULL, " +
+            AccountsColumns.USER_LAST_UPDATE + " INT DEFAULT 0, " +
+            "UNIQUE (" + AccountsColumns.STUDENT_USERNAME + ") ON CONFLICT REPLACE)";
+
+    private ScheduleDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     /**
-     * Returns an instance of the {@code ScheduleDatabase} object.
+     * Returns an instance of the {@code ScheduleDatabaseHelper} object.
      * <p>
-     * Ensures that for a given process, only one instance of the ScheduleDatabase
+     * Ensures that for a given process, only one instance of the ScheduleDatabaseHelper
      * object is returned.
      * @param context Context from which the database will be resolved;
      */
-    public static synchronized ScheduleDatabase getInstance(Context context) {
+    public static synchronized ScheduleDatabaseHelper getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new ScheduleDatabase(context);
+            sInstance = new ScheduleDatabaseHelper(context);
         }
         return sInstance;
     }
@@ -65,7 +80,7 @@ public class ScheduleDatabase extends SQLiteOpenHelper{
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        throw new AssertionError(ScheduleContract.DATABASE_VERSION + "is the only supported version at this time.");
+        throw new AssertionError(DATABASE_VERSION + "is the only supported version at this time.");
     }
 
     /**
@@ -79,21 +94,40 @@ public class ScheduleDatabase extends SQLiteOpenHelper{
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = {
                 BaseColumns._ID,
-                Accounts.COLUMN_STUDENT_NAME,
-                Accounts.COLUMN_USER_LAST_UPDATE};
-        String selection = Accounts.COLUMN_STUDENT_USERNAME + " = ?";
+                AccountsColumns.STUDENT_NAME,
+                AccountsColumns.USER_LAST_UPDATE};
+        String selection = AccountsColumns.STUDENT_USERNAME + " = ?";
         String[] selectionArgs = { accountUsername };
 
-        Cursor result = db.query(Accounts.TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+        Cursor result = db.query(Tables.ACCOUNTS, projection, selection, selectionArgs, null, null, null);
 
         Account account = null;
         if (result.moveToFirst()) {
             int accountId = result.getInt(0);
             String accountName = result.getString(1);
             Long accountLastUpdate = result.getLong(2);
-            account = new Account(accountId, accountUsername, accountName, accountLastUpdate);
+            account = new Account(accountUsername, accountName, accountLastUpdate);
         }
         return account;
+    }
+
+    /**
+     * Inserts the {@link Account} to the database.
+     *
+     * The username, full name and last time of update for the
+     * given Account will be stored as an entry in the database.
+     *
+     * @param account The Account to add
+     */
+    public void insertAccount(Account account) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(AccountsColumns.STUDENT_USERNAME, account.getUsername());
+        values.put(AccountsColumns.STUDENT_NAME, account.getmStudentName());
+        values.put(AccountsColumns.USER_LAST_UPDATE, account.getLastUpdateTime());
+
+        db.insert(Tables.ACCOUNTS, null, values);
     }
 
 }

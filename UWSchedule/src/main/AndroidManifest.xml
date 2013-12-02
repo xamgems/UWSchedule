@@ -27,6 +27,13 @@
 		    android:name=".ui.HomeActivity"
 		    />
 
+	    <provider
+		    android:authorities="com.amgems.uwschedule.provider"
+		    android:name=".provider.ScheduleProvider"
+	        android:permission="true"
+	        android:exported="false"
+		    />
+
 
     </application>
 

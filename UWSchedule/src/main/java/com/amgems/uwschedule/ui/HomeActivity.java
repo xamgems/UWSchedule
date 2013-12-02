@@ -1,7 +1,9 @@
 package com.amgems.uwschedule.ui;
 
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.model.Account;
+import com.amgems.uwschedule.provider.ScheduleContract;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,7 @@ public class HomeActivity extends FragmentActivity {
     private ExpandableListView mDrawerListView;
     private ViewPager mCoursesViewPager;
     private TextView mDrawerEmailTextView;
+    private ScheduleDatabaseHelper mDatabase;
 
     private CookieStore mCookieStore;
     private String mUsername;
@@ -37,9 +43,43 @@ public class HomeActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
+        // TODO Remove strict mode when database debugging is complete
+        // Death penalty for all strict mode violations
+        /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyDeath()
+                .build());*/
+
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
         mCookieStore = CookieStore.getInstance(getApplicationContext());
+
+        Cursor accountsCursor = getContentResolver().query(ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
+        try {
+            if (accountsCursor.moveToFirst()) {
+                do {
+                    String username = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_USERNAME));
+                    String studentName = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_NAME));
+                    long lastUpdateTime = accountsCursor.getLong(accountsCursor.getColumnIndex(ScheduleContract.Accounts.USER_LAST_UPDATE));
+                    String accountText = new Account(username, studentName, lastUpdateTime).toString();
+                    Toast.makeText(this, accountText, Toast.LENGTH_SHORT).show();
+                } while (accountsCursor.moveToNext());
+            } else {
+                Account testAccount = new Account(mUsername, "Zachary Iqbal");
+                getContentResolver().insert(ScheduleContract.Accounts.CONTENT_URI, testAccount.toContentValues());
+                Toast.makeText(this, "Added new accounts: " + testAccount, Toast.LENGTH_SHORT).show();
+            }
+        } finally {
+            accountsCursor.close();
+        }
+
+/*        Account currentUser = mDatabase.getAccount(mUsername);
+        if (currentUser == null) { // User was not found
+            Toast.makeText(this, "Welcome new user!", Toast.LENGTH_SHORT).show();
+            currentUser = new Account(mUsername, "Zachary Iqbal");
+            mDatabase.insertAccount(currentUser);
+        }
+        Toast.makeText(this, currentUser.toString(), Toast.LENGTH_LONG).show(); */
 
         // Initialize view references
         mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);

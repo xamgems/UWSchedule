@@ -19,33 +19,43 @@
 
 package com.amgems.uwschedule.provider;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
+
 /**
- * A Contract class used in conjunction with {@link ScheduleDatabase}, defining the
- * schema for the Schedule Database.
+ * A Contract class used for interacting with a {@link ScheduleProvider},
+ * defining the schema for its underlying {@link ScheduleDatabaseHelper}.
  */
 public final class ScheduleContract {
-
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "scheduleDatabase";
-
-    static final String CREATE_TABLE_ACCOUNTS = "CREATE TABLE " + Accounts.TABLE_NAME + " (" +
-                                             BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                                             Accounts.COLUMN_STUDENT_NAME + " TEXT NOT NULL, " +
-                                             Accounts.COLUMN_STUDENT_USERNAME + " TEXT NOT NULL, " +
-                                             Accounts.COLUMN_USER_LAST_UPDATE + " INT DEFAULT 0, " +
-                                             "UNIQUE (" + Accounts.COLUMN_STUDENT_USERNAME + ") ON CONFLICT REPLACE)";
 
 
     /* Suppress default constructor for noninstantiabiltiy */
     private ScheduleContract() { }
 
-    public static abstract class Accounts implements BaseColumns {
-        public static final String TABLE_NAME = "users";
-        public static final String COLUMN_STUDENT_NAME = "student_name";
-        public static final String COLUMN_STUDENT_USERNAME = "student_username";
-        public static final String COLUMN_USER_LAST_UPDATE = "user_last_update";
+    interface AccountsColumns {
+        public static final String STUDENT_NAME = "student_name";
+        public static final String STUDENT_USERNAME = "student_username";
+        public static final String USER_LAST_UPDATE = "user_last_update";
+    }
+
+    public static final String CONTENT_AUTHORITY = "com.amgems.uwschedule.provider";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    private static final String PATH_ACCOUNTS = "accounts";
+
+    public static abstract class Accounts implements BaseColumns, AccountsColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_ACCOUNTS).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/vnd.uwschedule.account";
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/vnd.uwschedule.account";
+
+        public static Uri buildAccountsUri(String accountsId) {
+            return CONTENT_URI.buildUpon().appendPath(accountsId).build();
+        }
     }
 
 }
