@@ -20,6 +20,7 @@
 package com.amgems.uwschedule.provider;
 
 import com.amgems.uwschedule.provider.ScheduleContract.AccountsColumns;
+import com.amgems.uwschedule.provider.ScheduleContract.CoursesColumns;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -46,6 +47,7 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
 
     static class Tables {
         public static final String ACCOUNTS = "accounts";
+        public static final String COURSES = "courses";
     }
 
     static final String CREATE_TABLE_ACCOUNTS = "CREATE TABLE " + Tables.ACCOUNTS + " (" +
@@ -54,6 +56,20 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
             AccountsColumns.STUDENT_USERNAME + " TEXT NOT NULL, " +
             AccountsColumns.USER_LAST_UPDATE + " INT DEFAULT 0, " +
             "UNIQUE (" + AccountsColumns.STUDENT_USERNAME + ") ON CONFLICT REPLACE)";
+
+    static final String CREATE_TABLE_COURSES = "CREATE TABLE " + Tables.COURSES + " (" +
+            BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            CoursesColumns.SLN + " TEXT NOT NULL, " +
+            CoursesColumns.STUDENT_USERNAME + " TEXT NOT NULL, " +
+            CoursesColumns.DEPARTMENT_CODE + " TEXT NOT NULL, " +
+            CoursesColumns.COURSE_NUMBER + " TEXT, " +
+            CoursesColumns.CREDITS + " TEXT, " +
+            CoursesColumns.SECTION_ID + " TEXT NOT NULL, " +
+            CoursesColumns.TYPE + " TEXT NOT NULL, " +
+            CoursesColumns.TITLE + " TEXT NOT NULL, " +
+            "FOREIGN KEY(" + CoursesColumns.STUDENT_USERNAME + ") REFERENCES " +
+            Tables.ACCOUNTS + "(" + AccountsColumns.STUDENT_USERNAME + "), " +
+            "UNIQUE (" + CoursesColumns.SLN + ") ON CONFLICT REPLACE)";
 
     private ScheduleDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -76,6 +92,7 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_ACCOUNTS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_COURSES);
     }
 
     @Override
@@ -124,7 +141,7 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
 
         ContentValues values = new ContentValues();
         values.put(AccountsColumns.STUDENT_USERNAME, account.getUsername());
-        values.put(AccountsColumns.STUDENT_NAME, account.getmStudentName());
+        values.put(AccountsColumns.STUDENT_NAME, account.getStudentName());
         values.put(AccountsColumns.USER_LAST_UPDATE, account.getLastUpdateTime());
 
         db.insert(Tables.ACCOUNTS, null, values);

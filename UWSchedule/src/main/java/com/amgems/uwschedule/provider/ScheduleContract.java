@@ -29,6 +29,8 @@ import android.provider.BaseColumns;
  */
 public final class ScheduleContract {
 
+    public static final String CONTENT_AUTHORITY = "com.amgems.uwschedule.provider";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     /* Suppress default constructor for noninstantiabiltiy */
     private ScheduleContract() { }
@@ -38,9 +40,6 @@ public final class ScheduleContract {
         public static final String STUDENT_USERNAME = "student_username";
         public static final String USER_LAST_UPDATE = "user_last_update";
     }
-
-    public static final String CONTENT_AUTHORITY = "com.amgems.uwschedule.provider";
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     private static final String PATH_ACCOUNTS = "accounts";
 
@@ -53,8 +52,37 @@ public final class ScheduleContract {
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/vnd.uwschedule.account";
 
-        public static Uri buildAccountsUri(String accountsId) {
-            return CONTENT_URI.buildUpon().appendPath(accountsId).build();
+        public static Uri buildAccountUri(long accountId) {
+            String idString = String.valueOf(accountId);
+            return CONTENT_URI.buildUpon().appendPath(idString).build();
+        }
+    }
+
+    interface CoursesColumns {
+        public static final String SLN = "course_sln";
+        public static final String STUDENT_USERNAME = "student_username";
+        public static final String DEPARTMENT_CODE = "course_dept_code";
+        public static final String COURSE_NUMBER = "course_number";
+        public static final String CREDITS = "course_credits";
+        public static final String SECTION_ID = "course_section";
+        public static final String TYPE = "course_type";
+        public static final String TITLE = "course_title";
+    }
+
+    private static final String PATH_COURSES = "courses";
+
+    public static abstract class Courses implements BaseColumns, CoursesColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_COURSES).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/vnd.uwschedule.course";
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/vnd.uwschedule.course";
+
+        public static Uri buildCoursesUri(long courseId) {
+            String idString = String.valueOf(courseId);
+            return CONTENT_URI.buildUpon().appendPath(idString).build();
         }
     }
 

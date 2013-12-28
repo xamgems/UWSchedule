@@ -40,7 +40,7 @@ public class Account {
      *
      * @return Full name of user of an account.
      */
-    public String getmStudentName() {
+    public String getStudentName() {
         return mStudentName;
     }
 
@@ -82,6 +82,7 @@ public class Account {
      *     lastupdate : 2027
      * }"
      */
+    @Override
     public String toString() {
         return "{\n" + " username : " + mUserame + ",\n" +
                    " fullname : " + mStudentName + ",\n" +
@@ -95,9 +96,9 @@ public class Account {
      */
     public ContentValues toContentValues() {
         final ContentValues contentValues = new ContentValues();
-        contentValues.put(ScheduleContract.Accounts.STUDENT_USERNAME, mUserame);
-        contentValues.put(ScheduleContract.Accounts.STUDENT_NAME, mStudentName);
-        contentValues.put(ScheduleContract.Accounts.USER_LAST_UPDATE, mLastUpdateTime);
+        contentValues.put(ScheduleContract.Accounts.STUDENT_USERNAME, getUsername());
+        contentValues.put(ScheduleContract.Accounts.STUDENT_NAME, getStudentName());
+        contentValues.put(ScheduleContract.Accounts.USER_LAST_UPDATE, getLastUpdateTime());
         return contentValues;
     }
 

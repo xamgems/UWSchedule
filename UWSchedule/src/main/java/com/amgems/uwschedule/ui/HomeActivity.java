@@ -14,10 +14,13 @@ import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.model.Account;
+import com.amgems.uwschedule.model.Course;
+import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -45,41 +48,46 @@ public class HomeActivity extends FragmentActivity {
 
         // TODO Remove strict mode when database debugging is complete
         // Death penalty for all strict mode violations
-        /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyDeath()
-                .build());*/
+                .build());
 
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
         mCookieStore = CookieStore.getInstance(getApplicationContext());
 
-        Cursor accountsCursor = getContentResolver().query(ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
+        /* Cursor accountsCursor = getContentResolver().query(ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
         try {
             if (accountsCursor.moveToFirst()) {
-                do {
-                    String username = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_USERNAME));
-                    String studentName = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_NAME));
-                    long lastUpdateTime = accountsCursor.getLong(accountsCursor.getColumnIndex(ScheduleContract.Accounts.USER_LAST_UPDATE));
-                    String accountText = new Account(username, studentName, lastUpdateTime).toString();
-                    Toast.makeText(this, accountText, Toast.LENGTH_SHORT).show();
-                } while (accountsCursor.moveToNext());
+                String username = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_USERNAME));
+                String studentName = accountsCursor.getString(accountsCursor.getColumnIndex(ScheduleContract.Accounts.STUDENT_NAME));
+                long lastUpdateTime = accountsCursor.getLong(accountsCursor.getColumnIndex(ScheduleContract.Accounts.USER_LAST_UPDATE));
+                String accountText = new Account(username, studentName, lastUpdateTime).toString();
+                Toast.makeText(this, accountText, Toast.LENGTH_SHORT).show();
+
+                Cursor coursesCursor = getContentResolver().query(ScheduleContract.Courses.CONTENT_URI, null, ScheduleContract.Courses.STUDENT_USERNAME + " = ?",
+                                                                  new String[] {mUsername}, null);
+                while (coursesCursor.moveToNext()) {
+                    String sln = coursesCursor.getString(coursesCursor.getColumnIndex(ScheduleContract.Courses.SLN));
+                    String department = coursesCursor.getString(coursesCursor.getColumnIndex(ScheduleContract.Courses.DEPARTMENT_CODE));
+                    String number = coursesCursor.getString(coursesCursor.getColumnIndex(ScheduleContract.Courses.COURSE_NUMBER));
+
+                    Toast.makeText(this, "sln: " + sln + ", dept: " + department + ", number: " + number, Toast.LENGTH_SHORT).show();
+                }
+
             } else {
                 Account testAccount = new Account(mUsername, "Zachary Iqbal");
                 getContentResolver().insert(ScheduleContract.Accounts.CONTENT_URI, testAccount.toContentValues());
-                Toast.makeText(this, "Added new accounts: " + testAccount, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Added new account: " + testAccount, Toast.LENGTH_SHORT).show();
+
+                Course testCourse = Course.newInstance("123123", "CSE", 332, "A", 5, "DATA ABSTRACTIONS", Course.Type.LC, new LinkedList<Meeting>());
+                getContentResolver().insert(ScheduleContract.Courses.CONTENT_URI, testCourse.toContentValues(mUsername));
+                Toast.makeText(this, "Added new course: " + testCourse, Toast.LENGTH_SHORT).show();
             }
         } finally {
             accountsCursor.close();
-        }
-
-/*        Account currentUser = mDatabase.getAccount(mUsername);
-        if (currentUser == null) { // User was not found
-            Toast.makeText(this, "Welcome new user!", Toast.LENGTH_SHORT).show();
-            currentUser = new Account(mUsername, "Zachary Iqbal");
-            mDatabase.insertAccount(currentUser);
-        }
-        Toast.makeText(this, currentUser.toString(), Toast.LENGTH_LONG).show(); */
+        } */
 
         // Initialize view references
         mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);

@@ -1,7 +1,6 @@
 package com.amgems.uwschedule.provider;
 
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper.Tables;
-import com.amgems.uwschedule.provider.ScheduleContract.Accounts;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -22,13 +21,17 @@ public class ScheduleProvider extends ContentProvider {
 
     private static final int ACCOUNTS = 100;
     private static final int ACCOUNTS_ID = 101;
+    private static final int COURSES = 200;
+    private static final int COURSES_ID = 201;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = ScheduleContract.CONTENT_AUTHORITY;
 
         uriMatcher.addURI(authority, "accounts", ACCOUNTS);
-        uriMatcher.addURI(authority, "accounts/*", ACCOUNTS_ID);
+        uriMatcher.addURI(authority, "accounts/#", ACCOUNTS_ID);
+        uriMatcher.addURI(authority, "courses", COURSES);
+        uriMatcher.addURI(authority, "courses/#", COURSES_ID);
 
         return uriMatcher;
     }
@@ -56,8 +59,20 @@ public class ScheduleProvider extends ContentProvider {
             }
             case ACCOUNTS_ID: {
                 qb.setTables(Tables.ACCOUNTS);
-                qb.appendWhere(Accounts._ID + " = " + uri.getLastPathSegment());
+                qb.appendWhere(ScheduleContract.Accounts._ID + " = " + uri.getLastPathSegment());
+                break;
             }
+            case COURSES: {
+                qb.setTables(Tables.COURSES);
+                break;
+            }
+            case COURSES_ID: {
+                qb.setTables(Tables.COURSES);
+                qb.appendWhere(ScheduleContract.Courses._ID + " = " + uri.getLastPathSegment());
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         return qb.query(db, projection, selection, selectionArgs, null, null, null);
@@ -70,9 +85,13 @@ public class ScheduleProvider extends ContentProvider {
 
         switch (match) {
             case ACCOUNTS:
-                return Accounts.CONTENT_TYPE;
+                return ScheduleContract.Accounts.CONTENT_TYPE;
             case ACCOUNTS_ID:
-                return Accounts.CONTENT_ITEM_TYPE;
+                return ScheduleContract.Accounts.CONTENT_ITEM_TYPE;
+            case COURSES:
+                return ScheduleContract.Courses.CONTENT_TYPE;
+            case COURSES_ID:
+                return ScheduleContract.Courses.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -85,9 +104,14 @@ public class ScheduleProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
-            case ACCOUNTS:
-                db.insertOrThrow(Tables.ACCOUNTS, null, values);
-                return Accounts.buildAccountsUri(values.getAsString(Accounts._ID));
+            case ACCOUNTS: {
+                final long rowId = db.insertOrThrow(Tables.ACCOUNTS, null, values);
+                return ScheduleContract.Accounts.buildAccountUri(rowId);
+            }
+            case COURSES: {
+                final long rowId = db.insertOrThrow(Tables.COURSES, null, values);
+                return ScheduleContract.Courses.buildCoursesUri(rowId);
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
