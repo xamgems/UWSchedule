@@ -11,5 +11,4 @@ An Android interface for sharing and viewing UW course registration information.
 
 ## Setting Up the Project
 
-To set up the project, open up Android Studio and import the top level gradle.build file. Make sure you have an internet connection to update required dependencies.
-
+To set up the project, open up Android Studio and import the project via the top level gradle.build file. Make sure you have an internet connection to dowload any required dependencies.
