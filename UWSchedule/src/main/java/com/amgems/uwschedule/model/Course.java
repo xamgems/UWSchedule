@@ -19,8 +19,10 @@
 
 package com.amgems.uwschedule.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.amgems.uwschedule.provider.ScheduleContract;
 
 import java.util.*;
 
@@ -40,8 +42,6 @@ public class Course implements Parcelable {
     private final String mTitle;
     private final Type mType;
     private final List<Meeting> mMeetings;
-
-    private static Map<String, Course> sCourseMap = new HashMap<String, Course>();
 
     /** Section type of a given course */
     public static enum Type {
@@ -106,25 +106,6 @@ public class Course implements Parcelable {
     }
 
     /**
-     * Returns an instance of the {@code Course} object specified by the given SLN.
-     *
-     * <p>This method guarantees that for any two instances of the same course returned
-     * are unique if they do not have the same SLN. For example, given A and B returned
-     * by this method, corresponding to a single SLN,{@code A.equals(B) IFF A == B}</p>
-     *
-     * @param sln SLN of course to return;
-     * @throws AssertionError if the SLN specified does not resolve to an already loaded
-     *                        course
-     */
-    public static Course getInstance(String sln) {
-        if (sCourseMap.containsKey(sln)) {
-            return sCourseMap.get(sln);
-        } else {
-            throw new AssertionError("Course for given sln not found.");
-        }
-    }
-
-    /**
      * Returns a new instance of the {@code Course} object.
      *
      * <p>This method also keeps track of each instance created in a local store,.
@@ -145,7 +126,6 @@ public class Course implements Parcelable {
     public static Course newInstance(String sln, String departmentCode, int courseNumber, String sectionId, int credits,
                                      String title, Type type, List<Meeting> meetings) {
         Course instance = new Course(sln, departmentCode, courseNumber, sectionId, credits, title.toUpperCase(), type, meetings);
-        sCourseMap.put(sln, instance);
         return instance;
     }
 
@@ -183,6 +163,31 @@ public class Course implements Parcelable {
         return 0;
     }
 
+    /**
+     * Returns a representation of this {@link Course} tied to a given user
+     * in the form of a {@link ContentValues}.
+     *
+     * This representation contains all logical information related to
+     * a course. However, it excludes information relating to the meetings
+     * tied to this course.
+     *
+     * @param username The username to associate this course to.
+     */
+    public ContentValues toContentValues(String username) {
+        final ContentValues contentValues = new ContentValues();
+
+        contentValues.put(ScheduleContract.Courses.SLN, getSln());
+        contentValues.put(ScheduleContract.Courses.STUDENT_USERNAME, username);
+        contentValues.put(ScheduleContract.Courses.DEPARTMENT_CODE, getDepartmentCode());
+        contentValues.put(ScheduleContract.Courses.COURSE_NUMBER, getCourseNumber());
+        contentValues.put(ScheduleContract.Courses.CREDITS, getCredits());
+        contentValues.put(ScheduleContract.Courses.SECTION_ID, getSectionId());
+        contentValues.put(ScheduleContract.Courses.TYPE, getType().toString());
+        contentValues.put(ScheduleContract.Courses.TITLE, getTitle());
+
+        return contentValues;
+    }
+
     public String getSln() {
         return mSln;
     }
@@ -213,6 +218,27 @@ public class Course implements Parcelable {
 
     public List<Meeting> getMeetings() {
         return mMeetings;
+    }
+
+    /**
+     * Returns a brief description of this {@link Course}. The exact details
+     * of this representation are unspecified and subject to change,
+     * but the following can be regarded as typical:
+     *
+     * "{
+     *     username : zac23
+     *     fullname : Zachary Iqbal
+     *     lastupdate : 2027
+     * }"
+     */
+    @Override
+    public String toString() {
+
+        return "{\n" + " sln : " + getSln() + ",\n" +
+                " deptcode : " + getDepartmentCode() + ",\n" +
+                " coursenum : " + getCourseNumber() + "\n" +
+                "}";
+
     }
 
 }
