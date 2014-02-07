@@ -3,13 +3,17 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.8.+'
     }
 }
 apply plugin: 'android'
 
 repositories {
-    mavenCentral()	     
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.android:support-v4:r6'
 }
 
 android {
@@ -17,22 +21,22 @@ android {
     buildToolsVersion "19.0.0"
 
     defaultConfig {
-    minSdkVersion 16
-	targetSdkVersion 19
+        minSdkVersion 16
+        targetSdkVersion 19
     }
     buildTypes {
-	release {
-	    runProguard true
-	    proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
-	}
-	debug {
-	    runProguard false
-	}
+        release {
+            runProguard true
+            proguardFile getDefaultProguardFile('proguard-android-optimize.txt')
+        }
+        debug {
+            runProguard false
+        }
     }
     productFlavors {
-	defaultFlavor {
-	    proguardFile 'proguard-rules.txt'
-	}
+        defaultFlavor {
+            proguardFile 'proguard-rules.txt'
+        }
     }
 }
 	
