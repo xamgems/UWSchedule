@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.android:support-v4:r6'
+    compile files('libs/android-support-v4.jar')
 }
 
 android {
