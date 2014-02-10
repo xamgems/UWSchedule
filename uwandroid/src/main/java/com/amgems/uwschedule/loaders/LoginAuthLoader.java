@@ -2,22 +2,25 @@ package com.amgems.uwschedule.loaders;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+
+import com.amgems.uwschedule.api.Response;
+import com.amgems.uwschedule.api.uw.GetStudentSlns;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 
 /**
  * Created by zac on 8/31/13.
  */
-public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
+public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result> {
 
     LoginAuthenticator mAuthenticator;
     String mUsername;
 
     public static class Result {
-        final LoginAuthenticator.Response mResponse;
+        final Response mResponse;
         final String mCookieValue;
         final String mUsername;
 
-        Result(LoginAuthenticator.Response response, String cookieValue, String username) {
+        Result(Response response, String cookieValue, String username) {
             mResponse = response;
             mCookieValue = cookieValue;
             mUsername = username;
@@ -27,9 +30,7 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
             return mCookieValue;
         }
 
-        public LoginAuthenticator.Response getResponse() {
-            return mResponse;
-        }
+        public Response getResponse() { return mResponse; }
 
         public String getUsername() { return mUsername; }
     }
@@ -43,6 +44,8 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
     @Override
     public Result loadInBackground() {
         mAuthenticator.execute();
+        GetStudentSlns getter = GetStudentSlns.newInstance(mAuthenticator.getCookie());
+        getter.execute();
         return new Result(mAuthenticator.getResponse(), mAuthenticator.getCookie(), mUsername);
     }
 }

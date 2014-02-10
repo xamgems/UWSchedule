@@ -23,19 +23,27 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
+import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
-import com.amgems.uwschedule.R;
-import com.amgems.uwschedule.api.uw.CookieStore;
-import com.amgems.uwschedule.api.uw.LoginAuthenticator;
-import com.amgems.uwschedule.loaders.LoginAuthLoader;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
-import java.lang.Override;
+import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.api.Response;
+import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.loaders.LoginAuthLoader;
 
 public class LoginActivity extends Activity
                            implements LoaderManager.LoaderCallbacks<LoginAuthLoader.Result> {
@@ -180,8 +188,8 @@ public class LoginActivity extends Activity
     @Override
     public void onLoadFinished(Loader<LoginAuthLoader.Result> loginResponseLoader, LoginAuthLoader.Result result) {
         if (mLoginInProgress) {
-            LoginAuthenticator.Response response = result.getResponse();
-            if (response == LoginAuthenticator.Response.OK) {
+            Response response = result.getResponse();
+            if (response == Response.OK) {
                 Intent homeActivityIntent = new Intent(this, HomeActivity.class);
                 homeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 homeActivityIntent.putExtra(HomeActivity.EXTRAS_HOME_USERNAME, result.getUsername());
