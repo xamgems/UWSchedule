@@ -4,23 +4,39 @@ import android.content.ContentValues;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
 /**
- * Class containing data pertaining to the account of a specific user.
+ * An immutable class containing data pertaining to the account of a
+ * specific user.
+ * <p>
+ *
+ * The class specifies basic information such as username and full name
+ * of the student and also provides information to determine the last
+ * time this account was updated on the uwschedule database.
  */
 public class Account {
 
-    private final String mUserame;
+    private final String mUserName;
     private final String mStudentName;
 
     private final long mLastUpdateTime;
 
-    public Account (String username, String studentName) {
-        mUserame = username;
-        mStudentName = studentName;
-        mLastUpdateTime = 0;
-    }
+    public static final long NOT_UPDATED = 0l;
 
+    /**
+     * Constructs an account instance with a specified timestamp of
+     * last update.
+     * <p>
+     * The last update time specified corresponds to the the number of
+     * seconds in unix time since the user was last updated on the
+     * database.
+     *
+     * @param username The username for this Account
+     * @param studentName The full name of the student
+     * @param lastUpdateTime A long representing the last time of update
+     *                       on the database or {@link Account#NOT_UPDATED}
+     *                       if the user has yet to enter the database.
+     */
     public Account (String username, String studentName, long lastUpdateTime) {
-        mUserame = username;
+        mUserName = username;
         mStudentName = studentName;
         mLastUpdateTime = lastUpdateTime;
     }
@@ -31,7 +47,7 @@ public class Account {
      * @return Username String for an account.
      */
     public String getUsername() {
-        return mUserame;
+        return mUserName;
     }
 
     /**
@@ -57,18 +73,14 @@ public class Account {
     }
 
     /**
-     * Determines if a given {@link Account} account has its primary
-     * information updated.
-     * <p>
-     * If primary information relating to an account is available, information
-     * about a user's full name and accurate last update information is
-     * available.
-     * </p>
-     * @return {@code true} if information is available and {@code false}
-     *         if otherwise.
+     * Determines if a given {@link Account} is marked as added
+     * into the UWSchedule database.
+     *
+     * @return {@code true} if this Account is considered to have
+     *         entered the database and {@code false} if otherwise.
      */
-    public boolean hasPrimaryDataUpdated() {
-        return mLastUpdateTime != 0;
+    public boolean hasEnteredDatabase() {
+        return mLastUpdateTime != NOT_UPDATED;
     }
 
     /**
@@ -84,7 +96,7 @@ public class Account {
      */
     @Override
     public String toString() {
-        return "{\n" + " username : " + mUserame + ",\n" +
+        return "{\n" + " username : " + mUserName + ",\n" +
                    " fullname : " + mStudentName + ",\n" +
                    " lastupdate : " + mLastUpdateTime + "\n" +
                 "}";
