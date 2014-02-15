@@ -2,6 +2,8 @@ package com.amgems.uwschedule.model;
 
 import android.content.ContentValues;
 import com.amgems.uwschedule.provider.ScheduleContract;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * An immutable class containing data pertaining to the account of a
@@ -14,7 +16,10 @@ import com.amgems.uwschedule.provider.ScheduleContract;
  */
 public class Account {
 
+    @Expose
+    @SerializedName("user_name")
     private final String mUserName;
+
     private final String mStudentName;
 
     private final long mLastUpdateTime;

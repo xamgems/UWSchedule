@@ -1,27 +1,28 @@
 package com.amgems.uwschedule.ui;
 
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.api.local.WebService;
 import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
-import com.amgems.uwschedule.model.Meeting;
-import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by zac on 9/2/13.
@@ -40,6 +41,7 @@ public class HomeActivity extends FragmentActivity {
 
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
     private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
+    private static final String TAG = "HOME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +113,35 @@ public class HomeActivity extends FragmentActivity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        WebService service = new WebService();
+        service.getAccount("shermpay", new Callback<Account>() {
+            @Override
+            public void success(Account account, Response response) {
+                Log.d(TAG, response.getStatus()+"");
+                Log.d(TAG, account.toString());
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                Log.d(TAG, retrofitError.getMessage());
+            }
+        });
+
+        service.getUserCourses("shermpay", "13wi", new Callback<List<Course>>() {
+            @Override
+            public void success(List<Course> courses, Response response) {
+                Log.d(TAG, response.getStatus()+"");
+                Log.d(TAG, courses.toString());
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                Log.d(TAG, retrofitError.getMessage());
+            }
+        });
+
+
     }
 
     @Override

@@ -22,16 +22,33 @@ package com.amgems.uwschedule.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Meeting implements Parcelable {
 
+    @Expose
+    @SerializedName("days")
     private final Set<Day> mMeetingDays;
+
+    @Expose
+    @SerializedName("start_time")
     private final int mStartTime;
+
+    @Expose
+    @SerializedName("end_time")
     private final int mEndTime;
+
+    @Expose
+    @SerializedName("location")
     private final String mLocation;
+
+    @Expose
+    @SerializedName("instructor")
     private final String mInstructor;
 
     /**
@@ -141,9 +158,9 @@ public class Meeting implements Parcelable {
         return 0;
     }
 
-    public String getLocation() {
-        return mLocation;
-    }
+    public Set<Day> getmMeetingDays() { return mMeetingDays; }
+
+    public String getLocation() { return mLocation; }
 
     public String getInstructor() {
         return mInstructor;
@@ -159,7 +176,10 @@ public class Meeting implements Parcelable {
 
     @Override
     public String toString() {
-        return  getStartTime() + " - " + getEndTime() + " | mLocation: " + getLocation();
+        return  "{" + "days: " + getmMeetingDays() + "\n" +
+                getStartTime() + " - " + getEndTime() + "\n" +
+                "Location: " + getLocation() + "\n" +
+                "Instructor: " + getInstructor() + "}";
     }
 
     /**
