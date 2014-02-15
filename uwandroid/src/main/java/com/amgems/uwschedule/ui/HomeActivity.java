@@ -140,7 +140,11 @@ public class HomeActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int i) {
-            return ScheduleFragment.newInstance();
+            if (i == 0) {
+                return ScheduleFragment.newInstance();
+            } else {
+                return DebugFragment.newInstance();
+            }
         }
 
         @Override

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		<RadioGroup
+			android:layout_width="wrap_content"
+			android:layout_height="40dp">
+			<RadioButton
+				android:id="@+id/render_html_checkbox"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:text="Render HTML"
+				android:checked="false"
+				/>
+			<RadioButton
+				android:id="@+id/render_plaintext_checkbox"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:text="Render Plaintext"
+				android:checked="true"
+				/>
+
+		</RadioGroup>
+	</LinearLayout>
+
+	<WebView
+		android:id="@+id/debug_webview"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+	</WebView>
+
+</LinearLayout>
