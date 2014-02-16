@@ -37,6 +37,13 @@ import com.amgems.uwschedule.loaders.LoginAuthLoader;
 
 import java.lang.Override;
 
+
+/**
+ * The login activity for the user.
+ *
+ * If a user has yet to log into UWSchedule or logs out of their account,
+ * they are redirected to this activity.
+ */
 public class LoginActivity extends Activity
                            implements LoaderManager.LoaderCallbacks<LoginAuthLoader.Result> {
 

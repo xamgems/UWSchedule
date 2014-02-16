@@ -29,6 +29,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Represents a scheduled meeting on a Course.
+ *
+ * Meetings expose information about the time, location and instructor
+ * for any given course.
+ */
 public class Meeting implements Parcelable {
 
     @Expose
