@@ -42,8 +42,18 @@ public interface ScheduleRequest {
     @POST("/add_user")
     void addAccount(@Field("user_name") String userName, Callback<Account> callback);
 
-    @GET("/user_courses")
-    void getUserCourses(@Query("user_name") String userName, @Query("quarter") String quarter,
+    @GET("/find_courses")
+    void getCourses(@Query("user_name") String userName, @Query("quarter") String quarter,
                     Callback<List<Course>> callback);
+
+    @FormUrlEncoded
+    @POST("/add_courses")
+    void addCourses(@Field("user_name") String userName, @Field("quarter") String quarter,
+                    @Field("courses") String courses, Callback<List<Course>> callback);
+
+    @FormUrlEncoded
+    @POST("/sync_courses")
+    void syncCourses(@Field("user_name") String userName, @Field("quarter") String quarter,
+              @Field("courses") String courses, Callback<List<Course>> callback);
 
 }

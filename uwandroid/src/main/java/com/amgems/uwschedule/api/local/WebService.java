@@ -55,7 +55,16 @@ public class WebService {
         request.getAccount(userName, callback);
     }
 
-    public void getUserCourses(String userName, String quarter, Callback<List<Course>> callback) {
-        request.getUserCourses(userName, quarter, callback);
+    public void getCourses(String userName, String quarter, Callback<List<Course>> callback) {
+        request.getCourses(userName, quarter, callback);
     }
+
+    public void addCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
+        request.addCourses(userName, quarter, courses, callback);
+    }
+
+    public void syncCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
+        request.syncCourses(userName, quarter, courses, callback);
+    }
+
 }
