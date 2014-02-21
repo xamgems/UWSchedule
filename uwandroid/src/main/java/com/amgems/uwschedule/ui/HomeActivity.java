@@ -109,13 +109,14 @@ public class HomeActivity extends FragmentActivity {
         service.getUserCourses("shermpay", "13wi", new Callback<List<Course>>() {
             @Override
             public void success(List<Course> courses, Response response) {
-                Log.d(TAG, response.getStatus()+"");
-                Log.d(TAG, courses.toString());
+                Log.d(TAG, response.getStatus() + "");
+                Log.d(TAG, courses.toString() + "");
             }
 
             @Override
             public void failure(RetrofitError retrofitError) {
-                Log.d(TAG, retrofitError.getMessage());
+                String message = retrofitError.getMessage();
+                Log.d(TAG, retrofitError.getMessage() + "");
             }
         });
 

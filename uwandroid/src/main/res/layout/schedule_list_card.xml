@@ -8,8 +8,6 @@
                 android:paddingBottom="100dp"
                 android:background="@drawable/card">
 
-	<!-- FIXME: background for RL crashes app -->
-
 	<TextView
 		android:id="@+id/course_title"
 		android:layout_width="wrap_content"
