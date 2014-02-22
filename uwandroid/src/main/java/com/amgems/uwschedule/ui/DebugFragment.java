@@ -13,28 +13,31 @@ import android.widget.RadioButton;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.util.NetUtils;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
- * A simple fragment that can be used for debugging. Allows
- * the rendering of an input String as HTML.
+ * A simple fragment that can be used for debugging. Allows the rendering
+ * of an input String as HTML. Observes a debug data source and updates
+ * this fragments view of that data accordingly.
  */
 public class DebugFragment extends Fragment implements View.OnClickListener {
 
     private static final String MIME_TYPE_HTML = "text/html";
     private static final String MIME_TYPE_PLAINTEXT = "text/plain";
 
+    // mDebugContent should never hold a null value
     private String mDebugContent;
     private WebView mDebugWebview;
 
     private RadioButton mHtmlRadioButton;
     private RadioButton mPlainRadioButton;
 
-    // Note that mDebugContent should never hold a null value
-
     DebugFragment() {
         mDebugContent = "";
     }
 
-    public static Fragment newInstance() {
+    public static DebugFragment newInstance() {
         return new DebugFragment();
     }
 
@@ -57,7 +60,7 @@ public class DebugFragment extends Fragment implements View.OnClickListener {
      *
      * @param contentString The plaintext of the content to load
      */
-    public void loadContent(String contentString) {
+    private void loadContent(String contentString) {
         mDebugContent = contentString;
         performRender();
     }
