@@ -18,10 +18,15 @@ import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
+import com.amgems.uwschedule.util.Publisher;
+import com.amgems.uwschedule.util.Subscriber;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by zac on 9/2/13.
@@ -37,6 +42,8 @@ public class HomeActivity extends FragmentActivity {
 
     private CookieStore mCookieStore;
     private String mUsername;
+
+    private static Publisher<String> mPublisher;
 
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
     private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
@@ -111,6 +118,26 @@ public class HomeActivity extends FragmentActivity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        mPublisher = new Publisher<String>() {
+            private List<Subscriber<? super String>> mSubscriberList = new ArrayList<Subscriber<? super String>>();
+            private String mData;
+
+            @Override
+            public void register(Subscriber<? super String> dataSubscriber) {
+                mSubscriberList.add(dataSubscriber);
+                dataSubscriber.update(mData);
+            }
+
+            @Override
+            public void publish(String data) {
+                mData = data;
+                for (Subscriber<? super String> subscriber : mSubscriberList) {
+                    subscriber.update(data);
+                }
+            }
+        };
+        mPublisher.publish("<body> PENIS is <b> my favorite </b></body>");
     }
 
     @Override
@@ -130,7 +157,7 @@ public class HomeActivity extends FragmentActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter {
+    private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter{
 
         private static int TAB_COUNT = 2;
 
@@ -143,7 +170,9 @@ public class HomeActivity extends FragmentActivity {
             if (i == 0) {
                 return ScheduleFragment.newInstance();
             } else {
-                return DebugFragment.newInstance();
+                DebugFragment debugFragment = DebugFragment.newInstance();
+                mPublisher.register(debugFragment);
+                return debugFragment;
             }
         }
 

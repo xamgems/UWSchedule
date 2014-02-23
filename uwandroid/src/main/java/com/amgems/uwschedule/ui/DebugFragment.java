@@ -12,6 +12,7 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.util.NetUtils;
+import com.amgems.uwschedule.util.Subscriber;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -21,7 +22,7 @@ import java.util.Observer;
  * of an input String as HTML. Observes a debug data source and updates
  * this fragments view of that data accordingly.
  */
-public class DebugFragment extends Fragment implements View.OnClickListener {
+public class DebugFragment extends Fragment implements View.OnClickListener, Subscriber<String> {
 
     private static final String MIME_TYPE_HTML = "text/html";
     private static final String MIME_TYPE_PLAINTEXT = "text/plain";
@@ -49,6 +50,7 @@ public class DebugFragment extends Fragment implements View.OnClickListener {
         mPlainRadioButton = (RadioButton) parentView.findViewById(R.id.render_plaintext_checkbox);
         mHtmlRadioButton.setOnClickListener(this);
         mPlainRadioButton.setOnClickListener(this);
+        performRender();
         return parentView;
     }
 
@@ -72,9 +74,9 @@ public class DebugFragment extends Fragment implements View.OnClickListener {
 
     private void performRender() {
         if (mPlainRadioButton.isChecked()) {
-            renderAsHtml();
-        } else {
             renderAsPlaintext();
+        } else {
+            renderAsHtml();
         }
     }
 
@@ -86,4 +88,12 @@ public class DebugFragment extends Fragment implements View.OnClickListener {
         mDebugWebview.loadData(mDebugContent, MIME_TYPE_PLAINTEXT, NetUtils.CHARSET);
     }
 
+
+    @Override
+    public void update(String updateData) {
+        mDebugContent = updateData;
+        if (isVisible()) {
+            performRender();
+        }
+    }
 }
