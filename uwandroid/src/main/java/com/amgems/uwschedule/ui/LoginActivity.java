@@ -54,10 +54,13 @@ public class LoginActivity extends Activity
     private Button mSyncButton;
     private EditText mPasswordEditText;
     private EditText mUsernameEditText;
+    private CheckBox mRememberMeBox;
 
     private SharedPreferences mLoginPreferences;
     private CookieStore mCookieStore;
     private static final String PREFS_LOGIN_USERNAME = "LOGIN_USERNAME";
+    private static final String PREFS_LOGIN_PASSWORD = "LOGIN_PASSWORD";
+    private static final String PREFS_LOGIN_REMEMBER = "LOGIN_REMEMBER";
     private static final String LOGIN_IN_PROGRESS = "mLoginInProgress";
     private static final int LOGIN_LOADER_ID = 0;
     private boolean mLoginInProgress;
@@ -80,6 +83,7 @@ public class LoginActivity extends Activity
         mPasswordEditText = (EditText) findViewById(R.id.password);
         mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
         mUsernameEditText = (EditText) findViewById(R.id.username);
+        mRememberMeBox = (CheckBox) findViewById(R.id.remember_me);
 
         int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_LARGE,
                 getResources().getDisplayMetrics());
@@ -96,8 +100,17 @@ public class LoginActivity extends Activity
 
         // Initialize SharedPreferences for persisting safe login data
         mLoginPreferences = getPreferences(MODE_PRIVATE);
-        String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME, mUsernameEditText.getText().toString());
+        String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME,
+                mUsernameEditText.getText().toString());
         mUsernameEditText.setText(defaultUsername);
+
+        String defaultPassword = mLoginPreferences.getString(PREFS_LOGIN_PASSWORD,
+                mPasswordEditText.getText().toString());
+        mPasswordEditText.setText(defaultPassword);
+
+        boolean checked = mLoginPreferences.getBoolean(PREFS_LOGIN_REMEMBER,
+                false);
+        mRememberMeBox.setChecked(checked);
 
         // Initialize LoaderManager for async authentication
         LoaderManager manager = getLoaderManager();
@@ -150,6 +163,7 @@ public class LoginActivity extends Activity
         mProgressBarGroup.setVisibility(View.VISIBLE);
         mUsernameEditText.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);
+        mRememberMeBox.setVisibility(View.GONE);
         mSyncButton.setVisibility(View.GONE);
 
         // Closes soft keyboard if open
@@ -174,9 +188,16 @@ public class LoginActivity extends Activity
     public Loader<LoginAuthLoader.Result> onCreateLoader(int id, Bundle args) {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
+        boolean checked = mRememberMeBox.isChecked();
 
         SharedPreferences.Editor preferenceEditor = mLoginPreferences.edit();
         preferenceEditor.putString(PREFS_LOGIN_USERNAME, username);
+        preferenceEditor.putBoolean(PREFS_LOGIN_REMEMBER, checked);
+        if (checked) {
+            preferenceEditor.putString(PREFS_LOGIN_PASSWORD, password);
+        } else if (mLoginPreferences.contains(PREFS_LOGIN_PASSWORD)) {
+            preferenceEditor.remove(PREFS_LOGIN_PASSWORD);
+        }
         preferenceEditor.commit();
 
         Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, username, password);
