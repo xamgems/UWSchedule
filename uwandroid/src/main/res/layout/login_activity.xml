@@ -52,17 +52,25 @@ p
 		android:singleLine="true"
 		android:layout_width="match_parent"
 		android:layout_marginBottom="20dp"
-		android:layout_above="@+id/sync_button"
+		android:layout_above="@+id/remember_me"
 		android:password="true"
 		style="@style/EditTextStandard"
 		/>
+
+    <CheckBox
+        android:layout_width="match_parent"
+        android:id="@id/remember_me"
+        android:layout_above="@+id/sync_button"
+        android:text="Remember my password"
+        style="@style/SelectorStandard"
+        />
 
 	<Button
 		android:id="@id/sync_button"
 		android:text="@string/sync"
 		android:layout_width="match_parent"
-		android:layout_alignParentBottom="true"
 		android:background="@drawable/button_purple"
+        android:layout_alignParentBottom="true"
 		style="@style/ButtonStandard"
 		/>
 

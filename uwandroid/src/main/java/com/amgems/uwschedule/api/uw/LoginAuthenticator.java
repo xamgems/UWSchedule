@@ -39,13 +39,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by zac on 8/28/13.
+ * Executes a login request to the UW servers, yielding a cookie on a successful
+ * login.
+ *
+ * Preforms the appropriate post request to the UW login service with a given
+ * username and password. All response cookies for any given request are then
+ * stored.
+ *
+ * Note that LoginAuthenticator instances are not thread-safe, and thus should only
+ * be manipulated on a single thread or when happens-before relationships on any
+ * given instance can be guaranteed.
+ *
+ * @author Zachary Iqbal
  */
-public class LoginAuthenticator {
+public final class LoginAuthenticator {
 
     private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"hidden\" name=\"(.+)\" value=\"(.*)\">");
 
-    private List<String> mCookies;
+    private String mCookiesValue;
     private Response mResponse;
     private final String mUsername;
     private final String mPassword;
@@ -53,21 +64,41 @@ public class LoginAuthenticator {
     LoginAuthenticator(String username, String password) {
         mUsername = username;
         mPassword = password;
+        mCookiesValue = "";
     }
 
+    /**
+     * Returns a new, executable instance of LoginAuthenticator
+     *
+     * @param username Username string to log in with
+     * @param password Password string to log in with
+     */
     public static LoginAuthenticator newInstance(String username, String password) {
         return new LoginAuthenticator(username, password);
     }
 
+    /**
+     * Executes a login authentication request.
+     *
+     * Stores the response from the execution and the cookie string if authentication
+     * was valid. The execute method should only be called once. Behavior is unspecified
+     * for multiple calls.
+     *
+     * Note that this method is blocking and should <b>not</b> be called on the UI thread.
+     */
     public void execute() {
 
+        // List of cookies received from server
+        List<String> cookieList = null;
+
         try {
-            URL loginUrl = new URL(NetUtils.LOGIN_REQUEST_URL);
+            URL loginUrl = new URL(NetUtils.BASE_REQUEST_URL);
             List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
 
             HttpURLConnection connection = NetUtils.getInputConnection(loginUrl);
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
+            // Captures and injects required post parameters for login
             try {
                 postParameters.add(new BasicNameValuePair("user", mUsername));
                 postParameters.add(new BasicNameValuePair("pass", mPassword));
@@ -80,13 +111,9 @@ public class LoginAuthenticator {
             connection = NetUtils.getOutputConnection(loginUrl);
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
+            // Reads stream from response and stores any received cookies
             try {
-                List<String> cookie = getAuthCookies(connection, bufferedWriter, postParameters);
-                if (cookie != null) {
-                    synchronized (cookie) { //TODO Reconsider thread-safety implications
-                        mCookies = cookie;
-                    }
-                }
+                cookieList = getAuthCookies(connection, bufferedWriter, postParameters);
             } finally {
                 connection.disconnect();
             }
@@ -98,29 +125,34 @@ public class LoginAuthenticator {
         }
 
         if (mResponse == null) {
-            if (mCookies != null) {
+            if (cookieList != null) {
                 mResponse = Response.OK;
+                mCookiesValue = cookieList.toString();
             } else { // No cookies returned, username/password incorrect
                 mResponse = Response.AUTHENTICATION_ERROR;
             }
         }
     }
 
+    /**
+     * @return The cookie string value of this instance execution or an empty
+     *         String if the instance was not executed or failed in execution.
+     */
     public String getCookie() {
-        String cookieValue;
-        if (mCookies != null) {
-            synchronized (mCookies) {
-                cookieValue = mCookies.toString();
-                mCookies = null;
-            }
-        } else {
-            cookieValue = null;
-        }
-        return cookieValue;
+        return mCookiesValue;
     }
 
-    public Response getResponse() { return mResponse; }
+    /**
+     * @return The server {@link Response} of this instance execution or null if this
+     *         instance has yet to be executed.
+     */
+    public Response getResponse() {
+        return mResponse;
+    }
 
+    /**
+     * Captures all form hidden key value pairs from an input source.
+     */
     private void captureHiddenParameters (BufferedReader reader,
                                                  List<? super NameValuePair> destHiddenParams) throws IOException {
         String line;
@@ -132,6 +164,9 @@ public class LoginAuthenticator {
         }
     }
 
+    /**
+     * Collects all cookies from a given response source into a list of NameValuePairs.
+     */
     private List<String> getAuthCookies (HttpURLConnection connection, BufferedWriter writer,
                                                 List<? extends NameValuePair> postParams) throws IOException {
         writer.write(NetUtils.toQueryString(postParams));
@@ -140,4 +175,27 @@ public class LoginAuthenticator {
         return connection.getHeaderFields().get("Set-Cookie");
     }
 
+    /**
+     * Builds a HTTP compliant query string from a series of NameValuePairs.
+     */
+    private String toQueryString (List<? extends NameValuePair> postParameterPairs) {
+        StringBuilder builder = new StringBuilder();
+        boolean firstParameter = true;
+
+        try {
+            for (NameValuePair postParameterPair : postParameterPairs) {
+                if (!firstParameter)
+                    builder.append("&");
+                firstParameter = false;
+
+                builder.append(URLEncoder.encode(postParameterPair.getName(), NetUtils.CHARSET));
+                builder.append("=");
+                builder.append(URLEncoder.encode(postParameterPair.getValue(), NetUtils.CHARSET));
+            }
+        } catch (UnsupportedEncodingException e) {
+            Log.e(LoginService.class.getSimpleName(), e.getMessage());
+        }
+
+        return builder.toString();
+    }
 }

@@ -1,3 +1,22 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   UWSchedule student class and registration sharing interface
+ *   Copyright (C) 2013 Sherman Pay, Jeremy Teo, Zachary Iqbal
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by`
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 package com.amgems.uwschedule.util;
 
 import android.util.Log;
@@ -14,25 +33,48 @@ import java.net.URLEncoder;
 import java.util.List;
 
 /**
- * Created by zac on 8/27/13.
+ * A series of utility methods used to make and respond to connections
+ * over the net.
  */
 public class NetUtils {
 
     public static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
     public static final String REGISTRATION_URL = "https://sdb.admin.washington.edu/students/uwnetid/register.asp";
+    /** The base URL for all UW server requests */
+    public static final String BASE_REQUEST_URL = "https://weblogin.washington.edu";
+
+    /** The user-agent to be used in a HTTP header */
     public static final String USER_AGENT_STRING = "Mozilla/5.0";
+
+    /** The content-type to be used in a HTTP header */
     public static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
+
+    /** The character set to be requested */
     public static final String CHARSET = "UTF-8";
 
     // Suppress default constructor to ensure noninstantiability
     private NetUtils() { }
 
+    /**
+     * Establishes a connection to a given target URL, capable of reading
+     * input from the connection's stream.
+     *
+     * @param targetUrl A non-null url to get a connection from
+     * @throws IOException If the connection could not be established
+     */
     public static HttpURLConnection getInputConnection (URL targetUrl) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
         connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
         return connection;
     }
 
+    /**
+     * Establishes a connection to a given target URL, capable of writing output
+     * and reading input from the connection's stream.
+     *
+     * @param targetUrl A non-null url to get a connection from
+     * @throws IOException If the connection could not be established
+     */
     public static HttpURLConnection getOutputConnection (URL targetUrl) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
         connection.setRequestProperty("User-Agent", USER_AGENT_STRING);

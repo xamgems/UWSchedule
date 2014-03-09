@@ -23,6 +23,8 @@ import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.amgems.uwschedule.provider.ScheduleContract;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.*;
 
@@ -34,13 +36,39 @@ import java.util.*;
   */
 public class Course implements Parcelable {
 
+    // TODO: Expose the fields
+    // TODO: Customize GSON for Meetings
+
+    @Expose
+    @SerializedName("sln")
     private final String mSln;
+
+    @Expose
+    @SerializedName("department_code")
     private final String mDepartmentCode;
+
+    @Expose
+    @SerializedName("course_number")
     private final int mCourseNumber;
+
+    @Expose
+    @SerializedName("credits")
     private final int mCredits;
+
+    @Expose
+    @SerializedName("section_id")
     private final String mSectionId;
+
+    @Expose
+    @SerializedName("title")
     private final String mTitle;
+
+    @Expose
+    @SerializedName("type")
     private final Type mType;
+
+    @Expose
+    @SerializedName("meetings")
     private final List<Meeting> mMeetings;
 
     /** Section type of a given course */
@@ -237,6 +265,10 @@ public class Course implements Parcelable {
         return "{\n" + " sln : " + getSln() + ",\n" +
                 " deptcode : " + getDepartmentCode() + ",\n" +
                 " coursenum : " + getCourseNumber() + "\n" +
+                " sectid : " + getSectionId() + "\n" +
+                " type: " + getType() + "\n" +
+                " title : " + getTitle() + "\n" +
+                " credits : " + getCredits() + "\n" +
                 "}";
 
     }
