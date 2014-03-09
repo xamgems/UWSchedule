@@ -35,12 +35,9 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result> {
     private String mUsername;
 
     public static class Result {
-        private final LoginAuthenticator.Response mResponse;
+        private final Response mResponse;
         private final String mCookieValue;
         private final String mUsername;
-        final Response mResponse;
-        final String mCookieValue;
-        final String mUsername;
 
         Result(Response response, String cookieValue, String username) {
             mResponse = response;

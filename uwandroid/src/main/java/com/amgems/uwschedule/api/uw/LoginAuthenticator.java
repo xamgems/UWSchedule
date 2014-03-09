@@ -19,20 +19,19 @@
 
 package com.amgems.uwschedule.api.uw;
 
+import android.util.Log;
 import com.amgems.uwschedule.api.Response;
+import com.amgems.uwschedule.services.LoginService;
 import com.amgems.uwschedule.util.NetUtils;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -175,27 +174,4 @@ public final class LoginAuthenticator {
         return connection.getHeaderFields().get("Set-Cookie");
     }
 
-    /**
-     * Builds a HTTP compliant query string from a series of NameValuePairs.
-     */
-    private String toQueryString (List<? extends NameValuePair> postParameterPairs) {
-        StringBuilder builder = new StringBuilder();
-        boolean firstParameter = true;
-
-        try {
-            for (NameValuePair postParameterPair : postParameterPairs) {
-                if (!firstParameter)
-                    builder.append("&");
-                firstParameter = false;
-
-                builder.append(URLEncoder.encode(postParameterPair.getName(), NetUtils.CHARSET));
-                builder.append("=");
-                builder.append(URLEncoder.encode(postParameterPair.getValue(), NetUtils.CHARSET));
-            }
-        } catch (UnsupportedEncodingException e) {
-            Log.e(LoginService.class.getSimpleName(), e.getMessage());
-        }
-
-        return builder.toString();
-    }
 }

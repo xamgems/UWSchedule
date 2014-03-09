@@ -83,6 +83,9 @@ public class NetUtils {
         return connection;
     }
 
+    /**
+     * Builds a HTTP compliant query string from a series of NameValuePairs.
+     */
     public static String toQueryString (List<? extends NameValuePair> postParameterPairs) {
         StringBuilder builder = new StringBuilder();
         boolean firstParameter = true;

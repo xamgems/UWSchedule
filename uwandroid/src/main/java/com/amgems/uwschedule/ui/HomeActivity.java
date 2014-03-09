@@ -122,7 +122,7 @@ public class HomeActivity extends FragmentActivity {
                 }
             }
         };
-        mPublisher.publish("<body> PENIS is <b> my favorite </b></body>");
+        mPublisher.publish("Cookie: " + mCookieStore.getActiveCookie());
     }
 
     /**
@@ -156,7 +156,6 @@ public class HomeActivity extends FragmentActivity {
      * Used to allow swiping fragments on home screen.
      */
     private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter {
-    private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter{
 
         private static int TAB_COUNT = 2;
 
