@@ -44,6 +44,7 @@ public class GetStudentSlns {
         mWebView = new WebView(context);
         mHandler = activityHandler;
         //CookieManager.getInstance().removeAllCookie();
+        CookieManager.getInstance().setCookie("sdb.admin.washington.edu", mCookie);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.addJavascriptInterface(new Object() {
             @JavascriptInterface
@@ -78,13 +79,13 @@ public class GetStudentSlns {
     public void execute() {
 
         final Map<String, String> cookieMap = new HashMap<String, String>();
-        cookieMap.put("Cookie", mCookie);
+        //cookieMap.put("Cookie", mCookie);
 
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(mWebView.getContext(), "Cookie: " + mCookie, Toast.LENGTH_LONG).show();
-                mWebView.loadUrl(NetUtils.REGISTRATION_URL, cookieMap);
+                // TODO Put back cookie mapping
+                mWebView.loadUrl(NetUtils.REGISTRATION_URL);
             }
         });
 

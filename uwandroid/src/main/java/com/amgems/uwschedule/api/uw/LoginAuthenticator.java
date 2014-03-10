@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
  */
 public final class LoginAuthenticator {
 
-    private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"hidden\" name=\"(.+)\" value=\"(.*)\">");
+    private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"?hidden\"? name=\"(.+)\".*value=\"(.*)\">");
 
     private String mCookiesValue;
     private Response mResponse;
@@ -89,21 +89,12 @@ public final class LoginAuthenticator {
                 mLoadingFinished = true;
             }
         }, "GETHTMLBODY");
-        mJsWebview.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void getCookies(final String cookies) {
-
-                mCookiesValue = cookies;
-            }
-        }, "GETCOOKIES");
         mJsWebview.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (mCount >= 0) {
+                if (mCount >= 1)
                     view.loadUrl("javascript:window.GETHTMLBODY.processHTML(document.getElementsByTagName('html')[0].innerHTML);");
-                    view.loadUrl("javascript:window.GETCOOKIES.getCookies(document.cookie);");
-                }
                 mCount++;
             }
         });
@@ -139,7 +130,7 @@ public final class LoginAuthenticator {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mJsWebview.loadUrl(NetUtils.BASE_REQUEST_URL);
+                    mJsWebview.loadUrl(NetUtils.REGISTRATION_URL);
                 }
             });
             while (!mLoadingFinished) ;
@@ -163,6 +154,18 @@ public final class LoginAuthenticator {
             // Reads stream from response and stores any received cookies
             try {
                 cookieList = getAuthCookies(connection, bufferedWriter, postParameters);
+                mCookiesValue = cookieList.get(0);
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String postLoginHtml = "";
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    postLoginHtml += line;
+                }
+                postParameters.clear();
+                captureHiddenParameters(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(postLoginHtml.getBytes()))), postParameters);
+                mCookiesValue = postLoginHtml.substring(postLoginHtml.indexOf("pubcookie_g"), postLoginHtml.indexOf("==\">") + 2);
+                mCookiesValue = "pubcookie_g=" + mCookiesValue.substring("pubcookie_g\" value=\"".length()) + ";";
+                //mCookiesValue = postParameters.get(0).toString().replace("Continue", "");
             } finally {
                 connection.disconnect();
             }
@@ -176,7 +179,7 @@ public final class LoginAuthenticator {
         if (mResponse == null) {
             if (true || cookieList != null) {
                 mResponse = Response.OK;
-                mCookiesValue = cookieList.get(0);
+                //mCookiesValue = postParameters.toString();
             } else { // No cookies returned, username/password incorrect
                 mResponse = Response.AUTHENTICATION_ERROR;
             }
@@ -205,7 +208,6 @@ public final class LoginAuthenticator {
     private void captureHiddenParameters (BufferedReader reader,
                                                  List<? super NameValuePair> destHiddenParams) throws IOException {
         String line;
-        mHtml = "";
         while ((line = reader.readLine()) != null) {
             Matcher parameterMatcher = HIDDEN_PARAMS.matcher(line);
             while (parameterMatcher.find()) {
@@ -221,7 +223,6 @@ public final class LoginAuthenticator {
                                                 List<? extends NameValuePair> postParams) throws IOException {
         writer.write(NetUtils.toQueryString(postParams));
         writer.flush();
-
         return connection.getHeaderFields().get("Set-Cookie");
     }
 
