@@ -46,6 +46,7 @@ public class DebugFragment extends Fragment implements View.OnClickListener, Sub
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View parentView = inflater.inflate(R.layout.debug_fragment, container, false);
         mDebugWebview = (WebView) parentView.findViewById(R.id.debug_webview);
+        mDebugWebview.getSettings().setJavaScriptEnabled(true);
         mHtmlRadioButton = (RadioButton) parentView.findViewById(R.id.render_html_checkbox);
         mPlainRadioButton = (RadioButton) parentView.findViewById(R.id.render_plaintext_checkbox);
         mHtmlRadioButton.setOnClickListener(this);

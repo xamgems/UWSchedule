@@ -19,7 +19,13 @@
 
 package com.amgems.uwschedule.api.uw;
 
+import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.services.LoginService;
 import com.amgems.uwschedule.util.NetUtils;
@@ -60,10 +66,47 @@ public final class LoginAuthenticator {
     private final String mUsername;
     private final String mPassword;
 
-    LoginAuthenticator(String username, String password) {
+    private final WebView mJsWebview;
+    private final Handler mHandler;
+    private volatile boolean mLoadingFinished;
+    private String mHtml;
+    private int mCount;
+
+    LoginAuthenticator(Context context, Handler handler, String username, String password) {
         mUsername = username;
         mPassword = password;
         mCookiesValue = "";
+
+        mLoadingFinished = false;
+        mJsWebview = new WebView(context);
+        mHandler = handler;
+        CookieManager.getInstance().removeAllCookie();
+        mJsWebview.getSettings().setJavaScriptEnabled(true);
+        mJsWebview.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void processHTML(final String html) {
+                mHtml = html;
+                mLoadingFinished = true;
+            }
+        }, "GETHTMLBODY");
+        mJsWebview.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void getCookies(final String cookies) {
+
+                mCookiesValue = cookies;
+            }
+        }, "GETCOOKIES");
+        mJsWebview.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if (mCount >= 0) {
+                    view.loadUrl("javascript:window.GETHTMLBODY.processHTML(document.getElementsByTagName('html')[0].innerHTML);");
+                    view.loadUrl("javascript:window.GETCOOKIES.getCookies(document.cookie);");
+                }
+                mCount++;
+            }
+        });
     }
 
     /**
@@ -72,8 +115,8 @@ public final class LoginAuthenticator {
      * @param username Username string to log in with
      * @param password Password string to log in with
      */
-    public static LoginAuthenticator newInstance(String username, String password) {
-        return new LoginAuthenticator(username, password);
+    public static LoginAuthenticator newInstance(Context context, Handler handler, String username, String password) {
+        return new LoginAuthenticator(context, handler, username, password);
     }
 
     /**
@@ -89,13 +132,20 @@ public final class LoginAuthenticator {
 
         // List of cookies received from server
         List<String> cookieList = null;
+        List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
 
         try {
-            URL loginUrl = new URL(NetUtils.BASE_REQUEST_URL);
-            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
 
-            HttpURLConnection connection = NetUtils.getInputConnection(loginUrl);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mJsWebview.loadUrl(NetUtils.BASE_REQUEST_URL);
+                }
+            });
+            while (!mLoadingFinished) ;
+            InputStream htmlInputStream = new ByteArrayInputStream(mHtml.getBytes());
+            // HttpURLConnection connection = NetUtils.getInputConnection(loginUrl);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(htmlInputStream));
 
             // Captures and injects required post parameters for login
             try {
@@ -103,11 +153,11 @@ public final class LoginAuthenticator {
                 postParameters.add(new BasicNameValuePair("pass", mPassword));
                 captureHiddenParameters(reader, postParameters);
             } finally {
-                connection.disconnect();
-                reader.close();
+                //connection.disconnect();
+                //reader.close();
             }
 
-            connection = NetUtils.getOutputConnection(loginUrl);
+            HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.LOGIN_REQUEST_URL));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
             // Reads stream from response and stores any received cookies
@@ -124,9 +174,9 @@ public final class LoginAuthenticator {
         }
 
         if (mResponse == null) {
-            if (cookieList != null) {
+            if (true || cookieList != null) {
                 mResponse = Response.OK;
-                mCookiesValue = cookieList.toString();
+                mCookiesValue = cookieList.get(0);
             } else { // No cookies returned, username/password incorrect
                 mResponse = Response.AUTHENTICATION_ERROR;
             }
@@ -155,9 +205,10 @@ public final class LoginAuthenticator {
     private void captureHiddenParameters (BufferedReader reader,
                                                  List<? super NameValuePair> destHiddenParams) throws IOException {
         String line;
+        mHtml = "";
         while ((line = reader.readLine()) != null) {
             Matcher parameterMatcher = HIDDEN_PARAMS.matcher(line);
-            if (parameterMatcher.matches()) {
+            while (parameterMatcher.find()) {
                 destHiddenParams.add(new BasicNameValuePair(parameterMatcher.group(1), parameterMatcher.group(2)));
             }
         }

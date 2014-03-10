@@ -29,6 +29,7 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -163,6 +164,8 @@ public class LoginActivity extends Activity
             disableLoginInput();
         }
 
+        // Logout user from any previous sessions by flushing cookie store
+        mCookieStore.flushActiveCookie();
     }
 
     public void disableLoginInput() {
@@ -207,7 +210,7 @@ public class LoginActivity extends Activity
         }
         preferenceEditor.commit();
 
-        Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, username, password);
+        Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, new Handler(), username, password);
         loader.forceLoad();
         return loader;
     }

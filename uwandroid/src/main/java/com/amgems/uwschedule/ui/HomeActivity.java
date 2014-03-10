@@ -19,10 +19,16 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.*;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v4.app.*;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -30,9 +36,12 @@ import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.WebService;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.api.uw.GetStudentSlns;
+import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
@@ -56,7 +65,7 @@ import retrofit.client.Response;
 /**
  * The Activity that represents a home screen for the user.
  */
-public class HomeActivity extends FragmentActivity {
+public class HomeActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<GetSlnLoader.Slns>{
 
     private DrawerLayout mDrawerLayoutRoot;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -69,6 +78,7 @@ public class HomeActivity extends FragmentActivity {
 
     private static Publisher<String> mPublisher;
 
+    private static final int GET_SLN_LOADER_ID = 1;
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
     private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
     private static final String TAG = "HOME";
@@ -104,6 +114,12 @@ public class HomeActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
+        LoaderManager manager = getLoaderManager();
+        if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
+            manager.initLoader(GET_SLN_LOADER_ID, null, this);
+        }
+
+
         mPublisher = new Publisher<String>() {
             private List<Subscriber<? super String>> mSubscriberList = new ArrayList<Subscriber<? super String>>();
             private String mData;
@@ -122,7 +138,7 @@ public class HomeActivity extends FragmentActivity {
                 }
             }
         };
-        mPublisher.publish("Cookie: " + mCookieStore.getActiveCookie());
+
     }
 
     /**
@@ -151,6 +167,22 @@ public class HomeActivity extends FragmentActivity {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    public Loader<GetSlnLoader.Slns> onCreateLoader(int id, Bundle args) {
+        Loader<GetSlnLoader.Slns> loader = new GetSlnLoader(this, new Handler(), mCookieStore.getActiveCookie());
+        loader.forceLoad();
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<GetSlnLoader.Slns> loader, GetSlnLoader.Slns data) {
+        Toast.makeText(this, "Done loading!", Toast.LENGTH_SHORT).show();
+        mPublisher.publish(data.getHtml());
+    }
+
+    @Override
+    public void onLoaderReset(Loader<GetSlnLoader.Slns> loader) { }
 
     /**
      * Used to allow swiping fragments on home screen.

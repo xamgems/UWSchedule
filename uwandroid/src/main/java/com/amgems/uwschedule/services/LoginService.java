@@ -102,7 +102,7 @@ public class LoginService extends Service {
 
     protected void onHandleIntent(Intent intent) {
 
-        LoginAuthenticator command = LoginAuthenticator.newInstance(intent.getStringExtra(PARAM_IN_USERNAME),
+        LoginAuthenticator command = LoginAuthenticator.newInstance(getApplicationContext(), new Handler(), intent.getStringExtra(PARAM_IN_USERNAME),
                 intent.getStringExtra(PARAM_IN_PASSWORD));
         command.execute();
         Response response = command.getResponse();

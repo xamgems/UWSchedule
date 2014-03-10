@@ -22,8 +22,8 @@ package com.amgems.uwschedule.loaders;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
+import android.os.Handler;
 import com.amgems.uwschedule.api.Response;
-import com.amgems.uwschedule.api.uw.GetStudentSlns;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 
 /**
@@ -54,17 +54,15 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result> {
         public String getUsername() { return mUsername; }
     }
 
-    public LoginAuthLoader(Context context, String username, String password) {
+    public LoginAuthLoader(Context context, Handler handler, String username, String password) {
         super(context);
         mUsername = username;
-        mAuthenticator = LoginAuthenticator.newInstance(username, password);
+        mAuthenticator = LoginAuthenticator.newInstance(context, handler, username, password);
     }
 
     @Override
     public Result loadInBackground() {
         mAuthenticator.execute();
-        GetStudentSlns getter = GetStudentSlns.newInstance(mAuthenticator.getCookie());
-        getter.execute();
         return new Result(mAuthenticator.getResponse(), mAuthenticator.getCookie(), mUsername);
     }
 }

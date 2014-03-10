@@ -3,6 +3,7 @@ package com.amgems.uwschedule.loaders;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
+import android.os.Handler;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.GetStudentSlns;
 
@@ -16,21 +17,27 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
     public static class Slns {
         final Response mResponse;
         final String[] mSlns;
+        final String mHtml;
 
-        Slns(Response response, String[] slns) {
+        Slns(Response response, String[] slns, String html) {
             mResponse = response;
             mSlns = slns;
+            mHtml = html;
+        }
+
+        public String getHtml() {
+            return mHtml;
         }
     }
-    public GetSlnLoader(Context context, String cookie) {
+    public GetSlnLoader(Context context, Handler activiyHandler, String cookie) {
         super(context);
         mCookie = cookie;
-        mGetter = GetStudentSlns.newInstance(mCookie);
+        mGetter = GetStudentSlns.newInstance(context, activiyHandler, mCookie);
     }
 
     @Override
     public Slns loadInBackground() {
         mGetter.execute();
-        return new Slns(mGetter.getResponse(), null);
+        return new Slns(mGetter.getResponse(), null, mGetter.getHtml());
     }
 }
