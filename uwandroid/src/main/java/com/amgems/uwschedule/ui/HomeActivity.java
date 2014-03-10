@@ -92,6 +92,35 @@ public class HomeActivity extends FragmentActivity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        WebService service = new WebService();
+        service.getAccount("shermpay", new Callback<Account>() {
+            @Override
+            public void success(Account account, Response response) {
+                Log.d(TAG, response.getStatus()+"");
+                Log.d(TAG, account.toString());
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                Log.d(TAG, retrofitError.getMessage());
+            }
+        });
+
+        service.getUserCourses("shermpay", "13wi", new Callback<List<Course>>() {
+            @Override
+            public void success(List<Course> courses, Response response) {
+                Log.d(TAG, response.getStatus()+"");
+                Log.d(TAG, courses.toString());
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                Log.d(TAG, retrofitError.getMessage());
+            }
+        });
+
+
     }
 
     /**

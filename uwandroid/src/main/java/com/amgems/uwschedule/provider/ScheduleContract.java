@@ -22,7 +22,6 @@ package com.amgems.uwschedule.provider;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-
 /**
  * A Contract class used for interacting with a {@link ScheduleProvider},
  * defining the schema for its underlying {@link ScheduleDatabaseHelper}.
@@ -35,6 +34,9 @@ public final class ScheduleContract {
     /* Suppress default constructor for noninstantiabiltiy */
     private ScheduleContract() { }
 
+    ////////////////////////////////////////////////////////////////
+    ////    Contract for all Accounts data.
+    ////////////////////////////////////////////////////////////////
     interface AccountsColumns {
         public static final String STUDENT_NAME = "student_name";
         public static final String STUDENT_USERNAME = "student_username";
@@ -58,6 +60,9 @@ public final class ScheduleContract {
         }
     }
 
+    ////////////////////////////////////////////////////////////////
+    ////    Contract for all Courses data.
+    ////////////////////////////////////////////////////////////////
     interface CoursesColumns {
         public static final String SLN = "course_sln";
         public static final String STUDENT_USERNAME = "student_username";

@@ -6,6 +6,22 @@
               android:layout_height="match_parent"
               android:background="@color/lightGray">
 
+	<LinearLayout
+		android:id="@+id/schedule_progress_group"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:visibility="visible"
+		>
+
+		<ProgressBar
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+		    android:layout_gravity="center"
+			/>
+
+	</LinearLayout>
+
 	<ListView
 		android:id="@android:id/list"
 		android:layout_width="match_parent"
@@ -15,6 +31,7 @@
 	    android:layout_marginRight="10dp"
 	    android:divider="@null"
 	    android:dividerHeight="10dp"
+	    android:visibility="invisible"
 		/>
 
 </LinearLayout>
