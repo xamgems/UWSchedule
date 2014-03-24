@@ -1,15 +1,5 @@
 package com.amgems.uwschedule.api.uw;
 
-import android.app.Application;
-import android.content.Context;
-import android.os.Handler;
-import android.util.Log;
-
-import android.webkit.CookieManager;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Toast;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.util.NetUtils;
 
@@ -19,82 +9,108 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
- * Created by JeremyTeoMBP on 9/2/14.
+ * Collects SLNs for all courses a student is registered for from the UW registration
+ * website.
+ *
+ * @author Jeremy Teo
  */
 public class GetStudentSlns {
+
+    /** Cookie value to request registration page with */
     private String mCookie;
-    private String mHtml;
+
+    private List<String> mSlns;
+
+    /** Defines the error or success response from executing a request*/
     private Response mResponse;
 
-    /** Context for WebView instantiation */
-    private WebView mWebView;
+    // TODO: Utilize the html string as a local variable instead and remove the getHtml() method
+    //       for debugging purposes only
+    private String mHtml;
 
-    Handler mHandler;
-    int mCount;
-
-    private volatile boolean mLoadingFinished;
-
-    private GetStudentSlns(Context context, Handler activityHandler, String cookie) {
+    /**
+     * Constructs a GetStudentSlns with the given well formed cookie string.
+     * @param cookie
+     */
+    private GetStudentSlns(String cookie) {
         mCookie = cookie;
-        mLoadingFinished = false;
-        mWebView = new WebView(context);
-        mHandler = activityHandler;
-        //CookieManager.getInstance().removeAllCookie();
-        CookieManager.getInstance().setCookie("sdb.admin.washington.edu", mCookie);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void processHTML(final String html) {
-                mHtml = html;
-                mLoadingFinished = true;
-            }
-        }, "GETHTMLBODY");
-        mWebView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void getCookies(final String cookies) {
-                mCookie = cookies;
-            }
-        }, "GETCOOKIES");
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                //if (mCount >= 1) {
-                    view.loadUrl("javascript:window.GETHTMLBODY.processHTML(document.getElementsByTagName('html')[0].innerHTML);");
-
-
-                mCount++;
-            }
-        });
+        mHtml = "";
     }
 
-    public static GetStudentSlns newInstance(Context context, Handler activityHandler, String cookie) {
-        return new GetStudentSlns(context, activityHandler, cookie);
+    /**
+     * @param cookie The cookie string to request the registration data with.
+     *               This cookie string must be non-null, well formed and contains
+     *               the required pubcookie_g cookie.
+     * @return A new, executable instance of GetStudentSlns.
+     */
+    public static GetStudentSlns newInstance(String cookie) {
+        return new GetStudentSlns(cookie);
     }
 
+    /**
+     * Executes a request for a list of the student's SLNs.
+     *
+     * Stores the response from the execution and the list of SLNs if the request was successful.
+     * The execute method should only be called once. Behavior is unspecified for multiple calls.
+     *
+     * Note that this method is blocking and should <b>not</b> be called on the UI thread.
+     */
     public void execute() {
 
-        final Map<String, String> cookieMap = new HashMap<String, String>();
-        //cookieMap.put("Cookie", mCookie);
+        try {
+            HttpURLConnection connection = NetUtils.getInputConnection(new URL(NetUtils.REGISTRATION_URL));
+            // Puts the given cookie in the request header
+            connection.setRequestProperty("Cookie", mCookie);
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                // TODO Put back cookie mapping
-                mWebView.loadUrl(NetUtils.REGISTRATION_URL);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            try {
+                // Reads lines to accumulate the registration page HTML content
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    mHtml += line;
+                }
+            } finally {
+                connection.disconnect();
+                reader.close();
             }
-        });
 
+            // TODO: Parse the html for slns
+            mSlns = parseSlnList(mHtml);
 
-        while (!mLoadingFinished) {  }
+        } catch (MalformedURLException e) {
+            mResponse = Response.SERVER_ERROR;
+        } catch (IOException e) {
+            mResponse = Response.NETWORK_ERROR;
+        }
 
     }
 
-    public Response getResponse() {return mResponse;}
+    // Returns a list of SLNs as Strings, given a well formed html content String.
+    private static List<String> parseSlnList(String html) {
+        return null;
+    }
 
+    /**
+     * @return A list of Strings corresponding to the SLNs for which the requested
+     *         student is registered for or {@code null} if this instance has yet
+     *         to be executed.
+     */
+    public List<String> getSlns() {
+        return mSlns;
+    }
+
+    /**
+     * @return The server {@link Response} of this instance execution or {@code null} if this
+     *         instance has yet to be executed.
+     */
+    public Response getResponse() {
+        return mResponse;
+    }
+
+    // TODO: Remove this debugging method when no longer necessary
     public String getHtml() { return mHtml; }
 }

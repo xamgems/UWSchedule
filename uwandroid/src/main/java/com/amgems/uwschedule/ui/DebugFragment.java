@@ -34,7 +34,8 @@ public class DebugFragment extends Fragment implements View.OnClickListener, Sub
     private RadioButton mHtmlRadioButton;
     private RadioButton mPlainRadioButton;
 
-    DebugFragment() {
+
+    public DebugFragment() {
         mDebugContent = "";
     }
 

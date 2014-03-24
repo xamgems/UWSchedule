@@ -3,12 +3,15 @@ package com.amgems.uwschedule.loaders;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
-import android.os.Handler;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.GetStudentSlns;
 
 /**
- * Created by JeremyTeoMBP on 9/2/14.
+ * Collects registration data from the UW registration website for a given user.
+ *
+ * Preforms the
+ *
+ * @author Jeremy Teo
  */
 public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
     String mCookie;
@@ -29,10 +32,10 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
             return mHtml;
         }
     }
-    public GetSlnLoader(Context context, Handler activiyHandler, String cookie) {
+    public GetSlnLoader(Context context, String cookie) {
         super(context);
         mCookie = cookie;
-        mGetter = GetStudentSlns.newInstance(context, activiyHandler, mCookie);
+        mGetter = GetStudentSlns.newInstance(mCookie);
     }
 
     @Override

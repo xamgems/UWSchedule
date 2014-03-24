@@ -170,7 +170,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
     @Override
     public Loader<GetSlnLoader.Slns> onCreateLoader(int id, Bundle args) {
-        Loader<GetSlnLoader.Slns> loader = new GetSlnLoader(this, new Handler(), mCookieStore.getActiveCookie());
+        Loader<GetSlnLoader.Slns> loader = new GetSlnLoader(this, mCookieStore.getActiveCookie());
         loader.forceLoad();
         return loader;
     }

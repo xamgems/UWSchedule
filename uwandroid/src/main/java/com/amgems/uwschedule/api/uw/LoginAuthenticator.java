@@ -123,30 +123,27 @@ public final class LoginAuthenticator {
 
         // List of cookies received from server
         List<String> cookieList = null;
-        List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+
 
         try {
-
+            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mJsWebview.loadUrl(NetUtils.REGISTRATION_URL);
                 }
             });
+
             while (!mLoadingFinished) ;
+
             InputStream htmlInputStream = new ByteArrayInputStream(mHtml.getBytes());
-            // HttpURLConnection connection = NetUtils.getInputConnection(loginUrl);
             BufferedReader reader = new BufferedReader(new InputStreamReader(htmlInputStream));
 
             // Captures and injects required post parameters for login
-            try {
-                postParameters.add(new BasicNameValuePair("user", mUsername));
-                postParameters.add(new BasicNameValuePair("pass", mPassword));
-                captureHiddenParameters(reader, postParameters);
-            } finally {
-                //connection.disconnect();
-                //reader.close();
-            }
+            postParameters.add(new BasicNameValuePair("user", mUsername));
+            postParameters.add(new BasicNameValuePair("pass", mPassword));
+            captureHiddenParameters(reader, postParameters);
+
 
             HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.LOGIN_REQUEST_URL));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
@@ -165,7 +162,6 @@ public final class LoginAuthenticator {
                 captureHiddenParameters(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(postLoginHtml.getBytes()))), postParameters);
                 mCookiesValue = postLoginHtml.substring(postLoginHtml.indexOf("pubcookie_g"), postLoginHtml.indexOf("==\">") + 2);
                 mCookiesValue = "pubcookie_g=" + mCookiesValue.substring("pubcookie_g\" value=\"".length()) + ";";
-                //mCookiesValue = postParameters.get(0).toString().replace("Continue", "");
             } finally {
                 connection.disconnect();
             }
@@ -177,9 +173,8 @@ public final class LoginAuthenticator {
         }
 
         if (mResponse == null) {
-            if (true || cookieList != null) {
+            if (cookieList != null) {
                 mResponse = Response.OK;
-                //mCookiesValue = postParameters.toString();
             } else { // No cookies returned, username/password incorrect
                 mResponse = Response.AUTHENTICATION_ERROR;
             }
