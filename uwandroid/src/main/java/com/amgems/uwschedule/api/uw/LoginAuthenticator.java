@@ -20,6 +20,7 @@
 package com.amgems.uwschedule.api.uw;
 
 import android.content.Context;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -40,6 +41,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,6 +72,9 @@ public final class LoginAuthenticator {
 
     private final WebView mJsWebview;
     private final Handler mHandler;
+
+    private final Lock lock = new ReentrantLock();
+    private final Condition htmlCallbackCondition = lock.newCondition();
     private volatile boolean mLoadingFinished;
     private String mHtml;
     private int mCount;
@@ -85,8 +92,12 @@ public final class LoginAuthenticator {
         mJsWebview.addJavascriptInterface(new Object() {
             @JavascriptInterface
             public void processHTML(final String html) {
+                lock.lock();
                 mHtml = html;
                 mLoadingFinished = true;
+                htmlCallbackCondition.signal();
+                lock.unlock();
+
             }
         }, "GETHTMLBODY");
         mJsWebview.setWebViewClient(new WebViewClient() {
@@ -124,9 +135,8 @@ public final class LoginAuthenticator {
         // List of cookies received from server
         List<String> cookieList = null;
 
-
         try {
-            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+            lock.lock();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -134,8 +144,17 @@ public final class LoginAuthenticator {
                 }
             });
 
-            while (!mLoadingFinished) ;
+            while (!mLoadingFinished) {
+                htmlCallbackCondition.await();
+            }
+        } catch (InterruptedException e) {
+            Log.d(getClass().getSimpleName(), "Html callback thread interrupted before it could be signaled");
+        } finally {
+            lock.unlock();
+        }
 
+        try {
+            List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
             InputStream htmlInputStream = new ByteArrayInputStream(mHtml.getBytes());
             BufferedReader reader = new BufferedReader(new InputStreamReader(htmlInputStream));
 
@@ -144,24 +163,26 @@ public final class LoginAuthenticator {
             postParameters.add(new BasicNameValuePair("pass", mPassword));
             captureHiddenParameters(reader, postParameters);
 
-
             HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.LOGIN_REQUEST_URL));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
             // Reads stream from response and stores any received cookies
             try {
                 cookieList = getAuthCookies(connection, bufferedWriter, postParameters);
-                mCookiesValue = cookieList.get(0);
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String postLoginHtml = "";
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    postLoginHtml += line;
+                // Valid cookie was returned - authentication was a success
+                if (cookieList != null) {
+                    mCookiesValue = cookieList.get(0);
+                    reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String postLoginHtml = "";
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        postLoginHtml += line;
+                    }
+                    postParameters.clear();
+                    captureHiddenParameters(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(postLoginHtml.getBytes()))), postParameters);
+                    mCookiesValue = postLoginHtml.substring(postLoginHtml.indexOf("pubcookie_g"), postLoginHtml.indexOf("==\">") + 2);
+                    mCookiesValue = "pubcookie_g=" + mCookiesValue.substring("pubcookie_g\" value=\"".length()) + ";";
                 }
-                postParameters.clear();
-                captureHiddenParameters(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(postLoginHtml.getBytes()))), postParameters);
-                mCookiesValue = postLoginHtml.substring(postLoginHtml.indexOf("pubcookie_g"), postLoginHtml.indexOf("==\">") + 2);
-                mCookiesValue = "pubcookie_g=" + mCookiesValue.substring("pubcookie_g\" value=\"".length()) + ";";
             } finally {
                 connection.disconnect();
             }
