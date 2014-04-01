@@ -25,24 +25,16 @@ import android.os.StrictMode;
 import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.amgems.uwschedule.R;
-import com.amgems.uwschedule.api.local.WebService;
+import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.uw.CookieStore;
-import com.amgems.uwschedule.model.Account;
-import com.amgems.uwschedule.model.Course;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * The Activity that represents a home screen for the user.
@@ -92,33 +84,9 @@ public class HomeActivity extends FragmentActivity {
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
-        WebService service = new WebService();
-        service.getAccount("shermpay", new Callback<Account>() {
-            @Override
-            public void success(Account account, Response response) {
-                Log.d(TAG, response.getStatus()+"");
-                Log.d(TAG, account.toString());
-            }
-
-            @Override
-            public void failure(RetrofitError retrofitError) {
-                Log.d(TAG, retrofitError.getMessage());
-            }
-        });
-
-        service.getUserCourses("shermpay", "13wi", new Callback<List<Course>>() {
-            @Override
-            public void success(List<Course> courses, Response response) {
-                Log.d(TAG, response.getStatus()+"");
-                Log.d(TAG, courses.toString());
-            }
-
-            @Override
-            public void failure(RetrofitError retrofitError) {
-                Log.d(TAG, retrofitError.getMessage());
-            }
-        });
+        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
+        asyncDataHandler.getRemoteAccount(mUsername);
+        asyncDataHandler.getRemoteCourses(mUsername, "13wi");
 
 
     }
@@ -137,6 +105,7 @@ public class HomeActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
