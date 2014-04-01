@@ -20,23 +20,28 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 /**
- * @author shermpay on 3/9/14.
- * This class is to facilitate ayschronous handling of the data used.
+ * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 3/9/14.
+ * This class is to facilitate ayschronous handling of data between the web server
+ * and the client.
+ *
  */
 public class AsyncDataHandler {
     private final String TAG = getClass().getSimpleName();
 
-    private final int INSERT_ACCOUNT_TOKEN = 1;
-    private final int INSERT_COURSES_TOKEN = 2;
+    public final int INSERT_ACCOUNT_TOKEN = 1;
+    public final int INSERT_COURSES_TOKEN = 2;
 
     private WebService mWebService;
     private AsyncQueryHandler mQueryHandler;
 
-    public AsyncDataHandler(Context context) {
+    /**
+     * Instantiates an AsyncDataHandler with the default AsyncQueryHandler.
+     * Custom AsyncQueryHandlers can be passed in via a different constructor provided.
+     * @param contentResolver ContentResolver obtained by context.getContentResolver()
+     */
+    public AsyncDataHandler(ContentResolver contentResolver) {
         mWebService = new WebService();
-        ContentResolver mContentResolver;
-        mContentResolver = context.getContentResolver();
-        mQueryHandler = new AsyncQueryHandler(mContentResolver) {
+        AsyncQueryHandler queryHandler = new AsyncQueryHandler(contentResolver) {
             // TODO: REMOVE WHEN VERIFIED TO WORK
             @Override
             protected void onInsertComplete(int token, Object cookie, Uri uri) {
@@ -91,6 +96,16 @@ public class AsyncDataHandler {
 
             }
         };
+
+    }
+
+    /**
+     * Instantiates a AsyncDataHandler provided an AsyncQueryHandler.
+     * @param asyncQueryHandler custom AsyncQueryHandler for querying the database.
+     */
+    public AsyncDataHandler(AsyncQueryHandler asyncQueryHandler) {
+        mWebService = new WebService();
+        mQueryHandler = asyncQueryHandler;
     }
 
     /**
