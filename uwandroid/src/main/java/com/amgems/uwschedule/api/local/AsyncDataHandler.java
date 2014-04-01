@@ -1,3 +1,21 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   UWSchedule student class and registration sharing interface
+ *   Copyright (C) 2013 Sherman Pay, Jeremy Teo, Zachary Iqbal
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by`
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 package com.amgems.uwschedule.api.local;
 
 import android.content.AsyncQueryHandler;
@@ -20,7 +38,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 /**
- * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 3/9/14.
+ * @author Sherman Pay on 3/9/14.
  * This class is to facilitate ayschronous handling of data between the web server
  * and the client.
  *
@@ -28,8 +46,12 @@ import retrofit.client.Response;
 public class AsyncDataHandler {
     private final String TAG = getClass().getSimpleName();
 
-    public final int INSERT_ACCOUNT_TOKEN = 1;
-    public final int INSERT_COURSES_TOKEN = 2;
+    /**
+     * {@value #INSERT_ACCOUNT_TOKEN} Token for when account is inserted to local db.
+     * {@value #INSERT_COURSES_TOKEN} Token for when courses are inserted to local db.
+     */
+    public static final int INSERT_ACCOUNT_TOKEN = 1;
+    public static final int INSERT_COURSES_TOKEN = 2;
 
     private WebService mWebService;
     private AsyncQueryHandler mQueryHandler;
@@ -101,6 +123,7 @@ public class AsyncDataHandler {
 
     /**
      * Instantiates a AsyncDataHandler provided an AsyncQueryHandler.
+     * Custom AsyncQueryHandler should use the constant tokens provided by this class.
      * @param asyncQueryHandler custom AsyncQueryHandler for querying the database.
      */
     public AsyncDataHandler(AsyncQueryHandler asyncQueryHandler) {
