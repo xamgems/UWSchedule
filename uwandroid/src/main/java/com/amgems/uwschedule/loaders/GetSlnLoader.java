@@ -6,6 +6,8 @@ import android.content.Context;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.GetStudentSlns;
 
+import java.util.List;
+
 /**
  * Collects registration data from the UW registration website for a given user.
  *
@@ -17,21 +19,6 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
     String mCookie;
     GetStudentSlns mGetter;
 
-    public static class Slns {
-        final Response mResponse;
-        final String[] mSlns;
-        final String mHtml;
-
-        Slns(Response response, String[] slns, String html) {
-            mResponse = response;
-            mSlns = slns;
-            mHtml = html;
-        }
-
-        public String getHtml() {
-            return mHtml;
-        }
-    }
     public GetSlnLoader(Context context, String cookie) {
         super(context);
         mCookie = cookie;
@@ -41,6 +28,23 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
     @Override
     public Slns loadInBackground() {
         mGetter.execute();
-        return new Slns(mGetter.getResponse(), null, mGetter.getHtml());
+        return new Slns(mGetter.getResponse(), mGetter.getSlns(), mGetter.getHtml());
+    }
+
+    public static class Slns {
+        final Response mResponse;
+        final List<String> mSlns;
+        //      mHtml for debugging purposes
+        final String mHtml;
+
+        Slns(Response response, List<String> slns, String html) {
+            mResponse = response;
+            mSlns = slns;
+            mHtml = html;
+        }
+
+        public String getHtml() {
+            return mHtml;
+        }
     }
 }
