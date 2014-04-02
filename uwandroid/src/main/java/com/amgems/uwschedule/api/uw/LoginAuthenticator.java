@@ -20,7 +20,6 @@
 package com.amgems.uwschedule.api.uw;
 
 import android.content.Context;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -28,7 +27,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.amgems.uwschedule.api.Response;
-import com.amgems.uwschedule.services.LoginService;
 import com.amgems.uwschedule.util.NetUtils;
 
 import org.apache.http.NameValuePair;
@@ -38,7 +36,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -63,23 +60,40 @@ import java.util.regex.Pattern;
  */
 public final class LoginAuthenticator {
 
+    /** Regex pattern to find name,value groups of hidden form fields */
     private static final Pattern HIDDEN_PARAMS = Pattern.compile("<input type=\"?hidden\"? name=\"(.+)\".*value=\"(.*)\">");
 
+    /** A single cookie string captured by this login request */
     private String mCookiesValue;
+
+    /** Defines the error or success response from executing a request*/
     private Response mResponse;
+
+    /** The username string for the login user */
     private final String mUsername;
+    /** The password string for the login user */
     private final String mPassword;
 
+    /** A WebView used as a Javascript engine to load redirects required for
+     *  cookie loading */
     private final WebView mJsWebview;
+    /** A handler running on the UI thread to house the WebView */
     private final Handler mHandler;
 
+    /** The HTML content received from the WebView */
+    private String mHtml;
+    /** Counts the number of times a loaded page callback is recieved from the
+     *  WebView */
+    private int mPageLoadCount;
+
+
+
     private final Lock lock = new ReentrantLock();
+    /** Condition variable to wait on loading HTML content into mHtml */
     private final Condition htmlCallbackCondition = lock.newCondition();
     private volatile boolean mLoadingFinished;
-    private String mHtml;
-    private int mCount;
 
-    LoginAuthenticator(Context context, Handler handler, String username, String password) {
+    private LoginAuthenticator(Context context, Handler handler, String username, String password) {
         mUsername = username;
         mPassword = password;
         mCookiesValue = "";
@@ -89,24 +103,18 @@ public final class LoginAuthenticator {
         mHandler = handler;
         CookieManager.getInstance().removeAllCookie();
         mJsWebview.getSettings().setJavaScriptEnabled(true);
-        mJsWebview.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void processHTML(final String html) {
-                lock.lock();
-                mHtml = html;
-                mLoadingFinished = true;
-                htmlCallbackCondition.signal();
-                lock.unlock();
-
-            }
-        }, "GETHTMLBODY");
+        mJsWebview.addJavascriptInterface(new CaptureHtmBody(), CaptureHtmBody.INTERFACE_NAME);
         mJsWebview.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (mCount >= 1)
-                    view.loadUrl("javascript:window.GETHTMLBODY.processHTML(document.getElementsByTagName('html')[0].innerHTML);");
-                mCount++;
+                // If the page has been loaded before, then the WebView must have
+                // returned from a JavaScript redirect required for
+                // appropriate login cookies. This is when the html content
+                // should be captured and processed
+                if (mPageLoadCount >= 1)
+                    view.loadUrl(CaptureHtmBody.CAPTURE_HTML_SCRIPT);
+                mPageLoadCount++;
             }
         });
     }
@@ -240,6 +248,30 @@ public final class LoginAuthenticator {
         writer.write(NetUtils.toQueryString(postParams));
         writer.flush();
         return connection.getHeaderFields().get("Set-Cookie");
+    }
+
+    /** Inner class used as a callback from a WebView */
+    private final class CaptureHtmBody {
+
+        /** A tag for this JavaScript interface */
+        private static final String INTERFACE_NAME = "GetHtmlBody";
+        /** Script used to inject HTML content into this JavaScript interface */
+        private static final String CAPTURE_HTML_SCRIPT = "javascript:window." + INTERFACE_NAME +
+                                                          ".processHTML(document.getElementsByTagName('html')[0].innerHTML);";
+
+        @JavascriptInterface
+        /**
+         * Called from a JavaScript interface with the html body of the WebView
+         */
+        public void processHTML(String html) {
+            lock.lock();
+
+            mHtml = html;
+            mLoadingFinished = true;
+
+            htmlCallbackCondition.signal();
+            lock.unlock();
+        }
     }
 
 }
