@@ -212,7 +212,13 @@ public class LoginActivity extends Activity
             if (response == LoginAuthenticator.Response.OK) {
                 Intent homeActivityIntent = new Intent(this, HomeActivity.class);
                 homeActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                homeActivityIntent.putExtra(HomeActivity.EXTRAS_HOME_USERNAME, result.getUsername());
+                String login = result.getUsername();
+                int aliasIndex = login.indexOf('@');
+                String username = login;
+                if (aliasIndex != -1) {
+                    username = login.substring(0, login.indexOf('@'));
+                }
+                homeActivityIntent.putExtra(HomeActivity.EXTRAS_HOME_USERNAME, username);
                 mCookieStore.setActiveCookie(result.getCookieValue());
 
                 Bundle translationBundle =
