@@ -63,7 +63,7 @@ public class AsyncDataHandler {
      */
     public AsyncDataHandler(ContentResolver contentResolver) {
         mWebService = new WebService();
-        AsyncQueryHandler queryHandler = new AsyncQueryHandler(contentResolver) {
+        mQueryHandler = new AsyncQueryHandler(contentResolver) {
             // TODO: REMOVE WHEN VERIFIED TO WORK
             @Override
             protected void onInsertComplete(int token, Object cookie, Uri uri) {
@@ -145,7 +145,8 @@ public class AsyncDataHandler {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(TAG, error.toString());
+                Response response = error.getResponse();
+                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
             }
         });
     }
@@ -166,7 +167,8 @@ public class AsyncDataHandler {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(TAG, error.toString());
+                Response response = error.getResponse();
+                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
             }
         });
     }
@@ -186,7 +188,8 @@ public class AsyncDataHandler {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(TAG, error.toString());
+                Response response = error.getResponse();
+                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
             }
         });
     }
@@ -215,7 +218,8 @@ public class AsyncDataHandler {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d(TAG, error.toString());
+                Response response = error.getResponse();
+                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
             }
         });
     }
@@ -238,7 +242,8 @@ public class AsyncDataHandler {
 
            @Override
            public void failure(RetrofitError error) {
-               Log.d(TAG, error.toString());
+               Response response = error.getResponse();
+               Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
            }
        });
     }

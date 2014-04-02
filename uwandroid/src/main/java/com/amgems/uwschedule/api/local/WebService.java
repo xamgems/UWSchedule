@@ -38,7 +38,7 @@ import retrofit.converter.GsonConverter;
 public class WebService {
     private final String TAG = getClass().getSimpleName();
     private static ScheduleRequest request;
-    public static final String WEB_SERVICE_URL = "http://shermanpay.com/uw_schedule/";
+    public static final String WEB_SERVICE_URL = "http://shermanpay.com:8080/uw_schedule/";
 
     public WebService() {
         Gson gson = new GsonBuilder()
