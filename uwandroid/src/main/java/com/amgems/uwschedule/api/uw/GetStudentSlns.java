@@ -9,7 +9,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * Collects SLNs for all courses a student is registered for from the UW registration
@@ -19,14 +22,12 @@ import java.util.List;
  */
 public class GetStudentSlns {
 
+    private static final Pattern pat_sln = Pattern.compile("<TT>\\d{5}");
     /** Cookie value to request registration page with */
     private String mCookie;
-
     private List<String> mSlns;
-
     /** Defines the error or success response from executing a request*/
     private Response mResponse;
-
     // TODO: Utilize the html string as a local variable instead and remove the getHtml() method
     //       for debugging purposes only
     private String mHtml;
@@ -50,12 +51,23 @@ public class GetStudentSlns {
         return new GetStudentSlns(cookie);
     }
 
+    // Returns a list of SLNs as Strings, given a well formed html content String.
+    private static List<String> parseSlnList(String html) {
+        Scanner scanner = new Scanner(html);
+        List<String> slns = new ArrayList<String>();
+        String sln;
+        while ((sln = scanner.findInLine(pat_sln)) != null) {
+            slns.add(sln.substring(4, sln.length()));
+        }
+        return slns;
+    }
+
     /**
      * Executes a request for a list of the student's SLNs.
-     *
+     * <p/>
      * Stores the response from the execution and the list of SLNs if the request was successful.
      * The execute method should only be called once. Behavior is unspecified for multiple calls.
-     *
+     * <p/>
      * Note that this method is blocking and should <b>not</b> be called on the UI thread.
      */
     public void execute() {
@@ -69,10 +81,12 @@ public class GetStudentSlns {
 
             try {
                 // Reads lines to accumulate the registration page HTML content
+                StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    mHtml += line;
+                    sb.append(line);
                 }
+                mHtml = sb.toString();
             } finally {
                 connection.disconnect();
                 reader.close();
@@ -87,11 +101,6 @@ public class GetStudentSlns {
             mResponse = Response.NETWORK_ERROR;
         }
 
-    }
-
-    // Returns a list of SLNs as Strings, given a well formed html content String.
-    private static List<String> parseSlnList(String html) {
-        return null;
     }
 
     /**
