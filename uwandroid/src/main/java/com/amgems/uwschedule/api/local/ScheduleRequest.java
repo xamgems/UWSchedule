@@ -43,8 +43,8 @@ public interface ScheduleRequest {
 
     @FormUrlEncoded
     @POST("/add_user")
-    void addAccount(@Field("user_name") String userName, String studentName, Callback<Account>
-            callback);
+    void addAccount(@Field("user_name") String userName, @Field("student_name") String studentName,
+            Callback<Account> callback);
 
     @GET("/find_courses")
     void getCourses(@Query("user_name") String userName, @Query("quarter") String quarter,

@@ -108,9 +108,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         }
 
 
-        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.getRemoteAccount(mUsername);
-        mPublisher = new Publisher<String>() {
+       mPublisher = new Publisher<String>() {
             private List<Subscriber<? super String>> mSubscriberList = new ArrayList<Subscriber<? super String>>();
             private String mData;
 
@@ -129,7 +127,9 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
             }
         };
 
-    }
+        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
+        asyncDataHandler.putAccount(mUsername, mUsername);
+     }
 
     /**
      * Helper method for enabling death penalty on strict mode.

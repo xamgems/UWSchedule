@@ -50,10 +50,15 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
     private static final int COURSE_CURSOR_LOADER = 0;
 
     /** Defines all incoming Course columns */
-    private static final String[] FROM_COLUMNS = new String[] { ScheduleContract.Courses.COURSE_NUMBER };
+    private static final String[] FROM_COLUMNS = new String[] {
+            ScheduleContract.Courses.DEPARTMENT_CODE, ScheduleContract.Courses.COURSE_NUMBER,
+            ScheduleContract.Courses.SECTION_ID, ScheduleContract.Courses.TYPE,
+            ScheduleContract.Courses.CREDITS,
+            ScheduleContract.Courses.TITLE };
 
     /** Defines all mappings from Course to View IDs */
-    private static final int[] TO_VIEWS = new int[] { R.id.course_title };
+    private static final int[] TO_VIEWS = new int[] {  R.id.department_code, R.id.course_number,
+           R.id.section_id, R.id.course_type, R.id.course_credits, R.id.course_title };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
