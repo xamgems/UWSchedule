@@ -128,7 +128,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         };
 
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putAccount(mUsername, mUsername.substring(0, mUsername.indexOf('@')));
+        asyncDataHandler.putAccount(mUsername, mUsername);
      }
 
     /**
