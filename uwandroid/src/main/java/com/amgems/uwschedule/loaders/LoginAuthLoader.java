@@ -21,22 +21,25 @@ package com.amgems.uwschedule.loaders;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+
+import android.os.Handler;
+import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 
 /**
  * A loader used to collect session cookies from a login instance.
  */
-public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
+public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result> {
 
     private LoginAuthenticator mAuthenticator;
     private String mUsername;
 
     public static class Result {
-        private final LoginAuthenticator.Response mResponse;
+        private final Response mResponse;
         private final String mCookieValue;
         private final String mUsername;
 
-        Result(LoginAuthenticator.Response response, String cookieValue, String username) {
+        Result(Response response, String cookieValue, String username) {
             mResponse = response;
             mCookieValue = cookieValue;
             mUsername = username;
@@ -46,17 +49,15 @@ public class LoginAuthLoader extends AsyncTaskLoader<LoginAuthLoader.Result>{
             return mCookieValue;
         }
 
-        public LoginAuthenticator.Response getResponse() {
-            return mResponse;
-        }
+        public Response getResponse() { return mResponse; }
 
         public String getUsername() { return mUsername; }
     }
 
-    public LoginAuthLoader(Context context, String username, String password) {
+    public LoginAuthLoader(Context context, Handler handler, String username, String password) {
         super(context);
         mUsername = username;
-        mAuthenticator = LoginAuthenticator.newInstance(username, password);
+        mAuthenticator = LoginAuthenticator.newInstance(context, handler, username, password);
     }
 
     @Override
