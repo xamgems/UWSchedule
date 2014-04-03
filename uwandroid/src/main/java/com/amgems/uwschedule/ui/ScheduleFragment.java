@@ -26,10 +26,12 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Adapter;
 import android.widget.CursorAdapter;
 import android.widget.SimpleCursorAdapter;
 
@@ -65,7 +67,7 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
         mCourseCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.schedule_list_card, null, FROM_COLUMNS,
-                                                       TO_VIEWS, SimpleCursorAdapter.NO_SELECTION);
+                                                       TO_VIEWS, Adapter.NO_SELECTION);
         setListAdapter(mCourseCursorAdapter);
     }
 
@@ -87,6 +89,7 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(ScheduleFragment.class.getSimpleName(), data.getCount() + "");
         if (data.getCount() > 0) {
             mCourseCursorAdapter.changeCursor(data);
             getListView().setVisibility(View.VISIBLE);

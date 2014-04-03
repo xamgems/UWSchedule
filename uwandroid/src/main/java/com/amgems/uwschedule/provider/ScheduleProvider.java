@@ -94,7 +94,9 @@ public class ScheduleProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        return qb.query(db, projection, selection, selectionArgs, null, null, null);
+        Cursor result = qb.query(db, projection, selection, selectionArgs, null, null, null);
+        result.setNotificationUri(getContext().getContentResolver(), uri);
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -129,11 +131,13 @@ public class ScheduleProvider extends ContentProvider {
             }
             case COURSES: {
                 final long rowId = db.insertOrThrow(Tables.COURSES, null, values);
+                getContext().getContentResolver().notifyChange(uri, null);
                 return ScheduleContract.Courses.buildCoursesUri(rowId);
             }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+
     }
 
     /** {@inheritDoc} */
