@@ -46,5 +46,9 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
         public String getHtml() {
             return mHtml;
         }
+
+        public List<String> getSlns() {
+            return mSlns;
+        }
     }
 }
