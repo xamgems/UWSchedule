@@ -20,6 +20,7 @@
 package com.amgems.uwschedule.ui;
 
 import android.app.LoaderManager;
+import android.content.AsyncQueryHandler;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -40,6 +41,8 @@ import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
+import com.amgems.uwschedule.provider.ScheduleContract;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.util.Publisher;
 import com.amgems.uwschedule.util.Subscriber;
 
@@ -72,6 +75,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
+        this.deleteDatabase(ScheduleDatabaseHelper.DATABASE_NAME);
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
         mCookieStore = CookieStore.getInstance(getApplicationContext());
@@ -104,7 +108,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         }
 
 
-        mPublisher = new Publisher<String>() {
+       mPublisher = new Publisher<String>() {
             private List<Subscriber<? super String>> mSubscriberList = new ArrayList<Subscriber<? super String>>();
             private String mData;
 
@@ -125,10 +129,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
         asyncDataHandler.putAccount(mUsername, mUsername.substring(0, mUsername.indexOf('@')));
-        asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, "13wi");
-
-    }
+     }
 
     /**
      * Helper method for enabling death penalty on strict mode.
@@ -168,7 +169,9 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<GetSlnLoader.Slns> loader, GetSlnLoader.Slns data) {
         Toast.makeText(this, "Done loading!", Toast.LENGTH_SHORT).show();
-        mPublisher.publish(data.getHtml());
+        mPublisher.publish(data.getSlns().toString());
+        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
+        asyncDataHandler.putCourses(mUsername, "14sp", data.getSlns().toString());
     }
 
     @Override
