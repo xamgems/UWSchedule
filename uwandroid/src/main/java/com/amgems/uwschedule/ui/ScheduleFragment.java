@@ -19,36 +19,78 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import com.amgems.uwschedule.R;
 
-import java.util.Arrays;
-import java.util.List;
+import android.widget.CursorAdapter;
+import android.widget.SimpleCursorAdapter;
+
+import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.provider.ScheduleContract;
 
 /**
  * A fragment used to show a list of courses making up a student schedule.
  */
-public class ScheduleFragment extends ListFragment {
+public class ScheduleFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private CursorAdapter mCourseCursorAdapter;
+    private ViewGroup mProgressGroup;
+
+    /** Courses cursor loader ID */
+    private static final int COURSE_CURSOR_LOADER = 0;
+
+    /** Defines all incoming Course columns */
+    private static final String[] FROM_COLUMNS = new String[] { ScheduleContract.Courses.COURSE_NUMBER };
+
+    /** Defines all mappings from Course to View IDs */
+    private static final int[] TO_VIEWS = new int[] { R.id.course_title };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.schedule_list_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.schedule_list_fragment, container, false);
+        mProgressGroup = (ViewGroup) rootView.findViewById(R.id.schedule_progress_group);
+        return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ArrayAdapter<String> coursesAdapter = new ArrayAdapter<String>(getActivity(), R.layout.schedule_list_card,
-                                                  R.id.course_title, Arrays.asList("CSE 315", "CSE 311", "MATH 308"));
-        setListAdapter(coursesAdapter);
+        getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
+        mCourseCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.schedule_list_card, null, FROM_COLUMNS,
+                                                       TO_VIEWS, SimpleCursorAdapter.NO_SELECTION);
+        setListAdapter(mCourseCursorAdapter);
     }
 
     public static ScheduleFragment newInstance() {
         return new ScheduleFragment();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(),
+                ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // Removes reference to old cursor adapter
+        mCourseCursorAdapter.changeCursor(null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data.getCount() > 0) {
+            mCourseCursorAdapter.changeCursor(data);
+            getListView().setVisibility(View.VISIBLE);
+            mProgressGroup.setVisibility(View.GONE);
+        }
     }
 }

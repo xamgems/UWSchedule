@@ -30,7 +30,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 /**
- * Created by zac on 12/1/13.
+ * Content provider for accessing all UWSchedule data.
  */
 public class ScheduleProvider extends ContentProvider {
 
@@ -59,7 +59,7 @@ public class ScheduleProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         mDatabaseHelper = ScheduleDatabaseHelper.getInstance(getContext());
-        return (mDatabaseHelper != null) ? true : false;
+        return mDatabaseHelper != null;
     }
 
     /** {@inheritDoc} */

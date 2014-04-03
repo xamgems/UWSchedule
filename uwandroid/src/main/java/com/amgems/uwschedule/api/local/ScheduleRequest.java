@@ -33,6 +33,9 @@ import retrofit.http.Query;
 
 /**
  * Created by shermpay on 2/10/14.
+ * Retrofit interface that allows simple interaction with a web server.
+ * Methods are not meant to be overridden.
+ * Interaction with the web service can be achieved via a RestAdapter.
  */
 public interface ScheduleRequest {
     @GET("/find_user")
@@ -40,7 +43,8 @@ public interface ScheduleRequest {
 
     @FormUrlEncoded
     @POST("/add_user")
-    void addAccount(@Field("user_name") String userName, Callback<Account> callback);
+    void addAccount(@Field("user_name") String userName, String studentName, Callback<Account>
+            callback);
 
     @GET("/find_courses")
     void getCourses(@Query("user_name") String userName, @Query("quarter") String quarter,

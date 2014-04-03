@@ -32,12 +32,13 @@ import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
 /**
- * Created by shermpay on 2/10/14.
+ * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 2/10/14.
+ * Class that interacts the Web Services provided for UW Schedule.
  */
 public class WebService {
-    private static final String TAG = "WEB SERVICE";
+    private final String TAG = getClass().getSimpleName();
     private static ScheduleRequest request;
-    public static final String WEB_SERVICE_URL = "http://shermanpay.com/uw_schedule/";
+    public static final String WEB_SERVICE_URL = "http://shermanpay.com:8080/uw_schedule/";
 
     public WebService() {
         Gson gson = new GsonBuilder()
@@ -51,18 +52,56 @@ public class WebService {
         request = restAdapter.create(ScheduleRequest.class);
     }
 
+    /**
+     * Gets the user account information from the web service
+     * Stores the information in an Account object
+     * @param userName String representing the userName to get the account
+     * @param callback Callback that stores the result in an Account object
+     */
     public void getAccount(String userName, Callback<Account> callback) {
         request.getAccount(userName, callback);
     }
 
+    /**
+     * Adds the user account to the database given the String representing the userName
+     * @param userName String representing the userName of the account
+     * @param studentName String representing the studentName of the account.
+     */
+    public void putAccount(String userName, String studentName, Callback<Account> callback) {
+        request.addAccount(userName, studentName, callback);
+    }
+
+    /**
+     * Gets the List of courses a user is taking in a particular quarter
+     * Stores the information in a List of Courses
+     * @param userName String representing the username to get the courses
+     * @param quarter String representing the quarter. eg "13wi" for winter 2013
+     * @param callback Callback that stores the result in a List<Course> object
+     */
     public void getCourses(String userName, String quarter, Callback<List<Course>> callback) {
         request.getCourses(userName, quarter, callback);
     }
 
-    public void addCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
+    /**
+     * Adds to the database a list of courses the user is taking.
+     * @param userName String representing the username to store the information
+     * @param quarter String representing the quarter. eg "13wi" for winter 2013
+     * @param courses String representing the list of courses. Requires the toString of a Java
+     *                Collection. eg "[12345, 56789]"
+     * @param callback Callback that stores the result in a List<Course> object
+     */
+    public void putCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
         request.addCourses(userName, quarter, courses, callback);
     }
 
+    /**
+     * Syncs to the database a list of courses a user is taking. Removes all old data before inserting.
+     * @param userName String representing the username to store the information
+     * @param quarter String representing the quarter. eg "13wi" for winter 2013
+     * @param courses String representing the list of courses. Requires the toString of a Java
+     *                Collection. eg "[12345, 56789]"
+     * @param callback Callback that stores the result in a List<Course> object
+     */
     public void syncCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
         request.syncCourses(userName, quarter, courses, callback);
     }

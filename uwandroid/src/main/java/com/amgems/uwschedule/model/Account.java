@@ -39,6 +39,12 @@ public class Account {
     @SerializedName("user_name")
     private final String mUserName;
 
+    @Expose
+    @SerializedName("id")
+    private final int mId = 0;
+
+    @Expose
+    @SerializedName("student_name")
     private final String mStudentName;
 
     private final long mLastUpdateTime;
