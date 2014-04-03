@@ -137,16 +137,25 @@ public class LoginActivity extends Activity
         mSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mLoginInProgress = true;
-                disableLoginInput();
-
-                LoaderManager manager = getLoaderManager();
-                if (manager.getLoader(LOGIN_LOADER_ID) != null) {
-                    manager.restartLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
+                if (mUsernameEditText.getText().toString().isEmpty()) {
+                    Toast toast = Toast.makeText(LoginActivity.this, "Please key in your UW NetID",
+                            Toast.LENGTH_LONG);
+                    toast.show();
+                }else if (mPasswordEditText.getText().toString().isEmpty()) {
+                    Toast toast = Toast.makeText(LoginActivity.this,  "Please key in your password",
+                            Toast.LENGTH_LONG);
+                    toast.show();
                 } else {
-                    manager.initLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
-                }
+                    mLoginInProgress = true;
+                    disableLoginInput();
 
+                    LoaderManager manager = getLoaderManager();
+                    if (manager.getLoader(LOGIN_LOADER_ID) != null) {
+                        manager.restartLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
+                    } else {
+                        manager.initLoader(LOGIN_LOADER_ID, null, LoginActivity.this);
+                    }
+                }
             }
         });
 

@@ -7,7 +7,7 @@
 	<!-- LoginActivity -->
 	<string name="login">Log In</string>
 	<string name="sync">Sync</string>
-	<string name="uw_username_hint">Username</string>
+	<string name="uw_username_hint">UW NetID</string>
 	<string name="password_hint">Password</string>
 
 	<!-- Login Dialog Responses -->
