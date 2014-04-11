@@ -21,7 +21,7 @@ package com.amgems.uwschedule.ui;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -30,19 +30,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.CursorAdapter;
-import android.widget.SimpleCursorAdapter;
-
+import android.widget.ExpandableListView;
+import android.widget.SimpleCursorTreeAdapter;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
 /**
  * A fragment used to show a list of courses making up a student schedule.
  */
-public class ScheduleFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private CursorAdapter mCourseCursorAdapter;
+    private SimpleCursorTreeAdapter mCourseCursorAdapter;
     private ViewGroup mProgressGroup;
+    private ExpandableListView mCoursesListView;
+
 
     /** Courses cursor loader ID */
     private static final int COURSE_CURSOR_LOADER = 0;
@@ -62,6 +63,7 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.schedule_list_fragment, container, false);
         mProgressGroup = (ViewGroup) rootView.findViewById(R.id.schedule_progress_group);
+        mCoursesListView = (ExpandableListView) rootView.findViewById(R.id.courses_expandable_list);
         return rootView;
     }
 
@@ -69,9 +71,10 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
-        mCourseCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.schedule_list_card, null, FROM_COLUMNS,
-                                                       TO_VIEWS, SimpleCursorAdapter.NO_SELECTION);
-        setListAdapter(mCourseCursorAdapter);
+
+        mCourseCursorAdapter = new CoursesTreeCursorAdapter(getActivity(), null, R.layout.schedule_list_card,
+                                                            FROM_COLUMNS, TO_VIEWS, 0, null, null);
+        mCoursesListView.setAdapter(mCourseCursorAdapter);
     }
 
     public static ScheduleFragment newInstance() {
@@ -94,7 +97,7 @@ public class ScheduleFragment extends ListFragment implements LoaderManager.Load
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data.getCount() > 0) {
             mCourseCursorAdapter.changeCursor(data);
-            getListView().setVisibility(View.VISIBLE);
+            mCoursesListView.setVisibility(View.VISIBLE);
             mProgressGroup.setVisibility(View.GONE);
         }
     }

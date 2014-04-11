@@ -42,6 +42,8 @@ public class ScheduleProvider extends ContentProvider {
     private static final int ACCOUNTS_ID = 101;
     private static final int COURSES = 200;
     private static final int COURSES_ID = 201;
+    private static final int MEETINGS = 300;
+    private static final int MEETINGS_ID = 301;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -51,6 +53,8 @@ public class ScheduleProvider extends ContentProvider {
         uriMatcher.addURI(authority, "accounts/#", ACCOUNTS_ID);
         uriMatcher.addURI(authority, "courses", COURSES);
         uriMatcher.addURI(authority, "courses/#", COURSES_ID);
+        uriMatcher.addURI(authority, "meetings", MEETINGS);
+        uriMatcher.addURI(authority, "meetings/#", MEETINGS_ID);
 
         return uriMatcher;
     }
@@ -90,6 +94,15 @@ public class ScheduleProvider extends ContentProvider {
                 qb.appendWhere(ScheduleContract.Courses._ID + " = " + uri.getLastPathSegment());
                 break;
             }
+            case MEETINGS: {
+                qb.setTables(Tables.MEETINGS);
+                break;
+            }
+            case MEETINGS_ID: {
+                qb.setTables(Tables.MEETINGS);
+                qb.appendWhere(ScheduleContract.Meetings._ID + " = " + uri.getLastPathSegment());
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -111,6 +124,10 @@ public class ScheduleProvider extends ContentProvider {
                 return ScheduleContract.Courses.CONTENT_TYPE;
             case COURSES_ID:
                 return ScheduleContract.Courses.CONTENT_ITEM_TYPE;
+            case MEETINGS:
+                return ScheduleContract.Meetings.CONTENT_TYPE;
+            case MEETINGS_ID:
+                return ScheduleContract.Meetings.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -130,6 +147,10 @@ public class ScheduleProvider extends ContentProvider {
             case COURSES: {
                 final long rowId = db.insertOrThrow(Tables.COURSES, null, values);
                 return ScheduleContract.Courses.buildUriFromId(rowId);
+            }
+            case MEETINGS: {
+                final long rowId = db.insertOrThrow(Tables.MEETINGS, null, values);
+                return ScheduleContract.Meetings.buildUriFromId(rowId);
             }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
