@@ -86,7 +86,6 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
             MeetingsColumns.THURSDAY_MEET + " INT DEFAULT 0, " +
             MeetingsColumns.FRIDAY_MEET + " INT DEFAULT 0, " +
             MeetingsColumns.SATURDAY_MEET + " INT DEFAULT 0, " +
-            MeetingsColumns.SUNDAY_MEET + " INT DEFAULT 0, " +
             "FOREIGN KEY(" + MeetingsColumns.SLN + ") REFERENCES " +
             Tables.COURSES + "(" + CoursesColumns.SLN + "))";
 

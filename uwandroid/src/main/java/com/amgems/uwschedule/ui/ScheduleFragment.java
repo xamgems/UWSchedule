@@ -30,8 +30,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
+import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
@@ -40,13 +42,13 @@ import com.amgems.uwschedule.provider.ScheduleContract;
  */
 public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private SimpleCursorTreeAdapter mCourseCursorAdapter;
+    private CursorTreeAdapter mCourseCursorAdapter;
     private ViewGroup mProgressGroup;
     private ExpandableListView mCoursesListView;
 
-
     /** Courses cursor loader ID */
     private static final int COURSE_CURSOR_LOADER = 0;
+    private static final int MEETINGS_CURSOR_LOADER = 1;
 
     /** Defines all incoming Course columns */
     private static final String[] FROM_COLUMNS = new String[] {
@@ -72,8 +74,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
 
-        mCourseCursorAdapter = new CoursesTreeCursorAdapter(getActivity(), null, R.layout.schedule_list_card,
-                                                            FROM_COLUMNS, TO_VIEWS, 0, null, null);
+        mCourseCursorAdapter = new CoursesCursorTreeAdapter(R.layout.schedule_list_card,
+                                                            FROM_COLUMNS, TO_VIEWS, R.layout.schedule_list_card,
+                                                            FROM_COLUMNS, TO_VIEWS);
         mCoursesListView.setAdapter(mCourseCursorAdapter);
     }
 
@@ -83,8 +86,18 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(),
-                ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
+        switch (id) {
+            case COURSE_CURSOR_LOADER: {
+                return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
+            }
+            case MEETINGS_CURSOR_LOADER: {
+                String groupSln = args.getString(CoursesCursorTreeAdapter.BUNDLE_SLN_KEY);
+                return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
+                                        ScheduleContract.Meetings.SLN + " = ?", new String[] {groupSln}, null);
+            }
+            default:
+                throw new IllegalArgumentException("Illegal loader id requested: " + id);
+        }
     }
 
     @Override
@@ -95,10 +108,53 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data.getCount() > 0) {
-            mCourseCursorAdapter.changeCursor(data);
-            mCoursesListView.setVisibility(View.VISIBLE);
-            mProgressGroup.setVisibility(View.GONE);
+        switch (loader.getId()) {
+            case COURSE_CURSOR_LOADER: {
+                if (data.getCount() > 0) {
+                    mCourseCursorAdapter.changeCursor(data);
+                    mCoursesListView.setVisibility(View.VISIBLE);
+                    mProgressGroup.setVisibility(View.GONE);
+                }
+                break;
+            }
+            case MEETINGS_CURSOR_LOADER: {
+                Toast.makeText(getActivity(), "Cursor returned with " + data.getCount() + " items",
+                               Toast.LENGTH_SHORT).show();
+                break;
+            }
+            default:
+                throw new IllegalArgumentException("Unrecognized loader finished: " + loader.getId());
         }
+    }
+
+    /**
+     * A {@link SimpleCursorTreeAdapter} implementation to managed the nested
+     * courses, meeting UI structure.
+     */
+    public class CoursesCursorTreeAdapter extends SimpleCursorTreeAdapter {
+
+        /** Defines Bundle keys for cursor tree group data*/
+        private static final String BUNDLE_SLN_KEY = "bundleSln";
+        private static final String BUNDLE_GROUP_ID = "bundleGroupId";
+
+        public CoursesCursorTreeAdapter(int groupLayout, String[] groupFrom,
+                                        int[] groupTo, int childLayout, String[] childFrom, int[] childTo) {
+            super(getActivity(), null, groupLayout, groupFrom, groupTo, childLayout, childFrom, childTo);
+        }
+
+        @Override
+        protected Cursor getChildrenCursor(Cursor groupCursor) {
+            int groupSlnIndex = groupCursor.getColumnIndex(ScheduleContract.Meetings.SLN);
+            String groupSln = groupCursor.getString(groupSlnIndex);
+            Bundle childRequestBundle = new Bundle();
+            childRequestBundle.putString(BUNDLE_SLN_KEY, groupSln);
+            childRequestBundle.putInt(BUNDLE_GROUP_ID, groupCursor.getPosition());
+
+            getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+
+            // Allows cursor loading to be deferred to a non-ui thread
+            return null;
+        }
+
     }
 }

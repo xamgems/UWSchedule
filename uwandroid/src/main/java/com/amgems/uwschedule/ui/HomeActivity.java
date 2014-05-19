@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class HomeActivity extends FragmentActivity {
         getActionBar().setHomeButtonEnabled(true);
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
         asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, "13wi");
+        asyncDataHandler.getRemoteCourses(mUsername, "14sp");
 
 
     }

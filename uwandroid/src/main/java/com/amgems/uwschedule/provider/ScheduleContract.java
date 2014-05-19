@@ -100,13 +100,16 @@ public final class ScheduleContract {
         public static final String END_TIME = "end_time";
         public static final String LOCATION = "meeting_location";
         public static final String INSTRUCTOR = "meeting_instructor";
+
+        /** Bool-int flags for storing meetings information in the database. */
+        public static final int HAS_MEETING = 1;
+        public static final int NOT_MEETING = 0;
         public static final String MONDAY_MEET = "monday_meet";
         public static final String TUESDAY_MEET = "tuesday_meet";
         public static final String WEDNESDAY_MEET = "wednesday_meet";
         public static final String THURSDAY_MEET = "thursday_meet";
         public static final String FRIDAY_MEET = "friday_meet";
         public static final String SATURDAY_MEET = "saturday_meet";
-        public static final String SUNDAY_MEET = "sunday_meet";
     }
 
     private static final String PATH_MEETINGS = "meetings";
