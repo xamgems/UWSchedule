@@ -22,6 +22,7 @@ package com.amgems.uwschedule.model;
 import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
@@ -211,6 +212,8 @@ public class Meeting implements Parcelable {
         contentValues.put(ScheduleContract.Meetings.LOCATION, getLocation());
         contentValues.put(ScheduleContract.Meetings.INSTRUCTOR, getInstructor());
 
+
+        Log.d(getClass().getSimpleName(), "sln: " + sln + "meetings: " + getMeetingDays());
         for (Day day : getMeetingDays()) {
             contentValues.put(day.getColumnName(), ScheduleContract.Meetings.HAS_MEETING);
         }

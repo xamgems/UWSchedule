@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
+import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
 import java.util.Arrays;
@@ -47,11 +48,36 @@ public class AsyncDataHandler {
     private final String TAG = getClass().getSimpleName();
 
     /**
-     * {@value #INSERT_ACCOUNT_TOKEN} Token for when account is inserted to local db.
-     * {@value #INSERT_COURSES_TOKEN} Token for when courses are inserted to local db.
+     * Tokens for V
      */
-    public static final int INSERT_ACCOUNT_TOKEN = 1;
-    public static final int INSERT_COURSES_TOKEN = 2;
+    public static enum AsyncDataHandlerTokens {
+        INSERT_COURSES_TOKEN (1),
+        INSERT_ACCOUNT_TOKEN (2),
+        INSERT_MEETING_TOKEN (3);
+
+        int value;
+        AsyncDataHandlerTokens(int x) {
+           this.value = x;
+        }
+
+        /**
+         * Returns a token enum for a corresponding integer given
+         * @param x
+         * @return token enum or null if integer given does not map to a token
+         */
+        public static AsyncDataHandlerTokens getType(int x) {
+            for (AsyncDataHandlerTokens token : AsyncDataHandlerTokens.values()) {
+               if (token.value == x) {
+                   return token;
+               }
+            }
+            return null;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
     private WebService mWebService;
     private AsyncQueryHandler mQueryHandler;
@@ -68,26 +94,29 @@ public class AsyncDataHandler {
             @Override
             protected void onInsertComplete(int token, Object cookie, Uri uri) {
                 super.onInsertComplete(token, cookie, uri);
-                switch (token) {
+                switch (AsyncDataHandlerTokens.getType(token)) {
                     case INSERT_ACCOUNT_TOKEN:
                         Log.d(TAG, "Account Inserted\n" + uri.toString());
-                        this.startQuery(INSERT_ACCOUNT_TOKEN, null,
+                        this.startQuery(token, null,
                                 ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
                         break;
                     case INSERT_COURSES_TOKEN:
                         Log.d(TAG, "Account Inserted\n" + uri.toString());
-                        this.startQuery(INSERT_COURSES_TOKEN, null,
+                        this.startQuery(token, null,
                                 ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
                         break;
-                    default:
+                    case INSERT_MEETING_TOKEN:
+                        Log.d(TAG, "Meeting Inserted\n" + uri.toString());
                         break;
+                    default:
+                        throw new IllegalArgumentException();
                 }
             }
 
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 super.onQueryComplete(token, cookie, cursor);
-                switch (token) {
+                switch (AsyncDataHandlerTokens.getType(token)) {
                     case INSERT_ACCOUNT_TOKEN:
                         Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
                         Log.d(TAG, cursor.getColumnCount() + "");
@@ -249,14 +278,20 @@ public class AsyncDataHandler {
     }
 
     private void localInsertAccount(Account account) {
-        mQueryHandler.startInsert(INSERT_ACCOUNT_TOKEN, null,
+        mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_ACCOUNT_TOKEN.getValue(), null,
                 ScheduleContract.Accounts.CONTENT_URI, account.toContentValues());
     }
 
     private void localInsertCourses(String userName, List<Course> courses) {
         for (Course course : courses) {
-            mQueryHandler.startInsert(INSERT_COURSES_TOKEN, null,
-                    ScheduleContract.Courses.CONTENT_URI, course.toContentValues(userName));
+            mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_COURSES_TOKEN.getValue(),
+                    null, ScheduleContract.Courses.CONTENT_URI,
+                    course.toContentValues(userName));
+            for (Meeting meeting : course.getMeetings()) {
+               mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_MEETING_TOKEN.getValue(),
+                       null,  ScheduleContract.Meetings.CONTENT_URI,
+                       meeting.toContentValues(course.getSln()));
+            }
         }
     }
 }
