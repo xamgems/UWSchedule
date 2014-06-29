@@ -213,7 +213,6 @@ public class Meeting implements Parcelable {
         contentValues.put(ScheduleContract.Meetings.INSTRUCTOR, getInstructor());
 
 
-        Log.d(getClass().getSimpleName(), "sln: " + sln + "meetings: " + getMeetingDays());
         for (Day day : getMeetingDays()) {
             contentValues.put(day.getColumnName(), ScheduleContract.Meetings.HAS_MEETING);
         }
