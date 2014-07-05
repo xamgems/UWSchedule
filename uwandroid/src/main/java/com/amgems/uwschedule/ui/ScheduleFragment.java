@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,8 +76,9 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
 
         mCourseCursorAdapter = new CoursesCursorTreeAdapter(R.layout.schedule_list_card,
-                                                            FROM_COLUMNS, TO_VIEWS, R.layout.schedule_list_card,
-                                                            FROM_COLUMNS, TO_VIEWS);
+                                                            FROM_COLUMNS, TO_VIEWS, R.layout.drawer_group_item,
+                                                            new String[] {ScheduleContract.Meetings.LOCATION},
+                                                            new int[] {R.id.group_title});
         mCoursesListView.setAdapter(mCourseCursorAdapter);
     }
 
@@ -103,6 +105,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         // Removes reference to old cursor adapter
+        Log.d(ScheduleFragment.class.getSimpleName(), "Loader resetting");
         mCourseCursorAdapter.changeCursor(null);
     }
 
@@ -111,15 +114,15 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         switch (loader.getId()) {
             case COURSE_CURSOR_LOADER: {
                 if (data.getCount() > 0) {
-                    mCourseCursorAdapter.changeCursor(data);
+                    mCourseCursorAdapter.setGroupCursor(data);
                     mCoursesListView.setVisibility(View.VISIBLE);
                     mProgressGroup.setVisibility(View.GONE);
                 }
                 break;
             }
             case MEETINGS_CURSOR_LOADER: {
-                Toast.makeText(getActivity(), "Cursor returned with " + data.getCount() + " items",
-                               Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Cursor returned for " + data.getCount() + " items",
+                        Toast.LENGTH_SHORT).show();
                 break;
             }
             default:
@@ -150,9 +153,17 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             childRequestBundle.putString(BUNDLE_SLN_KEY, groupSln);
             childRequestBundle.putInt(BUNDLE_GROUP_ID, groupCursor.getPosition());
 
-            getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+            Loader<Object> loader = getLoaderManager().getLoader(MEETINGS_CURSOR_LOADER);
 
-            // Allows cursor loading to be deferred to a non-ui thread
+            // Loader has not yet been initialized or has a call to reset and
+            // pending a state reset / being destroyed
+            if (loader == null || loader.isReset()) {
+                getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+            } else { // Loader is processing and needs to be restarted
+                getLoaderManager().restartLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+            }
+
+            // Allows cursor loading for this group's child to be deferred to a non-ui thread
             return null;
         }
 
