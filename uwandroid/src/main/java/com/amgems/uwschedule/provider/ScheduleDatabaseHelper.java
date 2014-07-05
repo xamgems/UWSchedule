@@ -21,6 +21,7 @@ package com.amgems.uwschedule.provider;
 
 import com.amgems.uwschedule.provider.ScheduleContract.AccountsColumns;
 import com.amgems.uwschedule.provider.ScheduleContract.CoursesColumns;
+import com.amgems.uwschedule.provider.ScheduleContract.MeetingsColumns;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -48,6 +49,7 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
     static class Tables {
         public static final String ACCOUNTS = "accounts";
         public static final String COURSES = "courses";
+        public static final String MEETINGS = "meetings";
     }
 
     static final String CREATE_TABLE_ACCOUNTS = "CREATE TABLE " + Tables.ACCOUNTS + " (" +
@@ -71,6 +73,23 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
             Tables.ACCOUNTS + "(" + AccountsColumns.STUDENT_USERNAME + "), " +
             "UNIQUE (" + CoursesColumns.SLN + ") ON CONFLICT REPLACE)";
 
+    static final String CREATE_TABLE_MEETINGS = "CREATE TABLE " + Tables.MEETINGS + " (" +
+            BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            MeetingsColumns.SLN + " TEXT NOT NULL, " +
+            MeetingsColumns.START_TIME + " INT NOT NULL, " +
+            MeetingsColumns.END_TIME + " INT NOT NULL, " +
+            MeetingsColumns.LOCATION + " TEXT NOT NULL, " +
+            MeetingsColumns.INSTRUCTOR + " TEXT NOT NULL, " +
+            MeetingsColumns.MONDAY_MEET + " INT DEFAULT 0, " +
+            MeetingsColumns.TUESDAY_MEET + " INT DEFAULT 0, " +
+            MeetingsColumns.WEDNESDAY_MEET + " INT DEFAULT 0, " +
+            MeetingsColumns.THURSDAY_MEET + " INT DEFAULT 0, " +
+            MeetingsColumns.FRIDAY_MEET + " INT DEFAULT 0, " +
+            MeetingsColumns.SATURDAY_MEET + " INT DEFAULT 0, " +
+            "FOREIGN KEY(" + MeetingsColumns.SLN + ") REFERENCES " +
+            Tables.COURSES + "(" + CoursesColumns.SLN + "))";
+
+
     private ScheduleDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -93,6 +112,7 @@ public class ScheduleDatabaseHelper extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_ACCOUNTS);
         sqLiteDatabase.execSQL(CREATE_TABLE_COURSES);
+        sqLiteDatabase.execSQL(CREATE_TABLE_MEETINGS);
     }
 
     @Override

@@ -20,7 +20,6 @@
 package com.amgems.uwschedule.ui;
 
 import android.app.LoaderManager;
-import android.content.AsyncQueryHandler;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -40,9 +39,8 @@ import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.uw.CookieStore;
-import com.amgems.uwschedule.loaders.GetSlnLoader;
-import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
+import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.util.Publisher;
 import com.amgems.uwschedule.util.Subscriber;
 
@@ -102,11 +100,15 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
+        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
+        asyncDataHandler.putAccount(mUsername, mUsername);
+        asyncDataHandler.getRemoteAccount(mUsername);
+        asyncDataHandler.getRemoteCourses(mUsername, "14sp");
+
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
             manager.initLoader(GET_SLN_LOADER_ID, null, this);
         }
-
 
        mPublisher = new Publisher<String>() {
             private List<Subscriber<? super String>> mSubscriberList = new ArrayList<Subscriber<? super String>>();
@@ -126,9 +128,6 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
                 }
             }
         };
-
-        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putAccount(mUsername, mUsername);
      }
 
     /**

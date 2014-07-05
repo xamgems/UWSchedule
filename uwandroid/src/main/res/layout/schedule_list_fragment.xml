@@ -22,14 +22,15 @@
 
 	</LinearLayout>
 
-	<ListView
-		android:id="@android:id/list"
+	<ExpandableListView
+		android:id="@+id/courses_expandable_list"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_marginTop="15dp"
 	    android:layout_marginLeft="10dp"
 	    android:layout_marginRight="10dp"
 	    android:divider="@null"
+	    android:groupIndicator="@null"
 	    android:dividerHeight="10dp"
 	    android:visibility="invisible"
 		/>
