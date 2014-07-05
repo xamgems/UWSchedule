@@ -144,12 +144,11 @@ public class ScheduleProvider extends ContentProvider {
         switch (match) {
             case ACCOUNTS: {
                 final long rowId = db.insertOrThrow(Tables.ACCOUNTS, null, values);
-                return ScheduleContract.Accounts.buildAccountUri(rowId);
+                return ScheduleContract.Accounts.buildUriFromId(rowId);
             }
             case COURSES: {
                 final long rowId = db.insertOrThrow(Tables.COURSES, null, values);
                 getContext().getContentResolver().notifyChange(uri, null);
-                return ScheduleContract.Courses.buildCoursesUri(rowId);
                 return ScheduleContract.Courses.buildUriFromId(rowId);
             }
             case MEETINGS: {
