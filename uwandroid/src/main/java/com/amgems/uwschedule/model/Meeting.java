@@ -19,9 +19,12 @@
 
 package com.amgems.uwschedule.model;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -61,23 +64,34 @@ public class Meeting implements Parcelable {
      * The day of the week for which a class meets.
      */
     public static enum Day {
-        M("Monday"),
-        T("Tuesday"),
-        W("Wednesday"),
-        TH("Thursday"),
-        F("Friday"),
-        S("Saturday");
+        M("Monday", ScheduleContract.Meetings.MONDAY_MEET),
+        T("Tuesday", ScheduleContract.Meetings.TUESDAY_MEET),
+        W("Wednesday", ScheduleContract.Meetings.WEDNESDAY_MEET),
+        TH("Thursday", ScheduleContract.Meetings.THURSDAY_MEET),
+        F("Friday", ScheduleContract.Meetings.FRIDAY_MEET),
+        S("Saturday", ScheduleContract.Meetings.SATURDAY_MEET);
 
         // Upper-case
         private final String mDayText;
 
-        private Day(String dayText) {
+        /** The name of the boolean day column this day corresponds to in the
+         *  database's meetings table.
+         *  See {@link com.amgems.uwschedule.provider.ScheduleContract.Meetings}
+         *  for more.*/
+        private final String mColumnName;
+
+        private Day(String dayText, String columnName) {
             mDayText = dayText;
+            mColumnName = columnName;
+        }
+
+        public String getColumnName() {
+            return mColumnName;
         }
 
         @Override
         public String toString() {
-            return mDayText;
+            return mColumnName + ":" + mDayText;
         }
 
         /**
@@ -164,7 +178,7 @@ public class Meeting implements Parcelable {
         return 0;
     }
 
-    public Set<Day> getmMeetingDays() { return mMeetingDays; }
+    public Set<Day> getMeetingDays() { return mMeetingDays; }
 
     public String getLocation() { return mLocation; }
 
@@ -180,9 +194,36 @@ public class Meeting implements Parcelable {
         return mEndTime;
     }
 
+    /**
+     * Returns a representation of this {@link Meeting}, given a SLN.
+     *
+     * This representation contains all logical information related to
+     * a meeting. The inclusion of an SLN tied to this Meeting is solely
+     * for forming course to meeting relationships in the client database.
+     *
+     * @param sln The SLN to represent this meeting being tied to.
+     */
+    public ContentValues toContentValues(String sln) {
+        final ContentValues contentValues = new ContentValues();
+
+        contentValues.put(ScheduleContract.Meetings.SLN, sln);
+        contentValues.put(ScheduleContract.Meetings.START_TIME, getStartTime());
+        contentValues.put(ScheduleContract.Meetings.END_TIME, getEndTime());
+        contentValues.put(ScheduleContract.Meetings.LOCATION, getLocation());
+        contentValues.put(ScheduleContract.Meetings.INSTRUCTOR, getInstructor());
+
+
+        Log.d(Meeting.class.getSimpleName(), "sln: " + sln + "meetings: " + getMeetingDays());
+        for (Day day : getMeetingDays()) {
+            contentValues.put(day.getColumnName(), ScheduleContract.Meetings.HAS_MEETING);
+        }
+
+        return contentValues;
+    }
+
     @Override
     public String toString() {
-        return  "{" + "days: " + getmMeetingDays() + "\n" +
+        return  "{" + "days: " + getMeetingDays() + "\n" +
                 getStartTime() + " - " + getEndTime() + "\n" +
                 "Location: " + getLocation() + "\n" +
                 "Instructor: " + getInstructor() + "}";

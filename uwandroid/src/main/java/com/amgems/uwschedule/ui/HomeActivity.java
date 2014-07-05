@@ -40,6 +40,7 @@ import android.widget.Toast;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
@@ -101,6 +102,9 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
+        asyncDataHandler.getRemoteAccount(mUsername);
+        asyncDataHandler.getRemoteCourses(mUsername, "14sp");
 
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {

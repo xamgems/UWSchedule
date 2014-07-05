@@ -54,7 +54,7 @@ public final class ScheduleContract {
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/vnd.uwschedule.account";
 
-        public static Uri buildAccountUri(long accountId) {
+        public static Uri buildUriFromId(long accountId) {
             String idString = String.valueOf(accountId);
             return CONTENT_URI.buildUpon().appendPath(idString).build();
         }
@@ -85,10 +85,47 @@ public final class ScheduleContract {
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/vnd.uwschedule.course";
 
-        public static Uri buildCoursesUri(long courseId) {
+        public static Uri buildUriFromId(long courseId) {
             String idString = String.valueOf(courseId);
             return CONTENT_URI.buildUpon().appendPath(idString).build();
         }
     }
 
+    ////////////////////////////////////////////////////////////////
+    ////    Contract for all Meetings data.
+    ////////////////////////////////////////////////////////////////
+    interface MeetingsColumns {
+        public static final String SLN = "course_sln";
+        public static final String START_TIME = "start_time";
+        public static final String END_TIME = "end_time";
+        public static final String LOCATION = "meeting_location";
+        public static final String INSTRUCTOR = "meeting_instructor";
+
+        /** Bool-int flags for storing meetings information in the database. */
+        public static final int HAS_MEETING = 1;
+        public static final int NOT_MEETING = 0;
+        public static final String MONDAY_MEET = "monday_meet";
+        public static final String TUESDAY_MEET = "tuesday_meet";
+        public static final String WEDNESDAY_MEET = "wednesday_meet";
+        public static final String THURSDAY_MEET = "thursday_meet";
+        public static final String FRIDAY_MEET = "friday_meet";
+        public static final String SATURDAY_MEET = "saturday_meet";
+    }
+
+    private static final String PATH_MEETINGS = "meetings";
+
+    public static abstract class Meetings implements BaseColumns, MeetingsColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MEETINGS).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/vnd.uwschedule.meeting";
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/vnd.uwschedule.meeting";
+
+        public static Uri buildUriFromId(long meetingId) {
+            String idString = String.valueOf(meetingId);
+            return CONTENT_URI.buildUpon().appendPath(idString).build();
+        }
+    }
 }
