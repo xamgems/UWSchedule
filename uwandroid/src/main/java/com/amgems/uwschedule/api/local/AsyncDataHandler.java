@@ -45,6 +45,7 @@ import retrofit.client.Response;
  *
  */
 public class AsyncDataHandler {
+    private final boolean DEBUG_MODE = false;
     private final String TAG = getClass().getSimpleName();
 
     /**
@@ -94,57 +95,60 @@ public class AsyncDataHandler {
             @Override
             protected void onInsertComplete(int token, Object cookie, Uri uri) {
                 super.onInsertComplete(token, cookie, uri);
-                switch (AsyncDataHandlerTokens.getType(token)) {
-                    case INSERT_ACCOUNT_TOKEN:
-                        Log.d(TAG, "Account Inserted\n" + uri.toString());
-                        this.startQuery(token, null,
-                                ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
-                        break;
-                    case INSERT_COURSES_TOKEN:
-                        Log.d(TAG, "Course Inserted\n" + uri.toString());
-                        this.startQuery(token, null,
-                                ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
-                        break;
-                    case INSERT_MEETING_TOKEN:
-                        Log.d(TAG, "Meeting Inserted\n" + uri.toString());
-                        break;
-                    default:
-                        throw new IllegalArgumentException();
+                if (DEBUG_MODE) {
+                    switch (AsyncDataHandlerTokens.getType(token)) {
+                        case INSERT_ACCOUNT_TOKEN:
+                            Log.d(TAG, "Account Inserted\n" + uri.toString());
+                            this.startQuery(token, null,
+                                    ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
+                            break;
+                        case INSERT_COURSES_TOKEN:
+                            Log.d(TAG, "Course Inserted\n" + uri.toString());
+                            this.startQuery(token, null,
+                                    ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
+                            break;
+                        case INSERT_MEETING_TOKEN:
+                            Log.d(TAG, "Meeting Inserted\n" + uri.toString());
+                            break;
+                        default:
+                            throw new IllegalArgumentException();
+                    }
                 }
             }
 
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 super.onQueryComplete(token, cookie, cursor);
-                switch (AsyncDataHandlerTokens.getType(token)) {
-                    case INSERT_ACCOUNT_TOKEN:
-                        Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
-                        Log.d(TAG, cursor.getColumnCount() + "");
-                        cursor.moveToFirst();
-                        String res = "";
-                        for (int i = 0; i < cursor.getColumnCount(); i++) {
-                            res += cursor.getString(i) + " ";
-                        }
-                        Log.d(TAG, res);
-                        break;
-                    case INSERT_COURSES_TOKEN:
-                        Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
-                        cursor.moveToFirst();
-                        int columnCount = cursor.getColumnCount();
-                        while (!cursor.isAfterLast()) {
-                            String str = "";
-                            for (int i = 0; i < columnCount; i++) {
-                                str += cursor.getString(i) + " ";
+                if (DEBUG_MODE) {
+                    switch (AsyncDataHandlerTokens.getType(token)) {
+                        case INSERT_ACCOUNT_TOKEN:
+                            Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
+                            Log.d(TAG, cursor.getColumnCount() + "");
+                            cursor.moveToFirst();
+                            String res = "";
+                            for (int i = 0; i < cursor.getColumnCount(); i++) {
+                                res += cursor.getString(i) + " ";
                             }
-                            Log.d(TAG, str);
-                            cursor.moveToNext();
-                        }
-                        break;
-                    default:
-                        break;
+                            Log.d(TAG, res);
+                            break;
+                        case INSERT_COURSES_TOKEN:
+                            Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
+                            cursor.moveToFirst();
+                            int columnCount = cursor.getColumnCount();
+                            while (!cursor.isAfterLast()) {
+                                String str = "";
+                                for (int i = 0; i < columnCount; i++) {
+                                    str += cursor.getString(i) + " ";
+                                }
+                                Log.d(TAG, str);
+                                cursor.moveToNext();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    cursor.close();
                 }
-                cursor.close();
-
             }
         };
 
