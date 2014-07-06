@@ -63,8 +63,9 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
     private static Publisher<String> mPublisher;
 
-    private static final int GET_SLN_LOADER_ID = 1;
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
+    public static final String QUARTER = "14au";
+    private static final int GET_SLN_LOADER_ID = 1;
     private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
     private static final String TAG = "HOME";
 
@@ -103,7 +104,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
         asyncDataHandler.putAccount(mUsername, mUsername);
         asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, "14sp");
+        asyncDataHandler.getRemoteCourses(mUsername, QUARTER);
 
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
@@ -170,7 +171,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         Toast.makeText(this, "Done loading!", Toast.LENGTH_SHORT).show();
         mPublisher.publish(data.getSlns().toString());
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putCourses(mUsername, "14sp", data.getSlns().toString());
+        asyncDataHandler.putCourses(mUsername, QUARTER, data.getSlns().toString());
     }
 
     @Override
