@@ -101,7 +101,7 @@ public class AsyncDataHandler {
                                 ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
                         break;
                     case INSERT_COURSES_TOKEN:
-                        Log.d(TAG, "Account Inserted\n" + uri.toString());
+                        Log.d(TAG, "Course Inserted\n" + uri.toString());
                         this.startQuery(token, null,
                                 ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
                         break;
@@ -287,10 +287,12 @@ public class AsyncDataHandler {
             mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_COURSES_TOKEN.getValue(),
                     null, ScheduleContract.Courses.CONTENT_URI,
                     course.toContentValues(userName));
+            Log.d(TAG, "Course: " + course + " Meetings: " + course.getMeetings());
             for (Meeting meeting : course.getMeetings()) {
                mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_MEETING_TOKEN.getValue(),
                        null,  ScheduleContract.Meetings.CONTENT_URI,
                        meeting.toContentValues(course.getSln()));
+                Log.d(TAG, "Meeting: " + meeting);
             }
         }
     }
