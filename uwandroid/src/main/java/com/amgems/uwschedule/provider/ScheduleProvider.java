@@ -31,6 +31,10 @@ import android.net.Uri;
 
 /**
  * Content provider for accessing all UWSchedule data.
+ *
+ * Clients are notified as the structure backing this provider is changed. This means that
+ * sequential inserts should be staged as a transaction and then commited to avoid overnotifying any
+ * listeners.
  */
 public class ScheduleProvider extends ContentProvider {
 

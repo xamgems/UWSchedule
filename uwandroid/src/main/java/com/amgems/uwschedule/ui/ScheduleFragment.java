@@ -136,7 +136,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
      */
     public class CoursesCursorTreeAdapter extends SimpleCursorTreeAdapter {
 
-        /** Defines Bundle keys for cursor tree group data*/
+        /** Defines Bundle keys for cursor tree group data */
         private static final String BUNDLE_SLN_KEY = "bundleSln";
         private static final String BUNDLE_GROUP_ID = "bundleGroupId";
 

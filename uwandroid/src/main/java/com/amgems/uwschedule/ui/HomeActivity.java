@@ -179,6 +179,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
     /**
      * Used to allow swiping fragments on home screen.
+     *<p>
+     * Note that this lazily instantiates fragments as they are needed by the user.
      */
     private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter {
 
