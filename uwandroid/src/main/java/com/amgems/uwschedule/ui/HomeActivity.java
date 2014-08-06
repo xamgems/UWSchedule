@@ -104,7 +104,6 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
         asyncDataHandler.putAccount(mUsername, mUsername);
         asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, QUARTER);
 
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
