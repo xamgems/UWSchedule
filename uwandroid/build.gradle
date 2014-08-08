@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     compile files('libs/android-support-v4.jar')
-    compile 'com.squareup.retrofit:retrofit:1.4.1'
+    compile 'com.squareup.retrofit:retrofit:1.6.1'
 }
 
 android {
@@ -40,4 +40,4 @@ android {
         }
     }
 }
-	
+
