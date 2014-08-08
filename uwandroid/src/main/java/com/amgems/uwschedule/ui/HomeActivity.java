@@ -19,8 +19,12 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.LoaderManager;
 import android.content.AsyncQueryHandler;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -188,6 +192,20 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
             @Override
             public void failure(RetrofitError retrofitError) {
                 WebService.handleError(retrofitError);
+               new DialogFragment() {
+                    @Override
+                    public Dialog onCreateDialog(Bundle savedInstanceState) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Error occurred while trying to contact server. Please" +
+                                " check your network connection")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                        return builder.create();
+                    }
+                }.show(getFragmentManager(), "dialog");
             }
         });
     }
