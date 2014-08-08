@@ -115,11 +115,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putAccount(mUsername, mUsername);
-        asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, QUARTER);
-
+        WebService.init();
+        mAsyncDataHandler = new AsyncDataHandler(new AsyncQueryHandler(this.getContentResolver()){});
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
             manager.initLoader(GET_SLN_LOADER_ID, null, this);

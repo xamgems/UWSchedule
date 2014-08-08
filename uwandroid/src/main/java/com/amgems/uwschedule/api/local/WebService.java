@@ -42,7 +42,7 @@ import retrofit.converter.GsonConverter;
 public class WebService {
     private static final String TAG = WebService.class.getSimpleName();
     private static ScheduleRequest request;
-    public static final String WEB_SERVICE_URL = "http://shermanpay.com:8181/uw_schedule/";
+    public static final String WEB_SERVICE_URL = "http://shermanpay.com:8080/uw_schedule/";
 
     public static final String LATEST_QUARTER = "latest";
 
