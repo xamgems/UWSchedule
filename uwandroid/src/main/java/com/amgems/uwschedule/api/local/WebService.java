@@ -38,6 +38,9 @@ import retrofit.converter.GsonConverter;
 /**
  * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 2/10/14.
  * Class that interacts the Web Services provided for UW Schedule.
+ * All method calls are asynchronous. And upon success/failure,
+ * the success/failure methods of the Callback object passed in will be invoked.
+ * Synchronous versions of these methods might be implemented in the future.
  */
 public class WebService {
     private static final String TAG = WebService.class.getSimpleName();

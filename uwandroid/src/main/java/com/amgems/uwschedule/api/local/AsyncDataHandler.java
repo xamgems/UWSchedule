@@ -97,6 +97,19 @@ public class AsyncDataHandler {
         mQueryHandler = asyncQueryHandler;
     }
 
+    /**
+     * Query the local database
+     * @param token Token used for the query operation. Use one of the enum constants.
+     * @param cookie Object that will be passed into onQueryComplete of the AsyncQueryHandler
+     * @param uri Uri of the table. Use the constants provided for each table.
+     * @param projection A list of which columns to return. If null, returns all columns
+     * @param selection A string formatted as a SQL WHERE clause (excluding the where)
+     * @param selectionArgs Include ?s in the selection, and this will replace in the order they
+     *                      appear.
+     * @param orderBy Set the ordering of rows, formatted as an SQL ORDER BY clause.
+     * @param queryHandler The AsyncQueryHandler object to use. Override onQueryComplete to
+     *                     obtain the callback.
+     */
     public static void query(OpToken token, Object cookie, Uri uri,
                              String[] projection, String selection,
                              String[] selectionArgs, String orderBy,
@@ -105,16 +118,43 @@ public class AsyncDataHandler {
                 selectionArgs, orderBy);
     }
 
+    /**
+     * Inserts an Account Object into the local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_ACCOUNT}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param account The account object to insert.
+     * @param cookie An Object that will be passed into onInsertComplete.
+     */
     public void insertAccount(Account account, Objects cookie) {
         mQueryHandler.startInsert(OpToken.INSERT_ACCOUNT.value(), cookie,
                 ScheduleContract.Accounts.CONTENT_URI, account.toContentValues());
     }
 
-    public static void insertAccount(Account account, AsyncQueryHandler queryHandler, Objects cookie) {
+    /**
+     * Inserts an Account Object into the local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_ACCOUNT}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param account The account object to insert.
+     * @param cookie An Object that will be passed into onInsertComplete.
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onQueryComplete to obtain the callback.
+     */
+    public static void insertAccount(Account account, Objects cookie, AsyncQueryHandler queryHandler) {
         queryHandler.startInsert(OpToken.INSERT_ACCOUNT.value(), cookie,
                 ScheduleContract.Accounts.CONTENT_URI, account.toContentValues());
     }
 
+    /**
+     * Insert a List of courses for a specific Account into local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_COURSE}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to insert
+     * @param cookie Object that will be passed into onInsertComplete of the AsyncQueryHandler
+     */
     public void insertUserCourses(String userName, List<Course> courses, Object cookie) {
         for (Course course : courses) {
             mQueryHandler.startInsert(OpToken.INSERT_COURSE.value(), cookie,
@@ -127,6 +167,17 @@ public class AsyncDataHandler {
         }
     }
 
+    /**
+     * Insert a List of courses for a specific Account into local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_COURSE}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to insert
+     * @param cookie Object that will be passed into onInsertComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onInsertComplete to obtain the callback.
+     */
     public static void insertUserCourses(String userName, List<Course> courses, Object cookie,
                                      AsyncQueryHandler queryHandler) {
         for (Course course : courses) {
@@ -140,17 +191,41 @@ public class AsyncDataHandler {
         }
     }
 
+    /**
+     * Updates an Account object in the databaase.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param account Account object to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     */
     public void updateAccount(Account account, Object cookie) {
         mQueryHandler.startUpdate(OpToken.UPDATE_ACCOUNT.value(), cookie,
                 ACCOUNTS_TABLE, account.toContentValues(), null, null);
     }
 
+    /**
+     * Updates an Account object in the databaase.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param account Account object to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onUpdateComplete to obtain the callback.
+     */
     public static void updateAccount(Account account, Object cookie,
                                      AsyncQueryHandler queryHandler) {
         queryHandler.startUpdate(OpToken.UPDATE_ACCOUNT.value(), cookie,
                 ACCOUNTS_TABLE, account.toContentValues(), null, null);
     }
 
+    /**
+     * Updates the Courses an Account is linked to.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     */
     public void updateUserCourses(String userName, List<Course> courses, Object cookie)  {
         for (Course course : courses) {
             mQueryHandler.startUpdate(OpToken.UPDATE_COURSE.value(), cookie,
@@ -163,6 +238,16 @@ public class AsyncDataHandler {
         }
     }
 
+    /**
+     * Updates the Courses an Account is linked to.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onUpdateComplete to obtain the callback.
+     */
     public static void updateUserCourses(String userName, List<Course> courses, Object cookie,
                                      AsyncQueryHandler queryHandler)  {
         for (Course course : courses) {
@@ -176,16 +261,40 @@ public class AsyncDataHandler {
         }
     }
 
+    /**
+     * Deletes an Account entry in the database. This cannot be reverted!
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param account Account object to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler
+     */
     public void deleteAccount(Account account, Object cookie) {
         mQueryHandler.startDelete(OpToken.DELETE_ACCOUNT.value(), cookie, ACCOUNTS_TABLE, null,
                 null);
     }
 
+    /**
+     * Deletes an Account entry in the database. This operation cannot be reverted!
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param account Account object to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onDeleteComplete to obtain the callback.
+     */
     public static void deleteAccount(Account account, Object cookie, AsyncQueryHandler queryHandler) {
         queryHandler.startDelete(OpToken.DELETE_ACCOUNT.value(), cookie, ACCOUNTS_TABLE, null,
                 null);
     }
 
+    /**
+     * Deletes the courses that are linked to a specifc Account. This operation cannot be reverted.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param userName Username of the Account.
+     * @param courses List of courses to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler.
+     */
     public void deleteUserCourses(String userName, List<Course> courses, Object cookie) {
         for (Course course : courses) {
             mQueryHandler.startDelete(OpToken.DELETE_COURSE.value(), cookie,
@@ -198,6 +307,16 @@ public class AsyncDataHandler {
         }
     }
 
+    /**
+     * Deletes the courses that are linked to a specifc Account. This operation cannot be reverted.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param userName Username of the Account.
+     * @param courses List of courses to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler.
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onDeleteComplete to obtain the callback.
+     */
     public static void deleteUserCourses(String userName, List<Course> courses, Object cookie,
                                          AsyncQueryHandler queryHandler) {
         for (Course course : courses) {
@@ -211,8 +330,12 @@ public class AsyncDataHandler {
         }
     }
 
-    public AsyncQueryHandler getQueryHandler() {
-        return mQueryHandler;
+    /**
+     * Sets the AsyncQueryHandler of this class.
+     * Used if you want to change the behaviour of on___Complete callback methods.
+     * @param queryHandler AsyncQueryHandler object.
+     */
+    public void setAsyncQueryHandler(AsyncQueryHandler queryHandler) {
+        this.mQueryHandler = queryHandler;
     }
-
 }
