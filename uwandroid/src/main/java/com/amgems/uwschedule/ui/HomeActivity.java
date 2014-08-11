@@ -19,7 +19,12 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.LoaderManager;
+import android.content.AsyncQueryHandler;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -32,13 +37,17 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
+import android.webkit.WebView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
+import com.amgems.uwschedule.api.local.WebService;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.model.Account;
+import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.util.Publisher;
@@ -46,6 +55,10 @@ import com.amgems.uwschedule.util.Subscriber;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * The Activity that represents a home screen for the user.
@@ -61,10 +74,12 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     private CookieStore mCookieStore;
     private String mUsername;
 
+    private AsyncDataHandler mAsyncDataHandler;
     private static Publisher<String> mPublisher;
 
-    private static final int GET_SLN_LOADER_ID = 1;
     public static final String EXTRAS_HOME_USERNAME = "mUsername";
+    public static final String QUARTER = "14au";
+    private static final int GET_SLN_LOADER_ID = 1;
     private static final String USER_EMAIL_POSTFIX = "@u.washington.edu";
     private static final String TAG = "HOME";
 
@@ -100,11 +115,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putAccount(mUsername, mUsername);
-        asyncDataHandler.getRemoteAccount(mUsername);
-        asyncDataHandler.getRemoteCourses(mUsername, "14sp");
-
+        WebService.init();
+        mAsyncDataHandler = new AsyncDataHandler(new AsyncQueryHandler(this.getContentResolver()){});
         LoaderManager manager = getLoaderManager();
         if (manager.getLoader(GET_SLN_LOADER_ID) == null) {
             manager.initLoader(GET_SLN_LOADER_ID, null, this);
@@ -169,8 +181,31 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     public void onLoadFinished(Loader<GetSlnLoader.Slns> loader, GetSlnLoader.Slns data) {
         Toast.makeText(this, "Done loading!", Toast.LENGTH_SHORT).show();
         mPublisher.publish(data.getSlns().toString());
-        AsyncDataHandler asyncDataHandler = new AsyncDataHandler(this.getContentResolver());
-        asyncDataHandler.putCourses(mUsername, "14sp", data.getSlns().toString());
+        WebService.putCourses(mUsername, QUARTER, data.getSlns().toString(), new Callback<List<Course>>() {
+            @Override
+            public void success(List<Course> courses, Response response) {
+                mAsyncDataHandler.insertUserCourses(mUsername, courses, null);
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                WebService.handleError(retrofitError);
+               new DialogFragment() {
+                    @Override
+                    public Dialog onCreateDialog(Bundle savedInstanceState) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setMessage("Error occurred while trying to contact server. Please" +
+                                " check your network connection")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                        return builder.create();
+                    }
+                }.show(getFragmentManager(), "dialog");
+            }
+        });
     }
 
     @Override
@@ -178,6 +213,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
     /**
      * Used to allow swiping fragments on home screen.
+     *<p>
+     * Note that this lazily instantiates fragments as they are needed by the user.
      */
     private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter {
 

@@ -19,6 +19,8 @@
 
 package com.amgems.uwschedule.api.local;
 
+import android.util.Log;
+
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
 import com.google.gson.FieldNamingPolicy;
@@ -29,18 +31,25 @@ import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 
 /**
  * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 2/10/14.
  * Class that interacts the Web Services provided for UW Schedule.
+ * All method calls are asynchronous. And upon success/failure,
+ * the success/failure methods of the Callback object passed in will be invoked.
+ * Synchronous versions of these methods might be implemented in the future.
  */
 public class WebService {
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = WebService.class.getSimpleName();
     private static ScheduleRequest request;
     public static final String WEB_SERVICE_URL = "http://shermanpay.com:8080/uw_schedule/";
 
-    public WebService() {
+    public static final String LATEST_QUARTER = "latest";
+
+    public static void init() {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .excludeFieldsWithoutExposeAnnotation()
@@ -58,7 +67,7 @@ public class WebService {
      * @param userName String representing the userName to get the account
      * @param callback Callback that stores the result in an Account object
      */
-    public void getAccount(String userName, Callback<Account> callback) {
+    public static void getAccount(String userName, Callback<Account> callback) {
         request.getAccount(userName, callback);
     }
 
@@ -67,7 +76,7 @@ public class WebService {
      * @param userName String representing the userName of the account
      * @param studentName String representing the studentName of the account.
      */
-    public void putAccount(String userName, String studentName, Callback<Account> callback) {
+    public static void putAccount(String userName, String studentName, Callback<Account> callback) {
         request.addAccount(userName, studentName, callback);
     }
 
@@ -78,7 +87,8 @@ public class WebService {
      * @param quarter String representing the quarter. eg "13wi" for winter 2013
      * @param callback Callback that stores the result in a List<Course> object
      */
-    public void getCourses(String userName, String quarter, Callback<List<Course>> callback) {
+    public static void getCourses(String userName, String quarter,
+                                  Callback<List<Course>> callback) {
         request.getCourses(userName, quarter, callback);
     }
 
@@ -90,7 +100,8 @@ public class WebService {
      *                Collection. eg "[12345, 56789]"
      * @param callback Callback that stores the result in a List<Course> object
      */
-    public void putCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
+    public static void putCourses(String userName, String quarter, String courses,
+                            Callback<List<Course>> callback) {
         request.addCourses(userName, quarter, courses, callback);
     }
 
@@ -102,8 +113,21 @@ public class WebService {
      *                Collection. eg "[12345, 56789]"
      * @param callback Callback that stores the result in a List<Course> object
      */
-    public void syncCourses(String userName, String quarter, String courses, Callback<List<Course>> callback) {
+    public static void syncCourses(String userName, String quarter, String courses,
+                             Callback<List<Course>> callback) {
         request.syncCourses(userName, quarter, courses, callback);
     }
 
+    public static void handleError(RetrofitError error) {
+        Response response = error.getResponse();
+        if (error.isNetworkError()) {
+            Log.e(TAG, "Network Error, please check your network connection.");
+        }
+        if (response != null) {
+            Log.e(TAG, "Status: " + response.getStatus() + " " + response.getReason() +
+                    " URL:" + response.getUrl());
+        } else {
+            Log.e(TAG, "Response is NULL. URL: " + error.getUrl() + "\nBody: " + error.getBody());
+        }
+    }
 }

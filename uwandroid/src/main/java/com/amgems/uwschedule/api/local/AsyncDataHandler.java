@@ -20,7 +20,6 @@ package com.amgems.uwschedule.api.local;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -31,8 +30,8 @@ import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -40,9 +39,8 @@ import retrofit.client.Response;
 
 /**
  * @author Sherman Pay on 3/9/14.
- * This class is to facilitate ayschronous handling of data between the web server
- * and the client.
- *
+ * This class is to facilitate asynchronous handling of data communication
+ * to the local SQLite database
  */
 public class AsyncDataHandler {
     private final String TAG = getClass().getSimpleName();
@@ -50,13 +48,15 @@ public class AsyncDataHandler {
     /**
      * Tokens for V
      */
-    public static enum AsyncDataHandlerTokens {
-        INSERT_COURSES_TOKEN (1),
-        INSERT_ACCOUNT_TOKEN (2),
-        INSERT_MEETING_TOKEN (3);
+    public static enum OpToken {
+
+        QUERY_ACCOUNT(1), QUERY_COURSE(2), QUERY_MEETING(3),
+        INSERT_ACCOUNT(4), INSERT_COURSE(5), INSERT_MEETING(6),
+        UPDATE_ACCOUNT(7), UPDATE_COURSE(8), UPDATE_MEETING(9),
+        DELETE_ACCOUNT(10), DELETE_COURSE(11), DELETE_MEETING(12);
 
         int value;
-        AsyncDataHandlerTokens(int x) {
+        OpToken(int x) {
            this.value = x;
         }
 
@@ -65,8 +65,8 @@ public class AsyncDataHandler {
          * @param x
          * @return token enum or null if integer given does not map to a token
          */
-        public static AsyncDataHandlerTokens getType(int x) {
-            for (AsyncDataHandlerTokens token : AsyncDataHandlerTokens.values()) {
+        public static OpToken type(int x) {
+            for (OpToken token : OpToken.values()) {
                if (token.value == x) {
                    return token;
                }
@@ -74,224 +74,268 @@ public class AsyncDataHandler {
             return null;
         }
 
-        public int getValue() {
+        public int value() {
             return value;
         }
     }
 
-    private WebService mWebService;
+    public static Uri ACCOUNTS_TABLE = ScheduleContract.Accounts.CONTENT_URI;
+    public static Uri COURSES_TABLE = ScheduleContract.Courses.CONTENT_URI;
+    public static Uri MEETINGS_TABLE = ScheduleContract.Meetings.CONTENT_URI;
+
     private AsyncQueryHandler mQueryHandler;
 
     /**
-     * Instantiates an AsyncDataHandler with the default AsyncQueryHandler.
-     * Custom AsyncQueryHandlers can be passed in via a different constructor provided.
-     * @param contentResolver ContentResolver obtained by context.getContentResolver()
-     */
-    public AsyncDataHandler(ContentResolver contentResolver) {
-        mWebService = new WebService();
-        mQueryHandler = new AsyncQueryHandler(contentResolver) {
-            // TODO: REMOVE WHEN VERIFIED TO WORK
-            @Override
-            protected void onInsertComplete(int token, Object cookie, Uri uri) {
-                super.onInsertComplete(token, cookie, uri);
-                switch (AsyncDataHandlerTokens.getType(token)) {
-                    case INSERT_ACCOUNT_TOKEN:
-                        Log.d(TAG, "Account Inserted\n" + uri.toString());
-                        this.startQuery(token, null,
-                                ScheduleContract.Accounts.CONTENT_URI, null, null, null, null);
-                        break;
-                    case INSERT_COURSES_TOKEN:
-                        Log.d(TAG, "Account Inserted\n" + uri.toString());
-                        this.startQuery(token, null,
-                                ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
-                        break;
-                    case INSERT_MEETING_TOKEN:
-                        Log.d(TAG, "Meeting Inserted\n" + uri.toString());
-                        break;
-                    default:
-                        throw new IllegalArgumentException();
-                }
-            }
-
-            @Override
-            protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-                super.onQueryComplete(token, cookie, cursor);
-                switch (AsyncDataHandlerTokens.getType(token)) {
-                    case INSERT_ACCOUNT_TOKEN:
-                        Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
-                        Log.d(TAG, cursor.getColumnCount() + "");
-                        cursor.moveToFirst();
-                        String res = "";
-                        for (int i = 0; i < cursor.getColumnCount(); i++) {
-                            res += cursor.getString(i) + " ";
-                        }
-                        Log.d(TAG, res);
-                        break;
-                    case INSERT_COURSES_TOKEN:
-                        Log.d(TAG, Arrays.toString(cursor.getColumnNames()));
-                        cursor.moveToFirst();
-                        int columnCount = cursor.getColumnCount();
-                        while (!cursor.isAfterLast()) {
-                            String str = "";
-                            for (int i = 0; i < columnCount; i++) {
-                                str += cursor.getString(i) + " ";
-                            }
-                            Log.d(TAG, str);
-                            cursor.moveToNext();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                cursor.close();
-
-            }
-        };
-
-    }
-
-    /**
      * Instantiates a AsyncDataHandler provided an AsyncQueryHandler.
-     * Custom AsyncQueryHandler should use the constant tokens provided by this class.
+     * All operations on AsyncDataHandler will be forwarded to this AsyncQueryHandler.
+     * Therefore it is expected that the AsyncQueryHandler implement the proprer On____Complete
+     * methods.
+     * Note: Custom AsyncQueryHandler should use the constant tokens provided by this class.
      * @param asyncQueryHandler custom AsyncQueryHandler for querying the database.
      */
     public AsyncDataHandler(AsyncQueryHandler asyncQueryHandler) {
-        mWebService = new WebService();
         mQueryHandler = asyncQueryHandler;
     }
 
     /**
-     * Gets the account from server and stores a local copy
-     * @param userName String representing the userName registered
+     * Query the local database
+     * @param token Token used for the query operation. Use one of the enum constants.
+     * @param cookie Object that will be passed into onQueryComplete of the AsyncQueryHandler
+     * @param uri Uri of the table. Use the constants provided for each table.
+     * @param projection A list of which columns to return. If null, returns all columns
+     * @param selection A string formatted as a SQL WHERE clause (excluding the where)
+     * @param selectionArgs Include ?s in the selection, and this will replace in the order they
+     *                      appear.
+     * @param orderBy Set the ordering of rows, formatted as an SQL ORDER BY clause.
+     * @param queryHandler The AsyncQueryHandler object to use. Override onQueryComplete to
+     *                     obtain the callback.
      */
-    public void getRemoteAccount(String userName) {
-        mWebService.getAccount(userName, new Callback<Account>() {
-            @Override
-            public void success(Account account, Response response) {
-                localInsertAccount(account);
-                Log.d(TAG, "Status: " + response.getStatus());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Response response = error.getResponse();
-                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
-            }
-        });
+    public static void query(OpToken token, Object cookie, Uri uri,
+                             String[] projection, String selection,
+                             String[] selectionArgs, String orderBy,
+                             AsyncQueryHandler queryHandler) {
+        queryHandler.startQuery(token.value(), cookie, uri, projection, selection,
+                selectionArgs, orderBy);
     }
 
     /**
-     * Obtains the courses from the server and inserts the data locally
-     * @param userName String representing the userName registered
-     * @param quarter String representing the quarter for the courses registered.
-     *                eg. "wi14" for winter 2014
+     * Inserts an Account Object into the local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_ACCOUNT}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param account The account object to insert.
+     * @param cookie An Object that will be passed into onInsertComplete.
      */
-    public void getRemoteCourses(final String userName, String quarter) {
-        mWebService.getCourses(userName, quarter, new Callback<List<Course>>() {
-            @Override
-            public void success(List<Course> courses, Response response) {
-                localInsertCourses(userName, courses);
-                Log.d(TAG, "Status: " + response.getStatus());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Response response = error.getResponse();
-                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
-            }
-        });
-    }
-
-    /**
-     * Inserts an account into the remote server and locally, given the userName.
-     * @param userName String representing the userName of the account.
-     * @param studentName String representing the studentName of the account.
-     */
-    public void putAccount(String userName, String studentName) {
-        mWebService.putAccount(userName, studentName, new Callback<Account>() {
-            @Override
-            public void success(Account account, Response response) {
-                localInsertAccount(account);
-                Log.d(TAG, "Status: " + response.getStatus());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Response response = error.getResponse();
-                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
-            }
-        });
-    }
-
-    /**
-     * Inserts into local storage an account.
-     * @param userName String representing the userName of the account.
-     * @param studentName String representing the studentName of the account.
-     */
-    public void putLocalAccount(String userName, String studentName) {
-        Account account = new Account(userName, studentName, System.currentTimeMillis());
-        localInsertAccount(account);
-    }
-
-    /**
-     * Inserts an account into the remote server database.
-     * @param userName String representing the userName of the account.
-     * @param studentName String representing the studentName of the account.
-     */
-    public void putRemoteAccount(String userName, String studentName) {
-        mWebService.putAccount(userName, studentName, new Callback<Account>() {
-            @Override
-            public void success(Account account, Response response) {
-                Log.d(TAG, "Status: " + response.getStatus());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Response response = error.getResponse();
-                Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
-            }
-        });
-    }
-
-    /**
-     * Inserts courses into the remote server and locally.
-     * Given the userName, quarter and the SLNs of each individual course
-     * @param userName String representing the userName of the account.
-     * @param quarter String representing the quarter of registration. eg. "wi14" for winter 2014
-     * @param slns String representing the toString() of a Java Collection containing the SLNs of
-     *             the courses registered
-     */
-    public void putCourses(final String userName, String quarter, String slns) {
-       mWebService.putCourses(userName, quarter, slns, new Callback<List<Course>>() {
-           @Override
-           public void success(List<Course> courses, Response response) {
-               localInsertCourses(userName, courses);
-               Log.d(TAG, "Status: " + response.getStatus());
-           }
-
-           @Override
-           public void failure(RetrofitError error) {
-               Response response = error.getResponse();
-               Log.d(TAG, response.getReason() + " URL: " + response.getUrl());
-           }
-       });
-    }
-
-    private void localInsertAccount(Account account) {
-        mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_ACCOUNT_TOKEN.getValue(), null,
+    public void insertAccount(Account account, Objects cookie) {
+        mQueryHandler.startInsert(OpToken.INSERT_ACCOUNT.value(), cookie,
                 ScheduleContract.Accounts.CONTENT_URI, account.toContentValues());
     }
 
-    private void localInsertCourses(String userName, List<Course> courses) {
+    /**
+     * Inserts an Account Object into the local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_ACCOUNT}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param account The account object to insert.
+     * @param cookie An Object that will be passed into onInsertComplete.
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onQueryComplete to obtain the callback.
+     */
+    public static void insertAccount(Account account, Objects cookie, AsyncQueryHandler queryHandler) {
+        queryHandler.startInsert(OpToken.INSERT_ACCOUNT.value(), cookie,
+                ScheduleContract.Accounts.CONTENT_URI, account.toContentValues());
+    }
+
+    /**
+     * Insert a List of courses for a specific Account into local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_COURSE}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to insert
+     * @param cookie Object that will be passed into onInsertComplete of the AsyncQueryHandler
+     */
+    public void insertUserCourses(String userName, List<Course> courses, Object cookie) {
         for (Course course : courses) {
-            mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_COURSES_TOKEN.getValue(),
-                    null, ScheduleContract.Courses.CONTENT_URI,
-                    course.toContentValues(userName));
+            mQueryHandler.startInsert(OpToken.INSERT_COURSE.value(), cookie,
+                    COURSES_TABLE, course.toContentValues(userName));
             for (Meeting meeting : course.getMeetings()) {
-               mQueryHandler.startInsert(AsyncDataHandlerTokens.INSERT_MEETING_TOKEN.getValue(),
-                       null,  ScheduleContract.Meetings.CONTENT_URI,
+                mQueryHandler.startInsert(OpToken.INSERT_MEETING.value(),
+                        cookie, MEETINGS_TABLE,
+                        meeting.toContentValues(course.getSln()));
+            }
+        }
+    }
+
+    /**
+     * Insert a List of courses for a specific Account into local database.
+     * Please use the {@link com.amgems.uwschedule.api.local.AsyncDataHandler
+     * .OpToken#INSERT_COURSE}.
+     * And call the value() method to obtain the int token for onInsertComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to insert
+     * @param cookie Object that will be passed into onInsertComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onInsertComplete to obtain the callback.
+     */
+    public static void insertUserCourses(String userName, List<Course> courses, Object cookie,
+                                     AsyncQueryHandler queryHandler) {
+        for (Course course : courses) {
+            queryHandler.startInsert(OpToken.INSERT_COURSE.value(), cookie,
+                    COURSES_TABLE, course.toContentValues(userName));
+            for (Meeting meeting : course.getMeetings()) {
+               queryHandler.startInsert(OpToken.INSERT_MEETING.value(),
+                       cookie, MEETINGS_TABLE,
                        meeting.toContentValues(course.getSln()));
             }
         }
+    }
+
+    /**
+     * Updates an Account object in the databaase.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param account Account object to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     */
+    public void updateAccount(Account account, Object cookie) {
+        mQueryHandler.startUpdate(OpToken.UPDATE_ACCOUNT.value(), cookie,
+                ACCOUNTS_TABLE, account.toContentValues(), null, null);
+    }
+
+    /**
+     * Updates an Account object in the databaase.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param account Account object to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onUpdateComplete to obtain the callback.
+     */
+    public static void updateAccount(Account account, Object cookie,
+                                     AsyncQueryHandler queryHandler) {
+        queryHandler.startUpdate(OpToken.UPDATE_ACCOUNT.value(), cookie,
+                ACCOUNTS_TABLE, account.toContentValues(), null, null);
+    }
+
+    /**
+     * Updates the Courses an Account is linked to.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     */
+    public void updateUserCourses(String userName, List<Course> courses, Object cookie)  {
+        for (Course course : courses) {
+            mQueryHandler.startUpdate(OpToken.UPDATE_COURSE.value(), cookie,
+                    COURSES_TABLE, course.toContentValues(userName), null, null);
+            for (Meeting meeting : course.getMeetings()) {
+                mQueryHandler.startUpdate(OpToken.UPDATE_MEETING.value(),
+                        cookie, MEETINGS_TABLE, meeting.toContentValues(course.getSln()), null,
+                        null);
+            }
+        }
+    }
+
+    /**
+     * Updates the Courses an Account is linked to.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#UPDATE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onUpdateComplete.
+     * @param userName Username of the Account
+     * @param courses List of courses to update
+     * @param cookie Object that will be passed into onUpdateComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onUpdateComplete to obtain the callback.
+     */
+    public static void updateUserCourses(String userName, List<Course> courses, Object cookie,
+                                     AsyncQueryHandler queryHandler)  {
+        for (Course course : courses) {
+            queryHandler.startUpdate(OpToken.UPDATE_COURSE.value(), cookie,
+                    COURSES_TABLE, course.toContentValues(userName), null, null);
+            for (Meeting meeting : course.getMeetings()) {
+                queryHandler.startUpdate(OpToken.UPDATE_MEETING.value(),
+                        cookie, MEETINGS_TABLE, meeting.toContentValues(course.getSln()), null,
+                        null);
+            }
+        }
+    }
+
+    /**
+     * Deletes an Account entry in the database. This cannot be reverted!
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param account Account object to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler
+     */
+    public void deleteAccount(Account account, Object cookie) {
+        mQueryHandler.startDelete(OpToken.DELETE_ACCOUNT.value(), cookie, ACCOUNTS_TABLE, null,
+                null);
+    }
+
+    /**
+     * Deletes an Account entry in the database. This operation cannot be reverted!
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_ACCOUNT}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param account Account object to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onDeleteComplete to obtain the callback.
+     */
+    public static void deleteAccount(Account account, Object cookie, AsyncQueryHandler queryHandler) {
+        queryHandler.startDelete(OpToken.DELETE_ACCOUNT.value(), cookie, ACCOUNTS_TABLE, null,
+                null);
+    }
+
+    /**
+     * Deletes the courses that are linked to a specifc Account. This operation cannot be reverted.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param userName Username of the Account.
+     * @param courses List of courses to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler.
+     */
+    public void deleteUserCourses(String userName, List<Course> courses, Object cookie) {
+        for (Course course : courses) {
+            mQueryHandler.startDelete(OpToken.DELETE_COURSE.value(), cookie,
+                    COURSES_TABLE, ScheduleContract.Courses.STUDENT_USERNAME, new String[]{userName});
+            for (Meeting meeting : course.getMeetings()) {
+                mQueryHandler.startDelete(OpToken.DELETE_MEETING.value(),
+                        cookie, MEETINGS_TABLE, ScheduleContract.Meetings.SLN,
+                        new String[]{course.getSln()});
+            }
+        }
+    }
+
+    /**
+     * Deletes the courses that are linked to a specifc Account. This operation cannot be reverted.
+     * Use {@link com.amgems.uwschedule.api.local.AsyncDataHandler.OpToken#DELETE_COURSE}.
+     * And call the value() method on the enum to obtain the int token for onDeleteComplete.
+     * @param userName Username of the Account.
+     * @param courses List of courses to delete.
+     * @param cookie Object that will be passed into onDeleteComplete of the AsyncQueryHandler.
+     * @param queryHandler The AsyncQueryHandler object to use.
+     *                     Override onDeleteComplete to obtain the callback.
+     */
+    public static void deleteUserCourses(String userName, List<Course> courses, Object cookie,
+                                         AsyncQueryHandler queryHandler) {
+        for (Course course : courses) {
+            queryHandler.startDelete(OpToken.DELETE_COURSE.value(), cookie,
+                    COURSES_TABLE, ScheduleContract.Courses.STUDENT_USERNAME, new String[]{userName});
+            for (Meeting meeting : course.getMeetings()) {
+                queryHandler.startDelete(OpToken.DELETE_MEETING.value(),
+                        cookie, MEETINGS_TABLE, ScheduleContract.Meetings.SLN,
+                        new String[]{course.getSln()});
+            }
+        }
+    }
+
+    /**
+     * Sets the AsyncQueryHandler of this class.
+     * Used if you want to change the behaviour of on___Complete callback methods.
+     * @param queryHandler AsyncQueryHandler object.
+     */
+    public void setAsyncQueryHandler(AsyncQueryHandler queryHandler) {
+        this.mQueryHandler = queryHandler;
     }
 }
