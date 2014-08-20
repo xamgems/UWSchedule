@@ -91,7 +91,7 @@ public class CookieStore {
     public synchronized void flushActiveCookie() {
         SharedPreferences.Editor editor = mCookiePrefrences.edit();
         editor.remove(PREFERENCE_KEY_COOKIE);
-        editor.commit();
+        editor.apply();
         mActiveCookie = null;
     }
 }

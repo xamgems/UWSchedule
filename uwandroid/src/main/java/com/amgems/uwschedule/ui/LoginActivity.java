@@ -37,13 +37,10 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
-
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.loaders.LoginAuthLoader;
-
-import java.lang.Override;
 
 
 /**
