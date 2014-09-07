@@ -74,16 +74,16 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
 
-        mCourseCursorAdapter = new CoursesCursorTreeAdapter(getActivity(), R.layout.schedule_list_card,
-                                                            FROM_COLUMNS, TO_VIEWS, R.layout.schedule_list_meeting,
-                                                            new String[] {
-                                                                    ScheduleContract.Meetings.START_TIME,
-                                                                    ScheduleContract.Meetings.END_TIME
-                                                            },
-                                                            new int[] {
-                                                                    R.id.start_time,
-                                                                    R.id.end_time
-                                                            });
+        mCourseCursorAdapter = new CoursesCursorTreeAdapter(
+                getActivity(), R.layout.schedule_list_card, FROM_COLUMNS, TO_VIEWS, R.layout.schedule_list_meeting,
+                new String[] {
+                        ScheduleContract.Meetings.START_TIME,
+                        ScheduleContract.Meetings.END_TIME
+                },
+                new int[] {
+                        R.id.start_time,
+                        R.id.end_time
+                });
         mCoursesListView.setAdapter(mCourseCursorAdapter);
     }
 
@@ -93,11 +93,15 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Because each request for a set of the meetings data must know what position it's group (corresponding course)
+        // is at, extra data must be stored within the Loader. Because extras can't be attached to a specific loader, a
+        // a group id that can specify a unique group must be used as the loader id. This can then ae translated to a
+        // group position using CourseCursorTreeAdapter#getGroupPosition(int loaderId).
         switch (id) {
             case COURSE_CURSOR_LOADER: {
                 return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
             }
-            default: {
+            default: { // A request for meeting data was made.
                 String groupSln = args.getString(CoursesCursorTreeAdapter.BUNDLE_SLN_KEY);
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
                         ScheduleContract.Meetings.SLN + " = ?", new String[]{groupSln}, null);
