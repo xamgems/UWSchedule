@@ -29,9 +29,14 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.app.*;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
@@ -172,7 +177,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     }
 
     @Override
-    public void onLoadFinished(Loader<GetSlnLoader.Slns> loader, GetSlnLoader.Slns data) {
+    public void onLoadFinished(Loader<GetSlnLoader.Slns> loader, final GetSlnLoader.Slns data) {
         Toast.makeText(this, "Done loading!", Toast.LENGTH_SHORT).show();
         mPublisher.publish(data.getSlns().toString());
         WebService.putCourses(mUsername, QUARTER, data.getSlns().toString(), new Callback<List<Course>>() {
@@ -182,14 +187,31 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
             }
 
             @Override
-            public void failure(RetrofitError retrofitError) {
-                WebService.handleError(retrofitError);
+            public void failure(RetrofitError error) {
+                Log.e(getClass().getSimpleName(), "Failed to putCourses:" + data.getSlns());
+                Response response = error.getResponse();
+                String errorMsg = "";
+                if (error.isNetworkError()) {
+                    errorMsg = "Network Error, please check your network connection.";
+                    Log.e(TAG, errorMsg);
+                }
+                if (response != null) {
+                    errorMsg = "Status: " + response.getStatus() + " " + response.getReason() +
+                            " URL:" + response.getUrl();
+                    Log.e(TAG, errorMsg + "\nCause " + error.getCause() +
+                            "\nBody: " +  response.getBody());
+                } else {
+                    errorMsg = "Response is NULL. URL: " + error.getUrl() + "\nCause: " +
+                            error.getCause();
+                    Log.e(TAG, errorMsg + "\nBody: " + error
+                            .getBody());
+                }
+                final String errorMessage = errorMsg;
                new DialogFragment() {
                     @Override
                     public Dialog onCreateDialog(Bundle savedInstanceState) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setMessage("Error occurred while trying to contact server. Please" +
-                                " check your network connection")
+                        builder.setMessage(errorMessage)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 

@@ -117,17 +117,4 @@ public class WebService {
                              Callback<List<Course>> callback) {
         request.syncCourses(userName, quarter, courses, callback);
     }
-
-    public static void handleError(RetrofitError error) {
-        Response response = error.getResponse();
-        if (error.isNetworkError()) {
-            Log.e(TAG, "Network Error, please check your network connection.");
-        }
-        if (response != null) {
-            Log.e(TAG, "Status: " + response.getStatus() + " " + response.getReason() +
-                    " URL:" + response.getUrl());
-        } else {
-            Log.e(TAG, "Response is NULL. URL: " + error.getUrl() + "\nBody: " + error.getBody());
-        }
-    }
 }
