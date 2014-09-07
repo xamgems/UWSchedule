@@ -29,36 +29,28 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
-import android.webkit.WebView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.local.WebService;
 import com.amgems.uwschedule.api.uw.CookieStore;
-import com.amgems.uwschedule.model.Account;
-import com.amgems.uwschedule.model.Course;
-import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
+import com.amgems.uwschedule.model.Course;
+import com.amgems.uwschedule.provider.ScheduleContract;
 import com.amgems.uwschedule.util.Publisher;
 import com.amgems.uwschedule.util.Subscriber;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Activity that represents a home screen for the user.
@@ -88,7 +80,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
-        this.deleteDatabase(ScheduleDatabaseHelper.DATABASE_NAME);
+        getContentResolver().delete(ScheduleContract.Courses.CONTENT_URI, null, null);
+
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
         mCookieStore = CookieStore.getInstance(getApplicationContext());
@@ -148,6 +141,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     private void enableDeathThreadPolicy() {
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
+                .penaltyLog()
                 .penaltyDeath()
                 .build());
     }

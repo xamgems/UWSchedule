@@ -173,6 +173,23 @@ public class ScheduleProvider extends ContentProvider {
     /** {@inheritDoc} */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+
+        switch (match) {
+            case COURSES: {
+                final int rowsAffected = db.delete(Tables.COURSES, null, null);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return rowsAffected;
+            }
+            case MEETINGS: {
+                final int rowsAffected = db.delete(Tables.MEETINGS, null, null);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return rowsAffected;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
     }
 }
