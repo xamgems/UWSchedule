@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@color/dark_gray" >
+
+	<TextView
+		android:id="@+id/start_time"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:layout_marginLeft="10dp"
+		android:paddingTop="10dp"
+		android:paddingBottom="10dp"
+		android:textColor="@color/textWhite"
+		android:textSize="17sp" />
+
+	<TextView
+		android:text="@string/meeting_time_separator"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:paddingTop="10dp"
+		android:paddingBottom="10dp"
+		android:textColor="@color/textWhite"
+		android:textSize="17sp" />
+
+	<TextView
+		android:id="@+id/end_time"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:paddingTop="10dp"
+		android:paddingBottom="10dp"
+		android:layout_marginRight="10dp"
+		android:textColor="@color/textWhite"
+		android:textSize="17sp" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/monday_icon"
+		android:text="@string/monday_abbrev"
+		android:background="@color/red" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/tuesday_icon"
+		android:text="@string/tuesday_abbrev"
+		android:background="@color/blue" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/wednesday_icon"
+		android:text="@string/wednesday_abbrev"
+		android:background="@color/light_green" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/thursday_icon"
+		android:text="@string/thursday_abbrev"
+		android:background="@color/amber" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/friday_icon"
+		android:text="@string/friday_abbrev"
+		android:background="@color/deep_orange" />
+
+	<TextView
+		style="@style/DayPresentIcon"
+		android:id="@+id/saturday_icon"
+		android:text="@string/saturday_abbrev"
+		android:background="@color/purple" />
+
+</LinearLayout>
