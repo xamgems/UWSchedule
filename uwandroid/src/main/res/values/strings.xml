@@ -25,8 +25,19 @@
 	<string name="drawer_group_friends">Friends</string>
 	<string name="drawer_group_favorites">Favorites</string>
 
+	<!-- Schedule list course and meeting related descriptions -->
+	<string name="meeting_time_separator">" - "</string>
+
 	<!-- Generic Strings -->
 	<string name="cancel">Cancel</string>
 	<string name="ok">OK</string>
+
+	<!-- Abbreviated named for days of the week -->
+	<string name="monday_abbrev">M</string>
+	<string name="tuesday_abbrev">Tu</string>
+	<string name="wednesday_abbrev">W</string>
+	<string name="thursday_abbrev">Th</string>
+	<string name="friday_abbrev">F</string>
+	<string name="saturday_abbrev">Sa</string>
 
 </resources>

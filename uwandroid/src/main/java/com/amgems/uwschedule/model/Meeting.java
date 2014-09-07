@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -64,15 +65,19 @@ public class Meeting implements Parcelable {
      * The day of the week for which a class meets.
      */
     public static enum Day {
-        M("Monday", ScheduleContract.Meetings.MONDAY_MEET),
-        T("Tuesday", ScheduleContract.Meetings.TUESDAY_MEET),
-        W("Wednesday", ScheduleContract.Meetings.WEDNESDAY_MEET),
-        TH("Thursday", ScheduleContract.Meetings.THURSDAY_MEET),
-        F("Friday", ScheduleContract.Meetings.FRIDAY_MEET),
-        S("Saturday", ScheduleContract.Meetings.SATURDAY_MEET);
+        M("Monday", R.id.monday_icon, ScheduleContract.Meetings.MONDAY_MEET),
+        T("Tuesday", R.id.tuesday_icon, ScheduleContract.Meetings.TUESDAY_MEET),
+        W("Wednesday", R.id.wednesday_icon, ScheduleContract.Meetings.WEDNESDAY_MEET),
+        TH("Thursday", R.id.thursday_icon, ScheduleContract.Meetings.THURSDAY_MEET),
+        F("Friday", R.id.friday_icon, ScheduleContract.Meetings.FRIDAY_MEET),
+        S("Saturday", R.id.saturday_icon, ScheduleContract.Meetings.SATURDAY_MEET);
 
-        // Upper-case
         private final String mDayText;
+
+        /**
+         * The resource id of a TextView that can specify a given day.
+         */
+        private final int mIconResId;
 
         /** The name of the boolean day column this day corresponds to in the
          *  database's meetings table.
@@ -80,13 +85,18 @@ public class Meeting implements Parcelable {
          *  for more.*/
         private final String mColumnName;
 
-        private Day(String dayText, String columnName) {
+        private Day(String dayText, int iconResId, String columnName) {
             mDayText = dayText;
+            mIconResId = iconResId;
             mColumnName = columnName;
         }
 
         public String getColumnName() {
             return mColumnName;
+        }
+
+        public int getIconResId() {
+            return mIconResId;
         }
 
         @Override
@@ -318,7 +328,7 @@ public class Meeting implements Parcelable {
                     mEndTime = 1200 + end;
                 else
                     mEndTime = end;
-            }
+           }
         }
 
         /**

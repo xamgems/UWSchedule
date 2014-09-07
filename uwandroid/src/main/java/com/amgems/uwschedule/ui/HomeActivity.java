@@ -86,6 +86,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         setContentView(R.layout.home_activity);
 
         getContentResolver().delete(ScheduleContract.Courses.CONTENT_URI, null, null);
+        getContentResolver().delete(ScheduleContract.Meetings.CONTENT_URI, null, null);
 
         // Initialize inbound data
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);

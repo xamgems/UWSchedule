@@ -5,7 +5,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingLeft="15dp"
-                android:paddingBottom="100dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="20dp"
                 android:background="@drawable/card">
 
     <TextView

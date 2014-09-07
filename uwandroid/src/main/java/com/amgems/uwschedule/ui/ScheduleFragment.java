@@ -19,21 +19,23 @@
 
 package com.amgems.uwschedule.ui;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
-import android.widget.Toast;
 import com.amgems.uwschedule.R;
+import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
 /**
@@ -41,13 +43,12 @@ import com.amgems.uwschedule.provider.ScheduleContract;
  */
 public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private CursorTreeAdapter mCourseCursorAdapter;
+    private CoursesCursorTreeAdapter mCourseCursorAdapter;
     private ViewGroup mProgressGroup;
     private ExpandableListView mCoursesListView;
 
     /** Courses cursor loader ID */
-    private static final int COURSE_CURSOR_LOADER = 0;
-    private static final int MEETINGS_CURSOR_LOADER = 1;
+    private static final int COURSE_CURSOR_LOADER = -1;
 
     /** Defines all incoming Course columns */
     private static final String[] FROM_COLUMNS = new String[] {
@@ -73,10 +74,16 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
 
-        mCourseCursorAdapter = new CoursesCursorTreeAdapter(R.layout.schedule_list_card,
-                                                            FROM_COLUMNS, TO_VIEWS, R.layout.drawer_group_item,
-                                                            new String[] {ScheduleContract.Meetings.LOCATION},
-                                                            new int[] {R.id.group_title});
+        mCourseCursorAdapter = new CoursesCursorTreeAdapter(
+                getActivity(), R.layout.schedule_list_card, FROM_COLUMNS, TO_VIEWS, R.layout.schedule_list_meeting,
+                new String[] {
+                        ScheduleContract.Meetings.START_TIME,
+                        ScheduleContract.Meetings.END_TIME
+                },
+                new int[] {
+                        R.id.start_time,
+                        R.id.end_time
+                });
         mCoursesListView.setAdapter(mCourseCursorAdapter);
     }
 
@@ -86,17 +93,19 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Because each request for a set of the meetings data must know what position it's group (corresponding course)
+        // is at, extra data must be stored within the Loader. Because extras can't be attached to a specific loader, a
+        // a group id that can specify a unique group must be used as the loader id. This can then ae translated to a
+        // group position using CourseCursorTreeAdapter#getGroupPosition(int loaderId).
         switch (id) {
             case COURSE_CURSOR_LOADER: {
                 return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
             }
-            case MEETINGS_CURSOR_LOADER: {
+            default: { // A request for meeting data was made.
                 String groupSln = args.getString(CoursesCursorTreeAdapter.BUNDLE_SLN_KEY);
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
-                                        ScheduleContract.Meetings.SLN + " = ?", new String[] {groupSln}, null);
+                        ScheduleContract.Meetings.SLN + " = ?", new String[]{groupSln}, null);
             }
-            default:
-                throw new IllegalArgumentException("Illegal loader id requested: " + id);
         }
     }
 
@@ -118,13 +127,10 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                 }
                 break;
             }
-            case MEETINGS_CURSOR_LOADER: {
-                Toast.makeText(getActivity(), "Cursor returned for " + data.getCount() + " items",
-                        Toast.LENGTH_SHORT).show();
+            default: {
+                mCourseCursorAdapter.setChildrenCursor(mCourseCursorAdapter.getGroupPosition(loader.getId()), data);
                 break;
             }
-            default:
-                throw new IllegalArgumentException("Unrecognized loader finished: " + loader.getId());
         }
     }
 
@@ -136,34 +142,51 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         /** Defines Bundle keys for cursor tree group data */
         private static final String BUNDLE_SLN_KEY = "bundleSln";
-        private static final String BUNDLE_GROUP_ID = "bundleGroupId";
 
-        public CoursesCursorTreeAdapter(int groupLayout, String[] groupFrom,
+        /** Mappings from the Loader id of a child request to the position of that child's group **/
+        private final SparseIntArray mGroupIdPosMap;
+
+        public CoursesCursorTreeAdapter(Context context, int groupLayout, String[] groupFrom,
                                         int[] groupTo, int childLayout, String[] childFrom, int[] childTo) {
-            super(getActivity(), null, groupLayout, groupFrom, groupTo, childLayout, childFrom, childTo);
+            super(context, null, groupLayout, groupFrom, groupTo, childLayout, childFrom, childTo);
+            mGroupIdPosMap = new SparseIntArray();
         }
 
         @Override
-        protected Cursor getChildrenCursor(Cursor groupCursor) {
-            int groupSlnIndex = groupCursor.getColumnIndex(ScheduleContract.Meetings.SLN);
-            String groupSln = groupCursor.getString(groupSlnIndex);
+        protected Cursor getChildrenCursor(Cursor group) {
+            int groupId = group.getInt(group.getColumnIndex(ScheduleContract.Meetings._ID));
+            mGroupIdPosMap.put(groupId, group.getPosition());
+
             Bundle childRequestBundle = new Bundle();
+            String groupSln = group.getString(group.getColumnIndex(ScheduleContract.Meetings.SLN));
             childRequestBundle.putString(BUNDLE_SLN_KEY, groupSln);
-            childRequestBundle.putInt(BUNDLE_GROUP_ID, groupCursor.getPosition());
 
-            Loader<Object> loader = getLoaderManager().getLoader(MEETINGS_CURSOR_LOADER);
-
+            Loader<Object> loader = getLoaderManager().getLoader(groupId);
             // Loader has not yet been initialized or has a call to reset and
             // pending a state reset / being destroyed
             if (loader == null || loader.isReset()) {
-                getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+                getLoaderManager().initLoader(groupId, childRequestBundle, ScheduleFragment.this);
             } else { // Loader is processing and needs to be restarted
-                getLoaderManager().restartLoader(MEETINGS_CURSOR_LOADER, childRequestBundle, ScheduleFragment.this);
+                getLoaderManager().restartLoader(groupId, childRequestBundle, ScheduleFragment.this);
             }
 
             // Allows cursor loading for this group's child to be deferred to a non-ui thread
             return null;
         }
 
+        public int getGroupPosition(int loaderId) {
+            return mGroupIdPosMap.get(loaderId);
+        }
+
+        @Override
+        protected void bindChildView(@NonNull View view, Context context, @NonNull Cursor cursor, boolean isLastChild) {
+            for (Meeting.Day day : Meeting.Day.values()) {
+                int currentDayIndex = cursor.getColumnIndex(day.getColumnName());
+                boolean shouldShowCurrentDay = cursor.getInt(currentDayIndex) == ScheduleContract.Meetings.HAS_MEETING;
+                int dayVisibiity = shouldShowCurrentDay ? View.VISIBLE : View.GONE;
+                view.findViewById(day.getIconResId()).setVisibility(dayVisibiity);
+            }
+            super.bindChildView(view, context, cursor, isLastChild);
+        }
     }
 }
