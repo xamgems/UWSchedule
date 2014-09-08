@@ -157,6 +157,7 @@ public class ScheduleProvider extends ContentProvider {
             }
             case MEETINGS: {
                 final long rowId = db.insertOrThrow(Tables.MEETINGS, null, values);
+                getContext().getContentResolver().notifyChange(uri, null);
                 return ScheduleContract.Meetings.buildUriFromId(rowId);
             }
             default:
