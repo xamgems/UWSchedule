@@ -262,7 +262,7 @@ public class Meeting implements Parcelable {
         private String mLocation = "";
         private String mInstructor = "";
 
-        private static final Pattern TIME_SPAN_PATTERN = Pattern.compile("^([0-9]{1,2}:?[0-9]{2})- ?([0-9]{1,2}:?[0-9]{2}) ?(?:P|PM)?$");
+        private static final Pattern TIME_SPAN_PATTERN = Pattern.compile("^([0-9]{1,2}:?[0-9]{2})- ?([0-9]{1,2}:?[0-9]{2}) ?(P|PM)?$");
 
         /**
          * Constructs a builder for the {@code Meeting} class.
@@ -272,11 +272,11 @@ public class Meeting implements Parcelable {
          *                 during which the course has meetings
          */
         public Builder(Set<Day> meetingDays, String timeSpan) {
-            Matcher timeMatcher = TIME_SPAN_PATTERN.matcher(timeSpan);
+            Matcher timeMatcher = TIME_SPAN_PATTERN.matcher(timeSpan.toUpperCase());
 
             if (timeMatcher.matches()) {
 
-                boolean isEveningMeeting = (timeMatcher.group(3) != null);
+                boolean isEveningMeeting = (timeMatcher.groupCount() > 2);
                 setStartTime(timeMatcher.group(1), isEveningMeeting);
                 setEndTime(timeMatcher.group(2), isEveningMeeting);
             } else {
