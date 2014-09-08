@@ -40,6 +40,8 @@ import java.util.regex.Pattern;
  * for any given course.
  */
 public class Meeting implements Parcelable {
+    public static final int EARLIEST = 730;
+    public static final int LATEST = 2130;
 
     @Expose
     @SerializedName("days")
@@ -222,8 +224,6 @@ public class Meeting implements Parcelable {
         contentValues.put(ScheduleContract.Meetings.LOCATION, getLocation());
         contentValues.put(ScheduleContract.Meetings.INSTRUCTOR, getInstructor());
 
-
-        Log.d(getClass().getSimpleName(), "sln: " + sln + "meetings: " + getMeetingDays());
         for (Day day : getMeetingDays()) {
             contentValues.put(day.getColumnName(), ScheduleContract.Meetings.HAS_MEETING);
         }

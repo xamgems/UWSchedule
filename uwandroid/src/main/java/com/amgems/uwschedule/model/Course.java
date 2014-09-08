@@ -90,6 +90,15 @@ public class Course implements Parcelable {
             mTypeText = typeText;
         }
 
+        public static Type getType(String name) {
+            for (Type t : Type.values()) {
+                if (t.mTypeText.equals(name)) {
+                    return t;
+                }
+            }
+            throw new IllegalArgumentException("Course Type: " + name + " does not exist!");
+        }
+
         @Override
         public String toString() {
             return mTypeText;
@@ -109,7 +118,8 @@ public class Course implements Parcelable {
         }
     };
 
-    Course(String sln, String departmentCode, int courseNumber, String sectionId, int credits,
+    public Course(String sln, String departmentCode, int courseNumber, String sectionId,
+                  int credits,
            String title, Type type, List<Meeting> meetings) {
         mSln = sln;
         mDepartmentCode = departmentCode;
