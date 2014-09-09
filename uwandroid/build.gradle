@@ -31,6 +31,7 @@ android {
 
 dependencies {
     compile "com.android.support:support-v4:20.0.+"
+    compile 'com.squareup.dagger:dagger-compiler:1.2.1'
     compile 'com.squareup.retrofit:retrofit:1.4.1'
 }
 
