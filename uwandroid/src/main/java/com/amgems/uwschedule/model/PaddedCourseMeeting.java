@@ -59,4 +59,9 @@ public class PaddedCourseMeeting implements TimetableEvent {
     public int getEndTime() {
         return courseMeeting.getEndTime();
     }
+
+    @Override
+    public String toString() {
+        return courseMeeting.toString();
+    }
 }

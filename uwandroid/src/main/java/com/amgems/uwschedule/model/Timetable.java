@@ -13,6 +13,7 @@ public class Timetable {
     public EnumMap<Meeting.Day, List<TimetableEvent>> table;
 
     public Timetable(List<Course> courses) {
+        table = new EnumMap<Meeting.Day, List<TimetableEvent>>(Meeting.Day.class);
         for (Course course : courses) {
             List<Meeting> meetings = course.getMeetings();
             for (Meeting meeting : meetings) {
@@ -20,6 +21,7 @@ public class Timetable {
                     List<TimetableEvent> meetingDay;
                     if (table.get(day) == null) {
                         meetingDay = new ArrayList<TimetableEvent>();
+                        table.put(day, meetingDay);
                     } else {
                         meetingDay = table.get(day);
                     }
@@ -29,6 +31,7 @@ public class Timetable {
                 }
             }
         }
+
 
         for (Meeting.Day day : table.keySet()) {
             Collections.sort(table.get(day));
@@ -81,5 +84,10 @@ public class Timetable {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return table.toString();
     }
 }

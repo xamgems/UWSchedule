@@ -276,9 +276,10 @@ public class Course implements Parcelable {
                 " deptcode : " + getDepartmentCode() + ",\n" +
                 " coursenum : " + getCourseNumber() + "\n" +
                 " sectid : " + getSectionId() + "\n" +
-                " type: " + getType() + "\n" +
+                " type : " + getType() + "\n" +
                 " title : " + getTitle() + "\n" +
                 " credits : " + getCredits() + "\n" +
+                " meetings :" + getMeetings() + "\n" +
                 "}";
 
     }

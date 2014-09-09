@@ -11,7 +11,7 @@ public class CourseMeeting implements TimetableEvent {
 
     public CourseMeeting(Course course, Meeting meeting) {
         mCourse = course;
-        mMeeting = mMeeting;
+        mMeeting = meeting;
         mStartTime = mMeeting.getStartTime();
         mEndTime = mMeeting.getEndTime();
     }
@@ -38,11 +38,19 @@ public class CourseMeeting implements TimetableEvent {
 
     @Override
     public int compareTo(TimetableEvent other) {
-        int startDiff = other.getStartTime() - this.mStartTime;
+        int startDiff = this.mStartTime - other.getStartTime();
         if (startDiff == 0) {
-            return other.getEndTime() - this.mEndTime;
+            return this.mEndTime - other.getEndTime() ;
         } else {
             return startDiff;
         }
+    }
+
+    @Override
+    public String toString() {
+        return mCourse.getDepartmentCode() + "\n" +
+                mCourse.getCourseNumber() + "\n" +
+                mCourse.getSectionId() + "\n" +
+                mStartTime  + " - " + mEndTime;
     }
 }

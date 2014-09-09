@@ -2,6 +2,7 @@ package com.amgems.uwschedule.ui;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -15,6 +16,8 @@ import android.widget.ArrayAdapter;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
+import com.amgems.uwschedule.model.Timetable;
+import com.amgems.uwschedule.model.TimetableEvent;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.etsy.android.grid.StaggeredGridView;
 
@@ -22,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,7 +42,9 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
     private static final String BUNDLE_SLN_KEY = "bundleSln";
 
-    private List<Course> mCourseList;
+    private ArrayAdapter<TimetableEvent> mAdapter;
+    private Map<String, Course> mCourseMap;
+    private Timetable mTimetable;
 
     public ScheduleTableFragment() {
         // Required empty public constructor
@@ -48,19 +55,23 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mCourseMap = new TreeMap<String, Course>();
+        getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.schedule_table_fragment, container, false);
         StaggeredGridView scheduleTableView = (StaggeredGridView) rootView.findViewById(R.id
                 .schedule_table);
-        if (scheduleTableView == null) {
-            Log.d(getClass().getSimpleName(), scheduleTableView + "");
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+        mAdapter = new ArrayAdapter<TimetableEvent>(getActivity(),
                 R.layout.schedule_table_cell, R.id.schedule_table_cell);
-        scheduleTableView.setAdapter(adapter);
-        getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
+        scheduleTableView.setAdapter(mAdapter);
+
         return rootView;
     }
 
@@ -71,13 +82,10 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
             }
             case MEETINGS_CURSOR_LOADER: {
-                Log.d(getClass().getSimpleName(), "Retrieving: " + args.toString());
                 ArrayList<String> slnList = args.getStringArrayList(BUNDLE_SLN_KEY);
                 String[] selection = slnList.toArray(new String[slnList.size()]);
-                Log.d(getClass().getSimpleName(), "Selection: " + Arrays.toString(selection));
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
-                        buildSlnWhereClause(2),
-                        new String[] {"12835", "12836"}, null);
+                        buildSlnWhereClause(slnList.size()), selection, null);
 //                return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
 //                       null, null, null);
             }
@@ -117,7 +125,8 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         String title = data.getString(data.getColumnIndex(ScheduleContract.Courses.TITLE));
         Course.Type type = Course.Type.getType(data.getString(data.getColumnIndex(ScheduleContract
                 .Courses.TYPE)));
-        return new Course(sln, departmentCode, courseNumber, sectionId, credits, title, type, null);
+        return new Course(sln, departmentCode, courseNumber, sectionId, credits, title, type,
+                new ArrayList<Meeting>());
     }
 
     private Meeting meetingInstance(Cursor data) {
@@ -141,19 +150,17 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
             case COURSE_CURSOR_LOADER: {
-                mCourseList = new ArrayList<Course>();
                 List<String> slnList = new ArrayList<String>();
                 if (data.getCount() > 0) {
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
                         Course course = courseInstance(data);
-                        mCourseList.add(course);
+                        mCourseMap.put(course.getSln(), course);
                         slnList.add(course.getSln());
                         data.moveToNext();
                     }
                     Bundle slnBundle = new Bundle();
                     slnBundle.putStringArrayList(BUNDLE_SLN_KEY, (ArrayList<String>) slnList);
-                    Log.d(getClass().getSimpleName(), "Delivering: " + slnBundle.toString());
                     if (getLoaderManager().getLoader(MEETINGS_CURSOR_LOADER) == null) {
                         getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
                     } else {
@@ -167,9 +174,13 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
                         Meeting meeting = meetingInstance(data);
-                        Log.d(getClass().getSimpleName(), "Meeting: " + meeting);
+                        String sln = data.getString(data.getColumnIndex(ScheduleContract.Meetings.SLN));
+                        mCourseMap.get(sln).getMeetings().add(meeting);
                         data.moveToNext();
                     }
+                    mTimetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
+                    Log.d(getClass().getSimpleName(), "Table: " + mTimetable);
+                    mAdapter.addAll(mTimetable.toList());
                 }
                 break;
             }
