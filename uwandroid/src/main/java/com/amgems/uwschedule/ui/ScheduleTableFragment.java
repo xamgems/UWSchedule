@@ -71,10 +71,15 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
             }
             case MEETINGS_CURSOR_LOADER: {
-//                ArrayList<String> slnList = args.getStringArrayList(BUNDLE_SLN_KEY);
-//                String[] selection = slnList.toArray(new String[slnList.size()]);
+                Log.d(getClass().getSimpleName(), "Retrieving: " + args.toString());
+                ArrayList<String> slnList = args.getStringArrayList(BUNDLE_SLN_KEY);
+                String[] selection = slnList.toArray(new String[slnList.size()]);
+                Log.d(getClass().getSimpleName(), "Selection: " + Arrays.toString(selection));
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
-                        null,  null, null);
+                        buildSlnWhereClause(2),
+                        new String[] {"12835", "12836"}, null);
+//                return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
+//                       null, null, null);
             }
             default:
                 throw new IllegalArgumentException("Illegal loader id requested: " + id);
@@ -89,7 +94,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 //            result +=  " OR " + ScheduleContract.Meetings.SLN + " = ?";
 //        }
 //        return result;
-        String result = "( ? ";
+        String result = ScheduleContract.Meetings.SLN + " IN (?";
         for (int i = 1; i < times; i++) {
             result += ", ?";
         }
@@ -128,7 +133,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         String endTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
                 .END_TIME));
         String timespan = startTime + "-" + endTime;
-        Log.d(getClass().getSimpleName(), "Timespan: " + timespan);
         Meeting.Builder builder = new Meeting.Builder(meetDays, timespan);
         return builder.build();
     }
@@ -139,32 +143,31 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
             case COURSE_CURSOR_LOADER: {
                 mCourseList = new ArrayList<Course>();
                 List<String> slnList = new ArrayList<String>();
-                Log.d(getClass().getSimpleName(), "Courses Cursor returned for " + data.getCount() +
-                        " items");
                 if (data.getCount() > 0) {
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
                         Course course = courseInstance(data);
-                        Log.d(getClass().getSimpleName(), "Course Data: " + course);
                         mCourseList.add(course);
                         slnList.add(course.getSln());
                         data.moveToNext();
                     }
+                    Bundle slnBundle = new Bundle();
+                    slnBundle.putStringArrayList(BUNDLE_SLN_KEY, (ArrayList<String>) slnList);
+                    Log.d(getClass().getSimpleName(), "Delivering: " + slnBundle.toString());
+                    if (getLoaderManager().getLoader(MEETINGS_CURSOR_LOADER) == null) {
+                        getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
+                    } else {
+                        getLoaderManager().restartLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
+                    }
                 }
-                Bundle slnBundle = new Bundle();
-                slnBundle.putStringArrayList(BUNDLE_SLN_KEY, (ArrayList<String>)slnList);
-                getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
                 break;
             }
             case MEETINGS_CURSOR_LOADER: {
-                Log.d(getClass().getSimpleName(), "Meeting Cursor returned for " + data.getCount() +
-                                " items");
                 if (data.getCount() > 0) {
-                    Log.d(getClass().getSimpleName(), "Col Names: " + Arrays.toString(data
-                            .getColumnNames()));
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
-                        Log.d(getClass().getSimpleName(), "Meeting Data: " + meetingInstance(data));
+                        Meeting meeting = meetingInstance(data);
+                        Log.d(getClass().getSimpleName(), "Meeting: " + meeting);
                         data.moveToNext();
                     }
                 }
