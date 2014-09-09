@@ -276,7 +276,7 @@ public class Meeting implements Parcelable {
 
             if (timeMatcher.matches()) {
 
-                boolean isEveningMeeting = (timeMatcher.groupCount() > 2);
+                boolean isEveningMeeting = (timeMatcher.groupCount() > 3);
                 setStartTime(timeMatcher.group(1), isEveningMeeting);
                 setEndTime(timeMatcher.group(2), isEveningMeeting);
             } else {
