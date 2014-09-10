@@ -171,7 +171,7 @@ public final class LoginAuthenticator {
             postParameters.add(new BasicNameValuePair("pass", mPassword));
             captureHiddenParameters(reader, postParameters);
 
-            HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.LOGIN_REQUEST_URL));
+            HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.BASE_REQUEST_URL));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
             // Reads stream from response and stores any received cookies

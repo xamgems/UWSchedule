@@ -20,9 +20,7 @@
 package com.amgems.uwschedule.util;
 
 import android.util.Log;
-
 import com.amgems.uwschedule.services.LoginService;
-
 import org.apache.http.NameValuePair;
 
 import java.io.IOException;
@@ -38,10 +36,11 @@ import java.util.List;
  */
 public class NetUtils {
 
-    public static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
-    public static final String REGISTRATION_URL = "https://sdb.admin.washington.edu/students/uwnetid/register.asp";
     /** The base URL for all UW server requests */
     public static final String BASE_REQUEST_URL = "https://weblogin.washington.edu";
+
+    /** The URL for the main UW registration page, detailing current courses */
+    public static final String REGISTRATION_URL = "https://sdb.admin.washington.edu/students/uwnetid/register.asp";
 
     /** The user-agent to be used in a HTTP header */
     public static final String USER_AGENT_STRING = "Mozilla/5.0";
@@ -106,4 +105,5 @@ public class NetUtils {
 
         return builder.toString();
     }
+
 }
