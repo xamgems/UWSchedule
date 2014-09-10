@@ -27,6 +27,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.amgems.uwschedule.api.Response;
+import com.amgems.uwschedule.util.HttpClient;
 import com.amgems.uwschedule.util.NetUtils;
 
 import org.apache.http.NameValuePair;
@@ -80,24 +81,26 @@ public final class LoginAuthenticator {
     /** A handler running on the UI thread to house the WebView */
     private final Handler mHandler;
 
+    /** A client to execute HTTP requests on */
+    private final HttpClient mHttpClient;
     /** The HTML content received from the WebView */
     private String mHtml;
     /** Counts the number of times a loaded page callback is recieved from the
      *  WebView */
     private int mPageLoadCount;
 
-
-
     private final Lock lock = new ReentrantLock();
     /** Condition variable to wait on loading HTML content into mHtml */
     private final Condition htmlCallbackCondition = lock.newCondition();
     private volatile boolean mLoadingFinished;
 
-    private LoginAuthenticator(Context context, Handler handler, String username, String password) {
+    private LoginAuthenticator(Context context, Handler handler, HttpClient httpClient, String username,
+                               String password) {
         mUsername = username;
         mPassword = password;
         mCookiesValue = "";
 
+        mHttpClient = httpClient;
         mLoadingFinished = false;
         mJsWebview = new WebView(context);
         mHandler = handler;
@@ -125,8 +128,9 @@ public final class LoginAuthenticator {
      * @param username Username string to log in with
      * @param password Password string to log in with
      */
-    public static LoginAuthenticator newInstance(Context context, Handler handler, String username, String password) {
-        return new LoginAuthenticator(context, handler, username, password);
+    public static LoginAuthenticator newInstance(Context context, Handler handler, HttpClient httpClient,
+                                                 String username, String password) {
+        return new LoginAuthenticator(context, handler, httpClient, username, password);
     }
 
     /**
@@ -171,7 +175,7 @@ public final class LoginAuthenticator {
             postParameters.add(new BasicNameValuePair("pass", mPassword));
             captureHiddenParameters(reader, postParameters);
 
-            HttpURLConnection connection = NetUtils.getOutputConnection(new URL(NetUtils.BASE_REQUEST_URL));
+            HttpURLConnection connection = mHttpClient.buildWriteReadableConnection(new URL(NetUtils.BASE_REQUEST_URL));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
 
             // Reads stream from response and stores any received cookies
