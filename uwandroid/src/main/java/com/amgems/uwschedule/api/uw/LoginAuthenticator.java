@@ -263,6 +263,7 @@ public final class LoginAuthenticator {
         /**
          * Called from a JavaScript interface with the html body of the WebView
          */
+        @SuppressWarnings("unused")
         public void processHTML(String html) {
             lock.lock();
 
