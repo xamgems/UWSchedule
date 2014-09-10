@@ -20,6 +20,7 @@ import com.amgems.uwschedule.model.Timetable;
 import com.amgems.uwschedule.model.TimetableEvent;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.etsy.android.grid.StaggeredGridView;
+import com.etsy.android.grid.util.DynamicHeightTextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +47,9 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     private Map<String, Course> mCourseMap;
     private Timetable mTimetable;
 
+    static class ViewHolder {
+        DynamicHeightTextView textView;
+    }
     public ScheduleTableFragment() {
         // Required empty public constructor
     }
@@ -69,7 +73,28 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         StaggeredGridView scheduleTableView = (StaggeredGridView) rootView.findViewById(R.id
                 .schedule_table);
         mAdapter = new ArrayAdapter<TimetableEvent>(getActivity(),
-                R.layout.schedule_table_cell, R.id.schedule_table_cell);
+                R.layout.schedule_table_cell, R.id.schedule_table_cell) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ViewHolder vh;
+                if (convertView == null) {
+                    convertView = View.inflate(getActivity(),R.layout.schedule_table_cell,
+                            null);
+                    vh = new ViewHolder();
+                    vh.textView = (DynamicHeightTextView) convertView.findViewById(R.id
+                            .schedule_table_cell);
+
+                    convertView.setTag(vh);
+                }
+                else {
+                    vh = (ViewHolder) convertView.getTag();
+                }
+
+                vh.textView.setText(mAdapter.getItem(position).toString());
+
+                return convertView;
+            }
+        };
         scheduleTableView.setAdapter(mAdapter);
 
         return rootView;

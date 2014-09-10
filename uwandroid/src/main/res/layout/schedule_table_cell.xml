@@ -5,10 +5,11 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <TextView
+    <com.etsy.android.grid.util.DynamicHeightTextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/schedule_table_cell"
         android:text="CSE142"
-        android:textSize="22sp"/>
+        android:layout_gravity="center"
+        android:textSize="20sp" />
 </LinearLayout>
