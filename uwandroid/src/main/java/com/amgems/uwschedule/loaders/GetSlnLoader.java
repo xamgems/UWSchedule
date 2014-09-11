@@ -2,7 +2,6 @@ package com.amgems.uwschedule.loaders;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.GetStudentSlns;
 import com.amgems.uwschedule.util.HttpClient;

@@ -7,15 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-
-import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.util.NetUtils;
 import com.amgems.uwschedule.util.Subscriber;
-
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A simple fragment that can be used for debugging. Allows the rendering

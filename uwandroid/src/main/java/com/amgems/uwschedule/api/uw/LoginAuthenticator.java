@@ -29,7 +29,6 @@ import android.webkit.WebViewClient;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.util.HttpClient;
 import com.amgems.uwschedule.util.NetUtils;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 

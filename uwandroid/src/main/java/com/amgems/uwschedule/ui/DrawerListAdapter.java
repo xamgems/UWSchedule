@@ -22,7 +22,6 @@ package com.amgems.uwschedule.ui;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,6 @@ import android.widget.TextView;
 import com.amgems.uwschedule.R;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * List adapter for Drawer navigation pane.

@@ -21,7 +21,6 @@ package com.amgems.uwschedule.loaders;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-
 import android.os.Handler;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;

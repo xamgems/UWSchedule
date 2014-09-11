@@ -26,7 +26,8 @@ import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p> Class containing a detailed overview of a particular course. </p>

@@ -21,15 +21,9 @@ package com.amgems.uwschedule.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
+import android.os.*;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
-
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
 import com.amgems.uwschedule.util.DefaultHttpClient;

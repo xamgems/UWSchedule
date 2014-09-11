@@ -19,8 +19,6 @@
 
 package com.amgems.uwschedule.provider;
 
-import com.amgems.uwschedule.provider.ScheduleDatabaseHelper.Tables;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -28,6 +26,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper.Tables;
 
 /**
  * Content provider for accessing all UWSchedule data.
