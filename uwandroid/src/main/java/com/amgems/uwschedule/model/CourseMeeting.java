@@ -3,7 +3,7 @@ package com.amgems.uwschedule.model;
 /**
  * @author shermpay on 8/19/14.
  */
-public class CourseMeeting implements TimetableEvent {
+public class CourseMeeting implements Comparable<TimetableEvent> {
     private Course mCourse;
     private Meeting mMeeting;
     private int mStartTime;
@@ -14,6 +14,10 @@ public class CourseMeeting implements TimetableEvent {
         mMeeting = meeting;
         mStartTime = mMeeting.getStartTime();
         mEndTime = mMeeting.getEndTime();
+    }
+
+    public Course getCourse() {
+        return mCourse;
     }
 
     public int getStartTime() {

@@ -7,4 +7,6 @@ package com.amgems.uwschedule.model;
 public interface TimetableEvent extends Comparable<TimetableEvent> {
     public int getStartTime();
     public int getEndTime();
+    public int getBeforePadding();
+    public void setBeforePadding(int padding);
 }

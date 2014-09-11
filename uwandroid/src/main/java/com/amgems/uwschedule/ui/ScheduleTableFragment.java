@@ -1,6 +1,8 @@
 package com.amgems.uwschedule.ui;
 
+import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,21 +14,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
+import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.model.Timetable;
-import com.amgems.uwschedule.model.TimetableEvent;
+import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.etsy.android.grid.StaggeredGridView;
 import com.etsy.android.grid.util.DynamicHeightTextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -43,9 +49,11 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
     private static final String BUNDLE_SLN_KEY = "bundleSln";
 
-    private ArrayAdapter<TimetableEvent> mAdapter;
+    private ArrayAdapter<PaddedCourseMeeting> mAdapter;
     private Map<String, Course> mCourseMap;
     private Timetable mTimetable;
+
+    private Map<Course, Integer> mColorMap;
 
     static class ViewHolder {
         DynamicHeightTextView textView;
@@ -63,16 +71,17 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         super.onActivityCreated(savedInstanceState);
         mCourseMap = new TreeMap<String, Course>();
         getLoaderManager().initLoader(COURSE_CURSOR_LOADER, null, this);
+        mColorMap = new HashMap<Course, Integer>();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.schedule_table_fragment, container, false);
         StaggeredGridView scheduleTableView = (StaggeredGridView) rootView.findViewById(R.id
                 .schedule_table);
-        mAdapter = new ArrayAdapter<TimetableEvent>(getActivity(),
+        mAdapter = new ArrayAdapter<PaddedCourseMeeting>(getActivity(),
                 R.layout.schedule_table_cell, R.id.schedule_table_cell) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -90,7 +99,11 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     vh = (ViewHolder) convertView.getTag();
                 }
 
-                vh.textView.setText(mAdapter.getItem(position).toString());
+                PaddedCourseMeeting event = mAdapter.getItem(position);
+                vh.textView.setText("[" + position + "]" + event.toString());
+                vh.textView.setHeight((event.getEndTime() - event.getStartTime()) * 2);
+                vh.textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
+                vh.textView.setTextColor(Color.WHITE);
 
                 return convertView;
             }
@@ -111,8 +124,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 String[] selection = slnList.toArray(new String[slnList.size()]);
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
                         buildSlnWhereClause(slnList.size()), selection, null);
-//                return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
-//                       null, null, null);
             }
             default:
                 throw new IllegalArgumentException("Illegal loader id requested: " + id);
@@ -204,8 +215,17 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                         data.moveToNext();
                     }
                     mTimetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
-                    Log.d(getClass().getSimpleName(), "Table: " + mTimetable);
-                    mAdapter.addAll(mTimetable.toList());
+                    mAdapter.clear();
+                    mAdapter.addAll(mTimetable.toHorizontalList());
+                    TypedArray colors = getResources().obtainTypedArray(R.array.colors);
+                    int colorIndex = 0;
+                    for (PaddedCourseMeeting meeting : mTimetable.toVerticalList()) {
+                        Course c = meeting.getCourseMeeting().getCourse();
+                        if (mColorMap.get(c) == null) {
+                            mColorMap.put(c, colors.getColor(colorIndex, 0));
+                        }
+                        colorIndex++;
+                    }
                 }
                 break;
             }

@@ -4,31 +4,46 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Sherman Pay
  * @version 0.1
  */
 public class Timetable {
-    public EnumMap<Meeting.Day, List<TimetableEvent>> table;
+    private EnumMap<Meeting.Day, List<PaddedCourseMeeting>> table;
+    private PaddedCourseMeeting earliest;
+    private PaddedCourseMeeting latest;
 
     public Timetable(List<Course> courses) {
-        table = new EnumMap<Meeting.Day, List<TimetableEvent>>(Meeting.Day.class);
+        table = new EnumMap<Meeting.Day, List<PaddedCourseMeeting>>(Meeting.Day.class);
         for (Course course : courses) {
             List<Meeting> meetings = course.getMeetings();
             for (Meeting meeting : meetings) {
                 for (Meeting.Day day : meeting.getMeetingDays()) {
-                    List<TimetableEvent> meetingDay;
+                    List<PaddedCourseMeeting> meetingDay;
                     if (table.get(day) == null) {
-                        meetingDay = new ArrayList<TimetableEvent>();
+                        meetingDay = new ArrayList<PaddedCourseMeeting>();
                         table.put(day, meetingDay);
                     } else {
                         meetingDay = table.get(day);
                     }
-                    TimetableEvent courseMeeting = new PaddedCourseMeeting(new
+                    PaddedCourseMeeting courseMeeting = new PaddedCourseMeeting(new
                             CourseMeeting(course, meeting));
                     meetingDay.add(courseMeeting);
+                    int currentPosition = meetingDay.size() - 1;
+                    if (currentPosition > 0) {
+                        PaddedCourseMeeting prevEvent = meetingDay.get(currentPosition - 1);
+                        courseMeeting.setBeforePadding(courseMeeting.getStartTime() - prevEvent
+                                .getEndTime());
+                    }
                 }
+            }
+            this.earliest = findEarliest();
+            this.latest = findLatest();
+            for (Meeting.Day day : table.keySet()) {
+                PaddedCourseMeeting event = table.get(day).get(0);
+                event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
             }
         }
 
@@ -38,11 +53,19 @@ public class Timetable {
         }
     }
 
-    public TimetableEvent earliest() {
+    public PaddedCourseMeeting getEarliest() {
+        return earliest;
+    }
+
+    public PaddedCourseMeeting getLatest() {
+        return latest;
+    }
+
+    private PaddedCourseMeeting findEarliest() {
         int min = Meeting.LATEST;
-        TimetableEvent result = null;
+        PaddedCourseMeeting result = null;
         for (Meeting.Day day : table.keySet()) {
-            TimetableEvent current = table.get(day).get(0);
+            PaddedCourseMeeting current = table.get(day).get(0);
             if (current.getStartTime() < min) {
                 min = current.getStartTime();
                 result = current;
@@ -51,11 +74,11 @@ public class Timetable {
         return result;
     }
 
-    public TimetableEvent latest() {
+    private PaddedCourseMeeting findLatest() {
         int max = Meeting.EARLIEST;
-        TimetableEvent result = null;
+        PaddedCourseMeeting result = null;
         for (Meeting.Day day : table.keySet()) {
-            TimetableEvent current = table.get(day).get(0);
+            PaddedCourseMeeting current = table.get(day).get(0);
             if (current.getEndTime() < max) {
                 max = current.getEndTime();
                 result = current;
@@ -68,23 +91,46 @@ public class Timetable {
        return new ArrayList<Meeting.Day>(table.keySet());
     }
 
-    public List<TimetableEvent> getDayEvents(Meeting.Day day) {
+    public List<PaddedCourseMeeting> getDayEvents(Meeting.Day day) {
         return table.get(day);
     }
 
-    public TimetableEvent get(Meeting.Day day, int i) {
+    public PaddedCourseMeeting get(Meeting.Day day, int i) {
         return table.get(day).get(i);
     }
 
-    public List<TimetableEvent> toList() {
-        List<TimetableEvent> result = new ArrayList<TimetableEvent>();
+    public List<PaddedCourseMeeting> toVerticalList() {
+        List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
         for (Meeting.Day day : table.keySet()) {
-            for (TimetableEvent event : getDayEvents(day)) {
+            for (PaddedCourseMeeting event : getDayEvents(day)) {
                 result.add(event);
             }
         }
         return result;
     }
+
+    public List<PaddedCourseMeeting> toHorizontalList() {
+        List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
+        boolean cont = true;
+        for (int i = 0; cont; i++) {
+            int counter = 0;
+            for (Meeting.Day day : table.keySet()) {
+                List<PaddedCourseMeeting> events = getDayEvents(day);
+                if (i < events.size()) {
+                    result.add(events.get(i));
+                } else {
+                    counter++;
+                }
+
+                if (counter == table.keySet().size()) {
+                    cont = false;
+                }
+            }
+        }
+
+        return result;
+    }
+
 
     @Override
     public String toString() {

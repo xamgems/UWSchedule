@@ -11,16 +11,14 @@ import android.support.annotation.NonNull;
 public class PaddedCourseMeeting implements TimetableEvent {
     private int beforePadding;
     private CourseMeeting courseMeeting;
-    private int afterPadding;
 
     public PaddedCourseMeeting(CourseMeeting courseMeeting) {
         this.courseMeeting = courseMeeting;
     }
 
-    public PaddedCourseMeeting(CourseMeeting courseMeeting, int beforePadding, int afterPadding) {
+    public PaddedCourseMeeting(CourseMeeting courseMeeting, int beforePadding) {
         this.courseMeeting = courseMeeting;
         this.beforePadding = beforePadding;
-        this.afterPadding = afterPadding;
     }
 
     public int getBeforePadding() {
@@ -39,16 +37,12 @@ public class PaddedCourseMeeting implements TimetableEvent {
         this.courseMeeting = courseMeeting;
     }
 
-    public int getAfterPadding() {
-        return afterPadding;
-    }
+    @Override
+    public int getStartTime() { return courseMeeting.getStartTime(); }
 
-    public void setAfterPadding(int afterPadding) {
-        this.afterPadding = afterPadding;
-    }
-
-    public int getStartTime() {
-        return courseMeeting.getStartTime();
+    @Override
+    public int getEndTime() {
+        return courseMeeting.getEndTime();
     }
 
     @Override
@@ -56,12 +50,9 @@ public class PaddedCourseMeeting implements TimetableEvent {
         return courseMeeting.compareTo(other);
     }
 
-    public int getEndTime() {
-        return courseMeeting.getEndTime();
-    }
-
     @Override
     public String toString() {
         return courseMeeting.toString();
     }
+
 }
