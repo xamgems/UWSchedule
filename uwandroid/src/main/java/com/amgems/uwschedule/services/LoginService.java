@@ -32,6 +32,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.LoginAuthenticator;
+import com.amgems.uwschedule.util.DefaultHttpClient;
 
 /**
  * Created by zac on 8/18/13.
@@ -102,7 +103,8 @@ public class LoginService extends Service {
 
     protected void onHandleIntent(Intent intent) {
 
-        LoginAuthenticator command = LoginAuthenticator.newInstance(getApplicationContext(), new Handler(), intent.getStringExtra(PARAM_IN_USERNAME),
+        LoginAuthenticator command = LoginAuthenticator.newInstance(getApplicationContext(), new Handler(),
+                new DefaultHttpClient(), intent.getStringExtra(PARAM_IN_USERNAME),
                 intent.getStringExtra(PARAM_IN_PASSWORD));
         command.execute();
         Response response = command.getResponse();

@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.GetStudentSlns;
+import com.amgems.uwschedule.util.HttpClient;
 
 import java.util.List;
 
@@ -19,10 +20,10 @@ public class GetSlnLoader extends AsyncTaskLoader<GetSlnLoader.Slns> {
     String mCookie;
     GetStudentSlns mGetter;
 
-    public GetSlnLoader(Context context, String cookie) {
+    public GetSlnLoader(Context context, HttpClient httpClient, String cookie) {
         super(context);
         mCookie = cookie;
-        mGetter = GetStudentSlns.newInstance(mCookie);
+        mGetter = GetStudentSlns.newInstance(mCookie, httpClient);
     }
 
     @Override

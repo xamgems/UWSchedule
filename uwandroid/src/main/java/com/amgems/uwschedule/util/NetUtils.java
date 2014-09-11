@@ -23,10 +23,7 @@ import android.util.Log;
 import com.amgems.uwschedule.services.LoginService;
 import org.apache.http.NameValuePair;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -53,34 +50,6 @@ public class NetUtils {
 
     // Suppress default constructor to ensure noninstantiability
     private NetUtils() { }
-
-    /**
-     * Establishes a connection to a given target URL, capable of reading
-     * input from the connection's stream.
-     *
-     * @param targetUrl A non-null url to get a connection from
-     * @throws IOException If the connection could not be established
-     */
-    public static HttpURLConnection getInputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        return connection;
-    }
-
-    /**
-     * Establishes a connection to a given target URL, capable of writing output
-     * and reading input from the connection's stream.
-     *
-     * @param targetUrl A non-null url to get a connection from
-     * @throws IOException If the connection could not be established
-     */
-    public static HttpURLConnection getOutputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        connection.setRequestProperty("Content-Type", CONTENT_TYPE);
-        connection.setDoOutput(true);
-        return connection;
-    }
 
     /**
      * Builds a HTTP compliant query string from a series of NameValuePairs.
