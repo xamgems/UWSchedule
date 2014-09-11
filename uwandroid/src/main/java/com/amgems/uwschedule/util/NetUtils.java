@@ -20,7 +20,6 @@
 package com.amgems.uwschedule.util;
 
 import android.util.Log;
-import com.amgems.uwschedule.services.LoginService;
 import org.apache.http.NameValuePair;
 
 import java.io.UnsupportedEncodingException;
@@ -69,7 +68,7 @@ public class NetUtils {
                 builder.append(URLEncoder.encode(postParameterPair.getValue(), NetUtils.CHARSET));
             }
         } catch (UnsupportedEncodingException e) {
-            Log.e(LoginService.class.getSimpleName(), e.getMessage());
+            Log.e(NetUtils.class.getSimpleName(), e.getMessage());
         }
 
         return builder.toString();
