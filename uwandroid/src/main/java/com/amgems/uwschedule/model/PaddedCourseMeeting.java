@@ -73,8 +73,7 @@ public class PaddedCourseMeeting implements TimetableEvent {
 
     @Override
     public String toString() {
-        return courseMeeting.toString() +
-                "\nAfter: " + afterPadding + "\n";
+        return courseMeeting.toString();
     }
 
 }

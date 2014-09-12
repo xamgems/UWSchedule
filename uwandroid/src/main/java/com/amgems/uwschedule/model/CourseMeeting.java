@@ -5,12 +5,14 @@ package com.amgems.uwschedule.model;
  */
 public class CourseMeeting implements Comparable<TimetableEvent> {
     private Course mCourse;
+    private Meeting mMeeting;
     private Meeting.Day mDay;
     private int mStartTime;
     private int mEndTime;
 
     public CourseMeeting(Course course, Meeting meeting, Meeting.Day day) {
         mCourse = course;
+        mMeeting = meeting;
         this.mDay = day;
         mStartTime = meeting.getStartTime();
         mEndTime = meeting.getEndTime();
@@ -56,8 +58,7 @@ public class CourseMeeting implements Comparable<TimetableEvent> {
 
     @Override
     public String toString() {
-        return mCourse.getDepartmentCode() + "\n" +
-                mCourse.getCourseNumber() + " " +
-                mCourse.getSectionId();
+        return mCourse.getDepartmentCode() + " " + mCourse.getCourseNumber() + " " +
+                mCourse.getSectionId() + "\n" + mMeeting.getLocation();
     }
 }

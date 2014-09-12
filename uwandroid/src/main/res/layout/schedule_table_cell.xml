@@ -12,5 +12,5 @@
         android:text="CSE142"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textSize="12sp" />
+        android:textSize="10sp" />
 </LinearLayout>

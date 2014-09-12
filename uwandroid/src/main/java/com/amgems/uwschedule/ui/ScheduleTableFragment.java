@@ -101,7 +101,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 }
 
                 PaddedCourseMeeting event = mAdapter.getItem(position);
-                vh.textView.setText("[" + position + "]" + event.toString());
+                vh.textView.setText(event.toString());
                 vh.textView.setHeight(((event.getEndTime() - event.getStartTime())));
                 vh.textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
                 vh.textView.setTextColor(Color.WHITE);
@@ -140,11 +140,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     }
 
     private String buildSlnWhereClause(int times) {
-//        String result = ScheduleContract.Meetings.SLN + " = ?";
-//        for (int i = 0; i < times - 1; i++) {
-//            result +=  " OR " + ScheduleContract.Meetings.SLN + " = ?";
-//        }
-//        return result;
         String result = ScheduleContract.Meetings.SLN + " IN (?";
         for (int i = 1; i < times; i++) {
             result += ", ?";
@@ -185,8 +180,9 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         String endTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
                 .END_TIME));
         String timespan = startTime + "-" + endTime;
+        String location = data.getString(data.getColumnIndex(ScheduleContract.Meetings.LOCATION));
         Meeting.Builder builder = new Meeting.Builder(meetDays, timespan);
-        return builder.build();
+        return builder.location(location).build();
     }
 
     @Override
