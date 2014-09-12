@@ -1,17 +1,12 @@
 package com.amgems.uwschedule.model;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
 
 /**
  * @author Sherman Pay
@@ -36,7 +31,7 @@ public class Timetable {
                         meetingDay = table.get(day);
                     }
                     PaddedCourseMeeting courseMeeting = new PaddedCourseMeeting(new
-                            CourseMeeting(course, meeting, day));
+                            PaddedCourseMeeting.CourseMeeting(course, meeting, day));
                     meetingDay.add(courseMeeting);
                 }
             }
@@ -184,10 +179,10 @@ public class Timetable {
 
         @Override
         public int compareTo(WeightedDay other) {
-            if (Integer.compare(this.weight, other.weight) == 0) {
+            if (this.weight == other.weight) {
                 return this.day.compareTo(other.day);
             } else {
-                return Integer.compare(this.weight, other.weight);
+                return Integer.valueOf(this.weight).compareTo(other.weight);
             }
         }
     }
