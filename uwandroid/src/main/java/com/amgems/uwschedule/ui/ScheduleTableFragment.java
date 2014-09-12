@@ -15,31 +15,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.model.Timetable;
-import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.etsy.android.grid.StaggeredGridView;
 import com.etsy.android.grid.util.DynamicHeightTextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
 /**
  * A simple {@link Fragment} subclass.
- *
  */
 public class ScheduleTableFragment extends Fragment implements LoaderManager
         .LoaderCallbacks<Cursor> {
@@ -101,23 +98,27 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 }
 
                 PaddedCourseMeeting event = mAdapter.getItem(position);
-                vh.textView.setText(event.toString());
-                vh.textView.setHeight(((event.getEndTime() - event.getStartTime())));
-                vh.textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
-                vh.textView.setTextColor(Color.WHITE);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup
-                        .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                int beforeMargin = event.firstEvent() ? event.getBeforePadding() : 0;
-                layoutParams.setMargins(0, beforeMargin, 0, event.getAfterPadding());
-                vh.textView.setPadding(0, 0, 0, 0);
-                vh.textView.setLayoutParams(layoutParams);
-
+                setupTextView(vh.textView, event);
                 return convertView;
             }
         };
         scheduleTableView.setAdapter(mAdapter);
 
         return rootView;
+    }
+
+    private void setupTextView(TextView textView, PaddedCourseMeeting event) {
+        textView.setText(event.toString());
+        textView.setHeight(((event.getEndTime() - event.getStartTime())));
+        textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
+        textView.setTextColor(Color.WHITE);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup
+                .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int beforeMargin = event.firstEvent() ? event.getBeforePadding() : 0;
+        layoutParams.setMargins(0, beforeMargin, 0, event.getAfterPadding());
+        textView.setPadding(0, 0, 0, 0);
+        textView.setLayoutParams(layoutParams);
+
     }
 
     @Override
@@ -145,12 +146,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
             result += ", ?";
         }
         return result + ")";
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // Removes reference to old cursor adapter
-        Log.d(ScheduleFragment.class.getSimpleName(), "Loader resetting");
     }
 
     private Course courseInstance(Cursor data) {
@@ -183,6 +178,11 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         String location = data.getString(data.getColumnIndex(ScheduleContract.Meetings.LOCATION));
         Meeting.Builder builder = new Meeting.Builder(meetDays, timespan);
         return builder.location(location).build();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(ScheduleFragment.class.getSimpleName(), "Loader resetting");
     }
 
     @Override

@@ -11,6 +11,13 @@ import java.util.Queue;
 /**
  * @author Sherman Pay
  * @version 0.1
+ *
+ * <p>
+ * Timetable that holds TimetableEvents. Each day is a sorted list of TimetableEvents
+ * (from earliest to latest).
+ * </p>
+ * Various Collection views of the Timetable can be obtained via its methods.
+ * @see com.amgems.uwschedule.model.TimetableEvent
  */
 public class Timetable {
     private EnumMap<Meeting.Day, List<PaddedCourseMeeting>> table;
@@ -54,11 +61,13 @@ public class Timetable {
         this.latest = findLatest();
         for (Meeting.Day day : table.keySet()) {
             List<PaddedCourseMeeting> today = getDayEvents(day);
-            PaddedCourseMeeting event = today.get(0);
-            event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
-            event.setFirstEvent(true);
-            PaddedCourseMeeting last = today.get(today.size() - 1);
-            last.setAfterPadding(this.latest.getEndTime() - last.getEndTime());
+            if (today.size() > 0) {
+                PaddedCourseMeeting event = today.get(0);
+                event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
+                event.setFirstEvent(true);
+                PaddedCourseMeeting last = today.get(today.size() - 1);
+                last.setAfterPadding(this.latest.getEndTime() - last.getEndTime());
+            }
         }
     }
 
@@ -109,6 +118,11 @@ public class Timetable {
         return table.get(day).get(i);
     }
 
+    /**
+     * Obtains a left to right view of the table in a list. The list returned will have each
+     * event sorted from left to right and from top to bottom for each column.
+     * @return a sorted List of TimetableEvents
+     */
     public List<PaddedCourseMeeting> toLeftRightList() {
         List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
         for (Meeting.Day day : table.keySet()) {
@@ -119,6 +133,11 @@ public class Timetable {
         return result;
     }
 
+    /**
+     * Obtains a top to bottom view of the table in a list. The list returned will have each
+     * event sorted from earliest to latest and from left to right for each row.
+     * @return a sorted List fo TimetableEvents
+     */
     public List<PaddedCourseMeeting> toTopDownList() {
         List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
         boolean cont = true;
@@ -141,6 +160,13 @@ public class Timetable {
         return result;
     }
 
+    /**
+     * Obtain a Queue view of the Timetable where the initial item of each day is pushed into
+     * the queue, subsequent items are pushed in from earliest to latest based on time only,
+     * and conflicts are than resolved by time of week.
+     *
+     * @return A Queue of TimetableEvents
+     */
     public Queue<PaddedCourseMeeting> toQueue() {
         Queue<PaddedCourseMeeting> result = new LinkedList<PaddedCourseMeeting>();
         Queue<WeightedDay> queue = new PriorityQueue<WeightedDay>();
@@ -166,6 +192,14 @@ public class Timetable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return table.toString();
+    }
+
+    /**
+     * Used for transforming the Timetable into a queue
+     */
     static class WeightedDay implements Comparable<WeightedDay> {
         Meeting.Day day;
         int index;
@@ -188,8 +222,4 @@ public class Timetable {
     }
 
 
-    @Override
-    public String toString() {
-        return table.toString();
-    }
 }

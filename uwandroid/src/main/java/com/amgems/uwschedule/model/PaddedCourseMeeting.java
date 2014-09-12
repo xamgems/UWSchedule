@@ -5,8 +5,7 @@ import android.support.annotation.NonNull;
 /**
  * @author Sherman Pay
  * @version 0.1, 9/6/14.
- * This class will hold "paddings" before and after a CourseMeeting.
- * Those "paddings" are meant to represent the empty time between CourseMeetings
+ * A special kind of TimetableEvent that represents a specific Meeting of a UW course.
  */
 public class PaddedCourseMeeting implements TimetableEvent {
     private int beforePadding;
@@ -76,9 +75,6 @@ public class PaddedCourseMeeting implements TimetableEvent {
         return courseMeeting.toString();
     }
 
-    /**
-     * @author shermpay on 8/19/14.
-     */
     public static class CourseMeeting implements Comparable<TimetableEvent> {
         private Course mCourse;
         private Meeting mMeeting;
