@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
@@ -101,9 +102,15 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
                 PaddedCourseMeeting event = mAdapter.getItem(position);
                 vh.textView.setText("[" + position + "]" + event.toString());
-                vh.textView.setHeight((event.getEndTime() - event.getStartTime()) * 2);
+                vh.textView.setHeight(((event.getEndTime() - event.getStartTime())));
                 vh.textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
                 vh.textView.setTextColor(Color.WHITE);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup
+                        .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                int beforeMargin = event.firstEvent() ? event.getBeforePadding() : 0;
+                layoutParams.setMargins(0, beforeMargin, 0, event.getAfterPadding());
+                vh.textView.setPadding(0, 0, 0, 0);
+                vh.textView.setLayoutParams(layoutParams);
 
                 return convertView;
             }
@@ -216,10 +223,12 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     }
                     mTimetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
                     mAdapter.clear();
-                    mAdapter.addAll(mTimetable.toHorizontalList());
+                    Queue<PaddedCourseMeeting> courseMeetingQueue = mTimetable.toQueue();
+
+                    mAdapter.addAll(courseMeetingQueue);
                     TypedArray colors = getResources().obtainTypedArray(R.array.colors);
                     int colorIndex = 0;
-                    for (PaddedCourseMeeting meeting : mTimetable.toVerticalList()) {
+                    for (PaddedCourseMeeting meeting : courseMeetingQueue) {
                         Course c = meeting.getCourseMeeting().getCourse();
                         if (mColorMap.get(c) == null) {
                             mColorMap.put(c, colors.getColor(colorIndex, 0));

@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
  */
 public class PaddedCourseMeeting implements TimetableEvent {
     private int beforePadding;
+    private int afterPadding;
+    private boolean firstEvent;
     private CourseMeeting courseMeeting;
 
     public PaddedCourseMeeting(CourseMeeting courseMeeting) {
@@ -29,12 +31,31 @@ public class PaddedCourseMeeting implements TimetableEvent {
         this.beforePadding = beforePadding;
     }
 
+    public int getAfterPadding() {
+        return afterPadding;
+    }
+
+    public void setAfterPadding(int afterPadding) {
+        this.afterPadding = afterPadding;
+    }
+
+    public void setFirstEvent(boolean firstEvent) {
+        this.firstEvent = firstEvent;
+    }
+
+    public boolean firstEvent() {
+        return firstEvent;
+    }
     public CourseMeeting getCourseMeeting() {
         return courseMeeting;
     }
 
     public void setCourseMeeting(CourseMeeting courseMeeting) {
         this.courseMeeting = courseMeeting;
+    }
+
+    public Meeting.Day getDay() {
+        return this.courseMeeting.getDay();
     }
 
     @Override
@@ -52,7 +73,8 @@ public class PaddedCourseMeeting implements TimetableEvent {
 
     @Override
     public String toString() {
-        return courseMeeting.toString();
+        return courseMeeting.toString() +
+                "\nAfter: " + afterPadding + "\n";
     }
 
 }

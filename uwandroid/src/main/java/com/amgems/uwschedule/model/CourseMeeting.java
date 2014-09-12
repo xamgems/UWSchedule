@@ -5,19 +5,23 @@ package com.amgems.uwschedule.model;
  */
 public class CourseMeeting implements Comparable<TimetableEvent> {
     private Course mCourse;
-    private Meeting mMeeting;
+    private Meeting.Day mDay;
     private int mStartTime;
     private int mEndTime;
 
-    public CourseMeeting(Course course, Meeting meeting) {
+    public CourseMeeting(Course course, Meeting meeting, Meeting.Day day) {
         mCourse = course;
-        mMeeting = meeting;
-        mStartTime = mMeeting.getStartTime();
-        mEndTime = mMeeting.getEndTime();
+        this.mDay = day;
+        mStartTime = meeting.getStartTime();
+        mEndTime = meeting.getEndTime();
     }
 
     public Course getCourse() {
         return mCourse;
+    }
+
+    public Meeting.Day getDay() {
+        return mDay;
     }
 
     public int getStartTime() {
@@ -42,9 +46,9 @@ public class CourseMeeting implements Comparable<TimetableEvent> {
 
     @Override
     public int compareTo(TimetableEvent other) {
-        int startDiff = this.mStartTime - other.getStartTime();
+        int startDiff = Integer.compare(this.mStartTime, other.getStartTime());
         if (startDiff == 0) {
-            return this.mEndTime - other.getEndTime() ;
+            return Integer.compare(this.mEndTime, other.getEndTime());
         } else {
             return startDiff;
         }
@@ -53,8 +57,7 @@ public class CourseMeeting implements Comparable<TimetableEvent> {
     @Override
     public String toString() {
         return mCourse.getDepartmentCode() + "\n" +
-                mCourse.getCourseNumber() + "\n" +
-                mCourse.getSectionId() + "\n" +
-                mStartTime  + " - " + mEndTime;
+                mCourse.getCourseNumber() + " " +
+                mCourse.getSectionId();
     }
 }
