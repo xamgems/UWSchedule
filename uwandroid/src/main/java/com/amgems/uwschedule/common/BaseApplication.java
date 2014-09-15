@@ -32,4 +32,12 @@ public class BaseApplication extends Application implements Injectable {
         mApplicationGraph.inject(target);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ObjectGraph getObjectGraph() {
+        return mApplicationGraph;
+    }
+
 }

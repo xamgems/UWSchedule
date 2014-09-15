@@ -1,7 +1,9 @@
 package com.amgems.uwschedule.common;
 
+import dagger.ObjectGraph;
+
 /**
- * Represents contract binding components that can inject objects with the component-specific
+ * Represents a contract binding components that can inject objects with the component-specific
  * dependency sub-graph.
  */
 public interface Injectable {
@@ -13,4 +15,8 @@ public interface Injectable {
      */
     public void inject(Object target);
 
+    /**
+     * @return The composite object dependency graph for this component.
+     */
+    public ObjectGraph getObjectGraph();
 }
