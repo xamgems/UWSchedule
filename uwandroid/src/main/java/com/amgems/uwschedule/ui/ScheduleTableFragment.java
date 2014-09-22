@@ -43,9 +43,9 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
     /** Courses cursor loader ID */
     private static final int COURSE_CURSOR_LOADER = 0;
-    private static final int MEETINGS_CURSOR_LOADER = 1;
+    private static final int MEETING_CURSOR_LOADER = 1;
 
-    private static final String BUNDLE_SLN_KEY = "bundleSln";
+    private static final String BUNDLE_SLNS_KEY = "bundleSlns";
 
     private ArrayAdapter<PaddedCourseMeeting> mAdapter;
     private Map<String, Course> mCourseMap;
@@ -127,8 +127,8 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
             case COURSE_CURSOR_LOADER: {
                 return new CursorLoader(getActivity(), ScheduleContract.Courses.CONTENT_URI, null, null, null, null);
             }
-            case MEETINGS_CURSOR_LOADER: {
-                ArrayList<String> slnList = args.getStringArrayList(BUNDLE_SLN_KEY);
+            case MEETING_CURSOR_LOADER: {
+                ArrayList<String> slnList = args.getStringArrayList(BUNDLE_SLNS_KEY);
                 String[] selection = slnList.toArray(new String[slnList.size()]);
                 return new CursorLoader(getActivity(), ScheduleContract.Meetings.CONTENT_URI, null,
                         buildSlnWhereClause(slnList.size()), selection, null);
@@ -190,25 +190,28 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         switch (loader.getId()) {
             case COURSE_CURSOR_LOADER: {
                 List<String> slnList = new ArrayList<String>();
+                TypedArray colors = getResources().obtainTypedArray(R.array.colors);
+                int colorIndex = 0;
                 if (data.getCount() > 0) {
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
                         Course course = courseInstance(data);
                         mCourseMap.put(course.getSln(), course);
+                        mColorMap.put(course, colors.getColor(colorIndex++, 0));
                         slnList.add(course.getSln());
                         data.moveToNext();
                     }
                     Bundle slnBundle = new Bundle();
-                    slnBundle.putStringArrayList(BUNDLE_SLN_KEY, (ArrayList<String>) slnList);
-                    if (getLoaderManager().getLoader(MEETINGS_CURSOR_LOADER) == null) {
-                        getLoaderManager().initLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
+                    slnBundle.putStringArrayList(BUNDLE_SLNS_KEY, (ArrayList<String>) slnList);
+                    if (getLoaderManager().getLoader(MEETING_CURSOR_LOADER) == null) {
+                        getLoaderManager().initLoader(MEETING_CURSOR_LOADER, slnBundle, this);
                     } else {
-                        getLoaderManager().restartLoader(MEETINGS_CURSOR_LOADER, slnBundle, this);
+                        getLoaderManager().restartLoader(MEETING_CURSOR_LOADER, slnBundle, this);
                     }
                 }
                 break;
             }
-            case MEETINGS_CURSOR_LOADER: {
+            case MEETING_CURSOR_LOADER: {
                 if (data.getCount() > 0) {
                     data.moveToFirst();
                     while (!data.isAfterLast()) {
@@ -222,15 +225,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     Queue<PaddedCourseMeeting> courseMeetingQueue = mTimetable.toQueue();
 
                     mAdapter.addAll(courseMeetingQueue);
-                    TypedArray colors = getResources().obtainTypedArray(R.array.colors);
-                    int colorIndex = 0;
-                    for (PaddedCourseMeeting meeting : courseMeetingQueue) {
-                        Course c = meeting.getCourseMeeting().getCourse();
-                        if (mColorMap.get(c) == null) {
-                            mColorMap.put(c, colors.getColor(colorIndex, 0));
-                        }
-                        colorIndex++;
-                    }
                 }
                 break;
             }
@@ -238,4 +232,5 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 throw new IllegalArgumentException("Unrecognized loader finished: " + loader.getId());
         }
     }
+
 }

@@ -18,6 +18,16 @@ import java.util.Queue;
  * </p>
  * Various Collection views of the Timetable can be obtained via its methods.
  * @see com.amgems.uwschedule.model.TimetableEvent
+ *
+ * TODO: Add an Interface for Course => EventGroup
+ * TODO: Add an Interface for Meeting => EventSchedule
+ * EventGroup has a an EventSchedule attached to it
+ *
+ * TODO: Add an Interface for CourseMeeting => Event
+ * A EventSchedule is made up of specific Events
+ *
+ * TODO: Add a Class for holding a Week of EventGroup
+ * A Week holds Events given an EventGroup
  */
 public class Timetable {
     private EnumMap<Meeting.Day, List<PaddedCourseMeeting>> table;

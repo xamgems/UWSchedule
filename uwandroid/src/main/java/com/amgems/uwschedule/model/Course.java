@@ -34,7 +34,7 @@ import java.util.*;
  * <p> This class is specified to be consistent with the various representations
  * of class schedules available from either the UW Registration or Time Schedule.</p>
   */
-public class Course implements Parcelable {
+public class Course implements Parcelable, EventGroup {
 
     // TODO: Expose the fields
     // TODO: Customize GSON for Meetings
@@ -256,6 +256,11 @@ public class Course implements Parcelable {
 
     public List<Meeting> getMeetings() {
         return mMeetings;
+    }
+
+    @Override
+    public String getUniqueId() {
+        return mSln;
     }
 
     /**
