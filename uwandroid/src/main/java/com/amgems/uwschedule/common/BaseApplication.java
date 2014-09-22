@@ -18,7 +18,9 @@ public class BaseApplication extends Application implements Injectable {
     @Override
     public void onCreate() {
         super.onCreate();
-        mApplicationGraph = ObjectGraph.create(getModules());
+
+        mApplicationGraph = ObjectGraph.create(getModules().toArray());
+        mApplicationGraph.inject(this);
     }
 
     /**
