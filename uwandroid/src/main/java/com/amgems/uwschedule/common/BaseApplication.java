@@ -1,10 +1,11 @@
 package com.amgems.uwschedule.common;
 
 import android.app.Application;
-import dagger.ObjectGraph;
 
 import java.util.Arrays;
 import java.util.List;
+
+import dagger.ObjectGraph;
 
 /**
  * The default {@link android.app.Application} used, providing access to a root
@@ -18,10 +19,6 @@ public class BaseApplication extends Application implements Injectable {
     public void onCreate() {
         super.onCreate();
         mApplicationGraph = ObjectGraph.create(getModules());
-    }
-
-    protected List<Object> getModules() {
-        return Arrays.<Object>asList(new BaseApplicationModule(this));
     }
 
     /**
@@ -38,6 +35,18 @@ public class BaseApplication extends Application implements Injectable {
     @Override
     public ObjectGraph getObjectGraph() {
         return mApplicationGraph;
+    }
+
+    /**
+     * Provides modules to use for inject this Application's object graph.
+     *
+     * Subclasses should override this method to include required modules given that they
+     * <em>always</em> include modules provided by calling {@code super.getModules()}.
+     *
+     * @return A List of modules for this Application's object graph to use.
+     */
+    protected List<Object> getModules() {
+        return Arrays.<Object>asList(new BaseApplicationModule(this));
     }
 
 }

@@ -19,4 +19,5 @@ public interface Injectable {
      * @return The composite object dependency graph for this component.
      */
     public ObjectGraph getObjectGraph();
+
 }
