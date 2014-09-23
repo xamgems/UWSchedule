@@ -11,7 +11,7 @@ import dagger.ObjectGraph;
  * The default {@link android.app.Application} used, providing access to a root
  * {@link dagger.ObjectGraph}.
  */
-public class BaseApplication extends Application implements Injectable {
+public class BaseApplication extends Application implements Injector {
 
     private ObjectGraph mApplicationGraph;
 

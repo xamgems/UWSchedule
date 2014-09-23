@@ -1,6 +1,5 @@
 package com.amgems.uwschedule.common;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -13,7 +12,7 @@ import dagger.ObjectGraph;
  * The default {@link android.app.Activity} used, providing access to a root activity specific
  * {@link dagger.ObjectGraph}. All Activity classes should inherit this class.
  */
-public class BaseActivity extends FragmentActivity {
+public abstract class BaseActivity extends FragmentActivity {
 
     ObjectGraph mActivityGraph;
 
@@ -21,7 +20,7 @@ public class BaseActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        BaseApplication application = (BaseApplication) getApplication();
+        Injector application = (Injector) getApplication();
         mActivityGraph = application.getObjectGraph().plus(getModules().toArray());
         mActivityGraph.inject(this);
     }

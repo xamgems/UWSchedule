@@ -6,7 +6,7 @@ import dagger.ObjectGraph;
  * Represents a contract binding components that can inject objects with the component-specific
  * dependency sub-graph.
  */
-public interface Injectable {
+public interface Injector {
 
     /**
      * Injects this component's sub-graph into a specified target.

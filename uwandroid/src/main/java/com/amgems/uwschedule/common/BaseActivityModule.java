@@ -16,9 +16,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Contributes to the object graph of a {@link com.amgems.uwschedule.common.BaseActivity}.
  */
 @Module (
-        injects = {
-                HomeActivity.class
-        }
+        injects = BaseActivity.class,
+        library = true
 )
 public class BaseActivityModule {
 
