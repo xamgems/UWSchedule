@@ -281,6 +281,9 @@ public class Meeting implements Parcelable {
                 boolean isEveningMeeting = (timeMatcher.groupCount() > 3);
                 setStartTime(timeMatcher.group(1), isEveningMeeting);
                 setEndTime(timeMatcher.group(2), isEveningMeeting);
+            } else if (timeSpan.equals("0-0")) {
+                setStartTime("0", false);
+                setEndTime("0", false);
             } else {
 
                 throw new IllegalArgumentException(timeSpan + " is not a valid time span format");
