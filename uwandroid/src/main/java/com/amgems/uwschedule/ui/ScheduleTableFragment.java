@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * A simple {@link Fragment} subclass.
+ * A {@link Fragment} that displays a particular list of courses as a timetable.
  */
 public class ScheduleTableFragment extends Fragment implements LoaderManager
         .LoaderCallbacks<Cursor> {
@@ -50,11 +50,9 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
     private ArrayAdapter<TimetableEvent> mAdapter;
     private Map<String, Course> mCourseMap;
-    private Timetable mTimetable;
-
     private Map<Course, Integer> mColorMap;
 
-    static class ViewHolder {
+    private static class ViewHolder {
         DynamicHeightTextView textView;
     }
     public ScheduleTableFragment() {
@@ -119,7 +117,6 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         layoutParams.setMargins(0, beforeMargin, 0, event.getAfterPadding());
         textView.setPadding(0, 0, 0, 0);
         textView.setLayoutParams(layoutParams);
-
     }
 
     @Override
@@ -221,9 +218,10 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                         mCourseMap.get(sln).getMeetings().add(meeting);
                         data.moveToNext();
                     }
-                    mTimetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
+
+                    Timetable timetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
                     mAdapter.clear();
-                    Queue<TimetableEvent> courseMeetingQueue = mTimetable.toQueue();
+                    Queue<TimetableEvent> courseMeetingQueue = timetable.toQueue();
 
                     mAdapter.addAll(courseMeetingQueue);
                 }

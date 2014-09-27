@@ -37,9 +37,6 @@ import java.util.List;
   */
 public class Course implements Parcelable, EventGroup {
 
-    // TODO: Expose the fields
-    // TODO: Customize GSON for Meetings
-
     @Expose
     @SerializedName("sln")
     private final String mSln;

@@ -1,5 +1,7 @@
 package com.amgems.uwschedule.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -166,7 +168,7 @@ public class Timetable {
     /**
      * Obtain a Queue view of the Timetable where the initial item of each day is pushed into
      * the queue, subsequent items are pushed in from earliest to latest based on time only,
-     * and conflicts are than resolved by time of week.
+     * and conflicts are than resolved by day of week.
      *
      * @return A Queue of TimetableEvents
      */
@@ -201,7 +203,8 @@ public class Timetable {
     }
 
     /**
-     * Used for transforming the Timetable into a queue
+     * Used for transforming the Timetable into a queue. Weighted based on the end time of a
+     * TimetableEvent, else compared by day of week.
      */
     static class WeightedDay implements Comparable<WeightedDay> {
         Meeting.Day day;
@@ -215,7 +218,7 @@ public class Timetable {
         }
 
         @Override
-        public int compareTo(WeightedDay other) {
+        public int compareTo(@NonNull WeightedDay other) {
             if (this.weight == other.weight) {
                 return this.day.compareTo(other.day);
             } else {
