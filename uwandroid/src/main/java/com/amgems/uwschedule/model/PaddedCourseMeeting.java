@@ -11,7 +11,7 @@ public class PaddedCourseMeeting implements TimetableEvent {
     private int beforePadding;
     private int afterPadding;
     private boolean firstEvent;
-    private CourseMeeting courseMeeting;
+    private Event courseMeeting;
 
     public PaddedCourseMeeting(CourseMeeting courseMeeting) {
         this.courseMeeting = courseMeeting;
@@ -42,10 +42,10 @@ public class PaddedCourseMeeting implements TimetableEvent {
         this.firstEvent = firstEvent;
     }
 
-    public boolean firstEvent() {
+    public boolean isFirstEvent() {
         return firstEvent;
     }
-    public CourseMeeting getCourseMeeting() {
+    public Event getEvent() {
         return courseMeeting;
     }
 
@@ -67,7 +67,7 @@ public class PaddedCourseMeeting implements TimetableEvent {
 
     @Override
     public int compareTo(@NonNull TimetableEvent other) {
-        return courseMeeting.compareTo(other);
+        return courseMeeting.compareTo(other.getEvent());
     }
 
     @Override
@@ -75,63 +75,4 @@ public class PaddedCourseMeeting implements TimetableEvent {
         return courseMeeting.toString();
     }
 
-    public static class CourseMeeting implements Comparable<TimetableEvent> {
-        private Course mCourse;
-        private Meeting mMeeting;
-        private Meeting.Day mDay;
-        private int mStartTime;
-        private int mEndTime;
-
-        public CourseMeeting(Course course, Meeting meeting, Meeting.Day day) {
-            mCourse = course;
-            mMeeting = meeting;
-            this.mDay = day;
-            mStartTime = meeting.getStartTime();
-            mEndTime = meeting.getEndTime();
-        }
-
-        public Course getCourse() {
-            return mCourse;
-        }
-
-        public Meeting.Day getDay() {
-            return mDay;
-        }
-
-        public int getStartTime() {
-            return mStartTime;
-        }
-
-        public int getEndTime() {
-            return mEndTime;
-        }
-
-        @Override
-        public int hashCode() {
-           return ((Integer) mStartTime).hashCode() + ((Integer) mEndTime).hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return other instanceof CourseMeeting &&
-                    this.mStartTime == ((CourseMeeting)other).mStartTime &&
-                    this.mEndTime == ((CourseMeeting) other).mEndTime;
-        }
-
-        @Override
-        public int compareTo(TimetableEvent other) {
-            int startDiff = Integer.valueOf(this.mStartTime).compareTo(other.getStartTime());
-            if (startDiff == 0) {
-                return Integer.valueOf(this.mEndTime).compareTo(other.getEndTime());
-            } else {
-                return startDiff;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return mCourse.getDepartmentCode() + " " + mCourse.getCourseNumber() + " " +
-                    mCourse.getSectionId() + "\n" + mMeeting.getLocation();
-        }
-    }
 }

@@ -29,11 +29,7 @@ import android.content.Loader;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -51,6 +47,7 @@ import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.provider.ScheduleContract;
+import com.amgems.uwschedule.util.DefaultHttpClient;
 import com.amgems.uwschedule.util.Publisher;
 import com.amgems.uwschedule.util.Subscriber;
 import retrofit.Callback;
@@ -174,7 +171,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
 
     @Override
     public Loader<GetSlnLoader.Slns> onCreateLoader(int id, Bundle args) {
-        Loader<GetSlnLoader.Slns> loader = new GetSlnLoader(this, mCookieStore.getActiveCookie());
+        Loader<GetSlnLoader.Slns> loader = new GetSlnLoader(this, new DefaultHttpClient(),
+                mCookieStore.getActiveCookie());
         loader.forceLoad();
         return loader;
     }

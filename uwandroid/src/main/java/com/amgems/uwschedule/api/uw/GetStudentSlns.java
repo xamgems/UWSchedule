@@ -1,6 +1,7 @@
 package com.amgems.uwschedule.api.uw;
 
 import com.amgems.uwschedule.api.Response;
+import com.amgems.uwschedule.util.HttpClient;
 import com.amgems.uwschedule.util.NetUtils;
 
 import java.io.BufferedReader;
@@ -32,11 +33,14 @@ public class GetStudentSlns {
     //       for debugging purposes only
     private String mHtml;
 
+    private final HttpClient mHttpClient;
+
     /**
      * Constructs a GetStudentSlns with the given well formed cookie string.
      * @param cookie
      */
-    private GetStudentSlns(String cookie) {
+    private GetStudentSlns(String cookie, HttpClient httpClient) {
+        mHttpClient = httpClient;
         mCookie = cookie;
         mHtml = "";
     }
@@ -47,8 +51,8 @@ public class GetStudentSlns {
      *               the required pubcookie_g cookie.
      * @return A new, executable instance of GetStudentSlns.
      */
-    public static GetStudentSlns newInstance(String cookie) {
-        return new GetStudentSlns(cookie);
+    public static GetStudentSlns newInstance(String cookie, HttpClient httpClient) {
+        return new GetStudentSlns(cookie, httpClient);
     }
 
     // Returns a list of SLNs as Strings, given a well formed html content String.
@@ -73,7 +77,7 @@ public class GetStudentSlns {
     public void execute() {
 
         try {
-            HttpURLConnection connection = NetUtils.getInputConnection(new URL(NetUtils.REGISTRATION_URL));
+            HttpURLConnection connection = mHttpClient.buildReadableConnection(new URL(NetUtils.REGISTRATION_URL));
             // Puts the given cookie in the request header
             connection.setRequestProperty("Cookie", mCookie);
 

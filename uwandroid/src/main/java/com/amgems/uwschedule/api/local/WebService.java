@@ -19,21 +19,16 @@
 
 package com.amgems.uwschedule.api.local;
 
-import android.util.Log;
-
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import java.util.List;
-
 import retrofit.Callback;
 import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
+
+import java.util.List;
 
 /**
  * @author Sherman Pay, Zachary Iqbal, Jeremy Teo on 2/10/14.

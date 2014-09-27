@@ -22,6 +22,7 @@ import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.model.Timetable;
+import com.amgems.uwschedule.model.TimetableEvent;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.etsy.android.grid.StaggeredGridView;
 import com.etsy.android.grid.util.DynamicHeightTextView;
@@ -47,7 +48,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
 
     private static final String BUNDLE_SLNS_KEY = "bundleSlns";
 
-    private ArrayAdapter<PaddedCourseMeeting> mAdapter;
+    private ArrayAdapter<TimetableEvent> mAdapter;
     private Map<String, Course> mCourseMap;
     private Timetable mTimetable;
 
@@ -79,7 +80,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         View rootView = inflater.inflate(R.layout.schedule_table_fragment, container, false);
         StaggeredGridView scheduleTableView = (StaggeredGridView) rootView.findViewById(R.id
                 .schedule_table);
-        mAdapter = new ArrayAdapter<PaddedCourseMeeting>(getActivity(),
+        mAdapter = new ArrayAdapter<TimetableEvent>(getActivity(),
                 R.layout.schedule_table_cell, R.id.schedule_table_cell) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -97,7 +98,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     vh = (ViewHolder) convertView.getTag();
                 }
 
-                PaddedCourseMeeting event = mAdapter.getItem(position);
+                TimetableEvent event = mAdapter.getItem(position);
                 setupTextView(vh.textView, event);
                 return convertView;
             }
@@ -107,14 +108,14 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         return rootView;
     }
 
-    private void setupTextView(TextView textView, PaddedCourseMeeting event) {
+    private void setupTextView(TextView textView, TimetableEvent event) {
         textView.setText(event.toString());
         textView.setHeight(((event.getEndTime() - event.getStartTime())));
-        textView.setBackgroundColor(mColorMap.get(event.getCourseMeeting().getCourse()));
+        textView.setBackgroundColor(mColorMap.get(event.getEvent().getEventGroup()));
         textView.setTextColor(Color.WHITE);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup
                 .LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        int beforeMargin = event.firstEvent() ? event.getBeforePadding() : 0;
+        int beforeMargin = event.isFirstEvent() ? event.getBeforePadding() : 0;
         layoutParams.setMargins(0, beforeMargin, 0, event.getAfterPadding());
         textView.setPadding(0, 0, 0, 0);
         textView.setLayoutParams(layoutParams);
@@ -222,7 +223,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                     }
                     mTimetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));
                     mAdapter.clear();
-                    Queue<PaddedCourseMeeting> courseMeetingQueue = mTimetable.toQueue();
+                    Queue<TimetableEvent> courseMeetingQueue = mTimetable.toQueue();
 
                     mAdapter.addAll(courseMeetingQueue);
                 }

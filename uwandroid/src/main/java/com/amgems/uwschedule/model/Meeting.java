@@ -23,13 +23,15 @@ import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -279,6 +281,9 @@ public class Meeting implements Parcelable {
                 boolean isEveningMeeting = (timeMatcher.groupCount() > 3);
                 setStartTime(timeMatcher.group(1), isEveningMeeting);
                 setEndTime(timeMatcher.group(2), isEveningMeeting);
+            } else if (timeSpan.equals("0-0")) {
+                setStartTime("0", false);
+                setEndTime("0", false);
             } else {
 
                 throw new IllegalArgumentException(timeSpan + " is not a valid time span format");

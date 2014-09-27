@@ -21,15 +21,10 @@ package com.amgems.uwschedule.api.local;
 
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
+import retrofit.Callback;
+import retrofit.http.*;
 
 import java.util.List;
-
-import retrofit.Callback;
-import retrofit.http.Field;
-import retrofit.http.FormUrlEncoded;
-import retrofit.http.GET;
-import retrofit.http.POST;
-import retrofit.http.Query;
 
 /**
  * Created by shermpay on 2/10/14.

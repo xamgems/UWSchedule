@@ -19,10 +19,6 @@
 
 package com.amgems.uwschedule.provider;
 
-import com.amgems.uwschedule.provider.ScheduleContract.AccountsColumns;
-import com.amgems.uwschedule.provider.ScheduleContract.CoursesColumns;
-import com.amgems.uwschedule.provider.ScheduleContract.MeetingsColumns;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -30,6 +26,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import com.amgems.uwschedule.model.Account;
+import com.amgems.uwschedule.provider.ScheduleContract.AccountsColumns;
+import com.amgems.uwschedule.provider.ScheduleContract.CoursesColumns;
+import com.amgems.uwschedule.provider.ScheduleContract.MeetingsColumns;
 
 /**
  * A helper class managing {@link android.database.sqlite.SQLiteDatabase} used as

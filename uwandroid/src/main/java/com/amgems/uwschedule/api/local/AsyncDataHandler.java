@@ -19,23 +19,14 @@
 package com.amgems.uwschedule.api.local;
 
 import android.content.AsyncQueryHandler;
-import android.content.ContentResolver;
-import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
-
 import com.amgems.uwschedule.model.Account;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
 import com.amgems.uwschedule.provider.ScheduleContract;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 /**
  * @author Sherman Pay on 3/9/14.

@@ -18,4 +18,7 @@ public interface TimetableEvent extends Comparable<TimetableEvent> {
     public void setBeforePadding(int padding);
     public int getAfterPadding();
     public void setAfterPadding(int padding);
+    public void setFirstEvent(boolean firstEvent);
+    public Event getEvent();
+    public boolean isFirstEvent();
 }

@@ -41,6 +41,7 @@ import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.CookieStore;
 import com.amgems.uwschedule.loaders.LoginAuthLoader;
+import com.amgems.uwschedule.util.DefaultHttpClient;
 
 
 /**
@@ -216,7 +217,8 @@ public class LoginActivity extends Activity
         }
         preferenceEditor.commit();
 
-        Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, new Handler(), username, password);
+        Loader<LoginAuthLoader.Result> loader = new LoginAuthLoader(this, new Handler(), new DefaultHttpClient(),
+                username, password);
         loader.forceLoad();
         return loader;
     }

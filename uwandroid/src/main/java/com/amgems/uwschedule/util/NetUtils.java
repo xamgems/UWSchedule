@@ -20,15 +20,9 @@
 package com.amgems.uwschedule.util;
 
 import android.util.Log;
-
-import com.amgems.uwschedule.services.LoginService;
-
 import org.apache.http.NameValuePair;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -38,10 +32,11 @@ import java.util.List;
  */
 public class NetUtils {
 
-    public static final String LOGIN_REQUEST_URL = "https://weblogin.washington.edu";
-    public static final String REGISTRATION_URL = "https://sdb.admin.washington.edu/students/uwnetid/register.asp";
     /** The base URL for all UW server requests */
     public static final String BASE_REQUEST_URL = "https://weblogin.washington.edu";
+
+    /** The URL for the main UW registration page, detailing current courses */
+    public static final String REGISTRATION_URL = "https://sdb.admin.washington.edu/students/uwnetid/register.asp";
 
     /** The user-agent to be used in a HTTP header */
     public static final String USER_AGENT_STRING = "Mozilla/5.0";
@@ -54,34 +49,6 @@ public class NetUtils {
 
     // Suppress default constructor to ensure noninstantiability
     private NetUtils() { }
-
-    /**
-     * Establishes a connection to a given target URL, capable of reading
-     * input from the connection's stream.
-     *
-     * @param targetUrl A non-null url to get a connection from
-     * @throws IOException If the connection could not be established
-     */
-    public static HttpURLConnection getInputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        return connection;
-    }
-
-    /**
-     * Establishes a connection to a given target URL, capable of writing output
-     * and reading input from the connection's stream.
-     *
-     * @param targetUrl A non-null url to get a connection from
-     * @throws IOException If the connection could not be established
-     */
-    public static HttpURLConnection getOutputConnection (URL targetUrl) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestProperty("User-Agent", USER_AGENT_STRING);
-        connection.setRequestProperty("Content-Type", CONTENT_TYPE);
-        connection.setDoOutput(true);
-        return connection;
-    }
 
     /**
      * Builds a HTTP compliant query string from a series of NameValuePairs.
@@ -101,9 +68,10 @@ public class NetUtils {
                 builder.append(URLEncoder.encode(postParameterPair.getValue(), NetUtils.CHARSET));
             }
         } catch (UnsupportedEncodingException e) {
-            Log.e(LoginService.class.getSimpleName(), e.getMessage());
+            Log.e(NetUtils.class.getSimpleName(), e.getMessage());
         }
 
         return builder.toString();
     }
+
 }

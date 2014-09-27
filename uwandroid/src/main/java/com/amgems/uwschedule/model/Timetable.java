@@ -19,47 +19,40 @@ import java.util.Queue;
  * Various Collection views of the Timetable can be obtained via its methods.
  * @see com.amgems.uwschedule.model.TimetableEvent
  *
- * TODO: Add an Interface for Course => EventGroup
- * TODO: Add an Interface for Meeting => EventSchedule
- * EventGroup has a an EventSchedule attached to it
- *
- * TODO: Add an Interface for CourseMeeting => Event
- * A EventSchedule is made up of specific Events
- *
  * TODO: Add a Class for holding a Week of EventGroup
  * A Week holds Events given an EventGroup
  */
 public class Timetable {
-    private EnumMap<Meeting.Day, List<PaddedCourseMeeting>> table;
-    private PaddedCourseMeeting earliest;
-    private PaddedCourseMeeting latest;
+    private EnumMap<Meeting.Day, List<TimetableEvent>> table;
+    private TimetableEvent earliest;
+    private TimetableEvent latest;
 
     public Timetable(List<Course> courses) {
-        table = new EnumMap<Meeting.Day, List<PaddedCourseMeeting>>(Meeting.Day.class);
+        table = new EnumMap<Meeting.Day, List<TimetableEvent>>(Meeting.Day.class);
         for (Course course : courses) {
             List<Meeting> meetings = course.getMeetings();
             for (Meeting meeting : meetings) {
                 for (Meeting.Day day : meeting.getMeetingDays()) {
-                    List<PaddedCourseMeeting> meetingDay;
+                    List<TimetableEvent> meetingDay;
                     if (table.get(day) == null) {
-                        meetingDay = new ArrayList<PaddedCourseMeeting>();
+                        meetingDay = new ArrayList<TimetableEvent>();
                         table.put(day, meetingDay);
                     } else {
                         meetingDay = table.get(day);
                     }
-                    PaddedCourseMeeting courseMeeting = new PaddedCourseMeeting(new
-                            PaddedCourseMeeting.CourseMeeting(course, meeting, day));
+                    TimetableEvent courseMeeting = new PaddedCourseMeeting(new
+                            CourseMeeting(course, meeting, day));
                     meetingDay.add(courseMeeting);
                 }
             }
         }
 
         for (Meeting.Day day : table.keySet()) {
-            List<PaddedCourseMeeting> meetingList = getDayEvents(day);
+            List<TimetableEvent> meetingList = getDayEvents(day);
             Collections.sort(meetingList);
             for (int i = 1; i < meetingList.size(); i++) {
-                PaddedCourseMeeting prevEvent = meetingList.get(i - 1);
-                PaddedCourseMeeting meeting = meetingList.get(i);
+                TimetableEvent prevEvent = meetingList.get(i - 1);
+                TimetableEvent meeting = meetingList.get(i);
                 int diff = meeting.getStartTime() - prevEvent
                         .getEndTime();
                 meeting.setBeforePadding(diff);
@@ -70,30 +63,30 @@ public class Timetable {
         this.earliest = findEarliest();
         this.latest = findLatest();
         for (Meeting.Day day : table.keySet()) {
-            List<PaddedCourseMeeting> today = getDayEvents(day);
+            List<TimetableEvent> today = getDayEvents(day);
             if (today.size() > 0) {
-                PaddedCourseMeeting event = today.get(0);
+                TimetableEvent event = today.get(0);
                 event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
                 event.setFirstEvent(true);
-                PaddedCourseMeeting last = today.get(today.size() - 1);
+                TimetableEvent last = today.get(today.size() - 1);
                 last.setAfterPadding(this.latest.getEndTime() - last.getEndTime());
             }
         }
     }
 
-    public PaddedCourseMeeting getEarliest() {
+    public TimetableEvent getEarliest() {
         return earliest;
     }
 
-    public PaddedCourseMeeting getLatest() {
+    public TimetableEvent getLatest() {
         return latest;
     }
 
-    private PaddedCourseMeeting findEarliest() {
+    private TimetableEvent findEarliest() {
         int min = Meeting.LATEST;
-        PaddedCourseMeeting result = null;
+        TimetableEvent result = null;
         for (Meeting.Day day : table.keySet()) {
-            PaddedCourseMeeting current = table.get(day).get(0);
+            TimetableEvent current = table.get(day).get(0);
             if (current.getStartTime() < min) {
                 min = current.getStartTime();
                 result = current;
@@ -102,12 +95,12 @@ public class Timetable {
         return result;
     }
 
-    private PaddedCourseMeeting findLatest() {
+    private TimetableEvent findLatest() {
         int max = Meeting.EARLIEST;
-        PaddedCourseMeeting result = null;
+        TimetableEvent result = null;
         for (Meeting.Day day : table.keySet()) {
-            List<PaddedCourseMeeting> today = getDayEvents(day);
-            PaddedCourseMeeting current = today.get(today.size() - 1);
+            List<TimetableEvent> today = getDayEvents(day);
+            TimetableEvent current = today.get(today.size() - 1);
             if (current.getEndTime() > max) {
                 max = current.getEndTime();
                 result = current;
@@ -120,11 +113,11 @@ public class Timetable {
        return new ArrayList<Meeting.Day>(table.keySet());
     }
 
-    public List<PaddedCourseMeeting> getDayEvents(Meeting.Day day) {
+    public List<TimetableEvent> getDayEvents(Meeting.Day day) {
         return table.get(day);
     }
 
-    public PaddedCourseMeeting get(Meeting.Day day, int i) {
+    public TimetableEvent get(Meeting.Day day, int i) {
         return table.get(day).get(i);
     }
 
@@ -133,10 +126,10 @@ public class Timetable {
      * event sorted from left to right and from top to bottom for each column.
      * @return a sorted List of TimetableEvents
      */
-    public List<PaddedCourseMeeting> toLeftRightList() {
-        List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
+    public List<TimetableEvent> toLeftRightList() {
+        List<TimetableEvent> result = new ArrayList<TimetableEvent>();
         for (Meeting.Day day : table.keySet()) {
-            for (PaddedCourseMeeting event : getDayEvents(day)) {
+            for (TimetableEvent event : getDayEvents(day)) {
                 result.add(event);
             }
         }
@@ -148,13 +141,13 @@ public class Timetable {
      * event sorted from earliest to latest and from left to right for each row.
      * @return a sorted List fo TimetableEvents
      */
-    public List<PaddedCourseMeeting> toTopDownList() {
-        List<PaddedCourseMeeting> result = new ArrayList<PaddedCourseMeeting>();
+    public List<TimetableEvent> toTopDownList() {
+        List<TimetableEvent> result = new ArrayList<TimetableEvent>();
         boolean cont = true;
         for (int i = 0; cont; i++) {
             int counter = 0;
             for (Meeting.Day day : table.keySet()) {
-                List<PaddedCourseMeeting> events = getDayEvents(day);
+                List<TimetableEvent> events = getDayEvents(day);
                 if (i < events.size()) {
                     result.add(events.get(i));
                 } else {
@@ -177,21 +170,21 @@ public class Timetable {
      *
      * @return A Queue of TimetableEvents
      */
-    public Queue<PaddedCourseMeeting> toQueue() {
-        Queue<PaddedCourseMeeting> result = new LinkedList<PaddedCourseMeeting>();
+    public Queue<TimetableEvent> toQueue() {
+        Queue<TimetableEvent> result = new LinkedList<TimetableEvent>();
         Queue<WeightedDay> queue = new PriorityQueue<WeightedDay>();
 
         for (Meeting.Day day : table.keySet()) {
-            PaddedCourseMeeting meeting = table.get(day).get(0);
+            TimetableEvent meeting = table.get(day).get(0);
             queue.add(new WeightedDay(day, meeting.getEndTime() + meeting.getAfterPadding()));
             result.add(meeting);
         }
 
         while (!queue.isEmpty()) {
             WeightedDay d = queue.poll();
-            List<PaddedCourseMeeting> dayEvents = table.get(d.day);
+            List<TimetableEvent> dayEvents = table.get(d.day);
             if (d.index < dayEvents.size()) {
-                PaddedCourseMeeting meeting = dayEvents.get(d.index);
+                TimetableEvent meeting = dayEvents.get(d.index);
                 result.add(meeting);
                 d.index++;
                 d.weight = meeting.getEndTime() + meeting.getAfterPadding();
