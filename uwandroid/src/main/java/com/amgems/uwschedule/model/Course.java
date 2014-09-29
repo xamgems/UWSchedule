@@ -20,6 +20,7 @@
 package com.amgems.uwschedule.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.amgems.uwschedule.provider.ScheduleContract;
@@ -88,7 +89,7 @@ public class Course implements Parcelable, EventGroup {
             mTypeText = typeText;
         }
 
-        public static Type getType(String name) {
+        public static Type fromTypeText(String name) {
             for (Type t : Type.values()) {
                 if (t.mTypeText.equals(name)) {
                     return t;
@@ -116,9 +117,8 @@ public class Course implements Parcelable, EventGroup {
         }
     };
 
-    public Course(String sln, String departmentCode, int courseNumber, String sectionId,
-                  int credits,
-           String title, Type type, List<Meeting> meetings) {
+    Course(String sln, String departmentCode, int courseNumber, String sectionId,
+           int credits, String title, Type type, List<Meeting> meetings) {
         mSln = sln;
         mDepartmentCode = departmentCode;
         mCourseNumber = courseNumber;
@@ -224,6 +224,20 @@ public class Course implements Parcelable, EventGroup {
         return contentValues;
     }
 
+    public static Course fromCursor(Cursor data) {
+        String sln = data.getString(data.getColumnIndex(ScheduleContract.Courses.SLN));
+        String departmentCode = data.getString(data.getColumnIndex(
+                ScheduleContract.Courses.DEPARTMENT_CODE));
+        int courseNumber = data.getInt(data.getColumnIndex(ScheduleContract.Courses.COURSE_NUMBER));
+        String sectionId = data.getString(data.getColumnIndex(ScheduleContract.Courses.SECTION_ID));
+        int credits = data.getInt(data.getColumnIndex(ScheduleContract.Courses.CREDITS));
+        String title = data.getString(data.getColumnIndex(ScheduleContract.Courses.TITLE));
+        Course.Type type = Course.Type.fromTypeText(data.getString(data.getColumnIndex(ScheduleContract
+                .Courses.TYPE)));
+        return  Course.newInstance(sln, departmentCode, courseNumber, sectionId, credits, title,
+                type, new ArrayList<Meeting>());
+    }
+
     public String getSln() {
         return mSln;
     }
@@ -258,7 +272,7 @@ public class Course implements Parcelable, EventGroup {
 
     @Override
     public String getUniqueId() {
-        return mSln;
+        return getSln();
     }
 
     /**

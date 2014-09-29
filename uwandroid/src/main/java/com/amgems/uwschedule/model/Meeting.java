@@ -20,9 +20,9 @@
 package com.amgems.uwschedule.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.provider.ScheduleContract;
 import com.google.gson.annotations.Expose;
@@ -30,6 +30,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -176,6 +177,25 @@ public class Meeting implements Parcelable {
         out.writeInt(mEndTime);
         out.writeString(mLocation);
         out.writeString(mInstructor);
+    }
+
+    public static Meeting fromCursor(Cursor data) {
+        Set<Meeting.Day> meetDays = new HashSet<Day>();
+        for (Meeting.Day day : Meeting.Day.values()) {
+            int hasMeet = data.getInt(data.getColumnIndex(day.getColumnName()));
+            if (hasMeet == ScheduleContract.Meetings.HAS_MEETING) {
+                meetDays.add(day);
+            }
+        }
+        String startTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
+                .START_TIME));
+        String endTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
+                .END_TIME));
+        String timespan = startTime + "-" + endTime;
+        String location = data.getString(data.getColumnIndex(ScheduleContract.Meetings.LOCATION));
+        Meeting.Builder builder = new Meeting.Builder(meetDays, timespan);
+        return builder.location(location)
+                .build();
     }
 
     /**

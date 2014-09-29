@@ -1,6 +1,9 @@
 package com.amgems.uwschedule.model;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,68 +14,68 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 /**
- * @author Sherman Pay
- * @version 0.1
- *
  * <p>
  * Timetable that holds TimetableEvents. Each day is a sorted list of TimetableEvents
  * (from earliest to latest).
  * </p>
  * Various Collection views of the Timetable can be obtained via its methods.
  * @see com.amgems.uwschedule.model.TimetableEvent
- *
- * TODO: Add a Class for holding a Week of EventGroup
- * A Week holds Events given an EventGroup
+ * @author Sherman Pay
  */
 public class Timetable {
     private EnumMap<Meeting.Day, List<TimetableEvent>> table;
     private TimetableEvent earliest;
     private TimetableEvent latest;
 
-    public Timetable(List<Course> courses) {
+    public Timetable(@NonNull List<Course> courses) {
+        checkNotNull(courses);
         table = new EnumMap<Meeting.Day, List<TimetableEvent>>(Meeting.Day.class);
-        for (Course course : courses) {
-            List<Meeting> meetings = course.getMeetings();
-            for (Meeting meeting : meetings) {
-                for (Meeting.Day day : meeting.getMeetingDays()) {
-                    List<TimetableEvent> meetingDay;
-                    if (table.get(day) == null) {
-                        meetingDay = new ArrayList<TimetableEvent>();
-                        table.put(day, meetingDay);
-                    } else {
-                        meetingDay = table.get(day);
+        if (!courses.isEmpty()) {
+            for (Course course : courses) {
+                List<Meeting> meetings = course.getMeetings();
+                for (Meeting meeting : meetings) {
+                    for (Meeting.Day day : meeting.getMeetingDays()) {
+                        List<TimetableEvent> meetingDay;
+                        if (table.get(day) == null) {
+                            meetingDay = new ArrayList<TimetableEvent>();
+                            table.put(day, meetingDay);
+                        } else {
+                            meetingDay = table.get(day);
+                        }
+                        TimetableEvent courseMeeting = new PaddedCourseMeeting(new
+                                CourseMeeting(course, meeting, day));
+                        meetingDay.add(courseMeeting);
                     }
-                    TimetableEvent courseMeeting = new PaddedCourseMeeting(new
-                            CourseMeeting(course, meeting, day));
-                    meetingDay.add(courseMeeting);
                 }
             }
-        }
 
-        for (Meeting.Day day : table.keySet()) {
-            List<TimetableEvent> meetingList = getDayEvents(day);
-            Collections.sort(meetingList);
-            for (int i = 1; i < meetingList.size(); i++) {
-                TimetableEvent prevEvent = meetingList.get(i - 1);
-                TimetableEvent meeting = meetingList.get(i);
-                int diff = meeting.getStartTime() - prevEvent
-                        .getEndTime();
-                meeting.setBeforePadding(diff);
-                prevEvent.setAfterPadding(diff);
+            for (Meeting.Day day : table.keySet()) {
+                List<TimetableEvent> meetingList = table.get(day);
+                Collections.sort(meetingList);
+                for (int i = 1; i < meetingList.size(); i++) {
+                    TimetableEvent prevEvent = meetingList.get(i - 1);
+                    TimetableEvent meeting = meetingList.get(i);
+                    int diff = meeting.getStartTime() - prevEvent
+                            .getEndTime();
+                    meeting.setBeforePadding(diff);
+                    prevEvent.setAfterPadding(diff);
+                }
             }
-        }
 
-        this.earliest = findEarliest();
-        this.latest = findLatest();
-        for (Meeting.Day day : table.keySet()) {
-            List<TimetableEvent> today = getDayEvents(day);
-            if (today.size() > 0) {
-                TimetableEvent event = today.get(0);
-                event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
-                event.setFirstEvent(true);
-                TimetableEvent last = today.get(today.size() - 1);
-                last.setAfterPadding(this.latest.getEndTime() - last.getEndTime());
+            this.earliest = findEarliest();
+            this.latest = findLatest();
+            for (Meeting.Day day : table.keySet()) {
+                List<TimetableEvent> today = table.get(day);
+                if (today.size() > 0) {
+                    TimetableEvent event = today.get(0);
+                    event.setBeforePadding(event.getStartTime() - this.earliest.getStartTime());
+                    event.setFirstEvent(true);
+                    TimetableEvent last = today.get(today.size() - 1);
+                    last.setAfterPadding(this.latest.getEndTime() - last.getEndTime());
+                }
             }
+        } else {
+            Log.d(getClass().getSimpleName(), "Empty List of Courses while initializing Timtable");
         }
     }
 
@@ -101,7 +104,7 @@ public class Timetable {
         int max = Meeting.EARLIEST;
         TimetableEvent result = null;
         for (Meeting.Day day : table.keySet()) {
-            List<TimetableEvent> today = getDayEvents(day);
+            List<TimetableEvent> today = table.get(day);
             TimetableEvent current = today.get(today.size() - 1);
             if (current.getEndTime() > max) {
                 max = current.getEndTime();
@@ -111,16 +114,33 @@ public class Timetable {
         return result;
     }
 
+    /**
+     * Obtain a list days that this timetable is holding.
+     * This list is not a view of the internal representation
+     * @return  List of Days
+     */
     public List<Meeting.Day> days() {
        return new ArrayList<Meeting.Day>(table.keySet());
     }
 
+    /**
+     * Obtain a list of timetable events on a particular day.
+     * This list is not a view of the internal representation of the timetable.
+     * @param day The day of events to return
+     * @return A list of timetable events.
+     */
     public List<TimetableEvent> getDayEvents(Meeting.Day day) {
-        return table.get(day);
+        return new ArrayList<TimetableEvent>(table.get(day));
     }
 
-    public TimetableEvent get(Meeting.Day day, int i) {
-        return table.get(day).get(i);
+    /**
+     * Get the particular event of a day at an index.
+     * @param day The day of the event.
+     * @param index The index of the event on a day.
+     * @return A TimetableEvent at a specific day and index.
+     */
+    public TimetableEvent get(Meeting.Day day, int index) {
+        return table.get(day).get(index);
     }
 
     /**
@@ -131,7 +151,7 @@ public class Timetable {
     public List<TimetableEvent> toLeftRightList() {
         List<TimetableEvent> result = new ArrayList<TimetableEvent>();
         for (Meeting.Day day : table.keySet()) {
-            for (TimetableEvent event : getDayEvents(day)) {
+            for (TimetableEvent event : table.get(day)) {
                 result.add(event);
             }
         }
@@ -141,7 +161,7 @@ public class Timetable {
     /**
      * Obtains a top to bottom view of the table in a list. The list returned will have each
      * event sorted from earliest to latest and from left to right for each row.
-     * @return a sorted List fo TimetableEvents
+     * @return a sorted List of TimetableEvents
      */
     public List<TimetableEvent> toTopDownList() {
         List<TimetableEvent> result = new ArrayList<TimetableEvent>();
@@ -149,7 +169,7 @@ public class Timetable {
         for (int i = 0; cont; i++) {
             int counter = 0;
             for (Meeting.Day day : table.keySet()) {
-                List<TimetableEvent> events = getDayEvents(day);
+                List<TimetableEvent> events = table.get(day);
                 if (i < events.size()) {
                     result.add(events.get(i));
                 } else {
@@ -206,7 +226,7 @@ public class Timetable {
      * Used for transforming the Timetable into a queue. Weighted based on the end time of a
      * TimetableEvent, else compared by day of week.
      */
-    static class WeightedDay implements Comparable<WeightedDay> {
+    private static class WeightedDay implements Comparable<WeightedDay> {
         Meeting.Day day;
         int index;
         int weight;

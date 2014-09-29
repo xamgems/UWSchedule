@@ -1,8 +1,8 @@
 package com.amgems.uwschedule.model;
 
 /**
+ * An EventGroup is a Group of Events that represent the same type of Event.
  * @author Sherman Pay.
- * @version 0.1, 9/20/14.
  */
 public interface EventGroup {
     public String getUniqueId();

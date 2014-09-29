@@ -20,7 +20,6 @@ import android.widget.TextView;
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.model.Meeting;
-import com.amgems.uwschedule.model.PaddedCourseMeeting;
 import com.amgems.uwschedule.model.Timetable;
 import com.amgems.uwschedule.model.TimetableEvent;
 import com.amgems.uwschedule.provider.ScheduleContract;
@@ -55,6 +54,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     private static class ViewHolder {
         DynamicHeightTextView textView;
     }
+
     public ScheduleTableFragment() {
         // Required empty public constructor
     }
@@ -72,7 +72,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.schedule_table_fragment, container, false);
@@ -84,8 +84,7 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
             public View getView(int position, View convertView, ViewGroup parent) {
                 ViewHolder vh;
                 if (convertView == null) {
-                    convertView = View.inflate(getActivity(),R.layout.schedule_table_cell,
-                            null);
+                    convertView = inflater.inflate(R.layout.schedule_table_cell, container, false);
                     vh = new ViewHolder();
                     vh.textView = (DynamicHeightTextView) convertView.findViewById(R.id
                             .schedule_table_cell);
@@ -146,41 +145,11 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
         return result + ")";
     }
 
-    private Course courseInstance(Cursor data) {
-        String sln = data.getString(data.getColumnIndex(ScheduleContract.Courses.SLN));
-        String departmentCode = data.getString(data.getColumnIndex(
-                ScheduleContract.Courses.DEPARTMENT_CODE));
-        int courseNumber = data.getInt(data.getColumnIndex(ScheduleContract.Courses.COURSE_NUMBER));
-        String sectionId = data.getString(data.getColumnIndex(ScheduleContract.Courses.SECTION_ID));
-        int credits = data.getInt(data.getColumnIndex(ScheduleContract.Courses.CREDITS));
-        String title = data.getString(data.getColumnIndex(ScheduleContract.Courses.TITLE));
-        Course.Type type = Course.Type.getType(data.getString(data.getColumnIndex(ScheduleContract
-                .Courses.TYPE)));
-        return new Course(sln, departmentCode, courseNumber, sectionId, credits, title, type,
-                new ArrayList<Meeting>());
-    }
-
-    private Meeting meetingInstance(Cursor data) {
-        Set<Meeting.Day> meetDays = new HashSet<Meeting.Day>();
-        for (Meeting.Day day : Meeting.Day.values()) {
-            int hasMeet = data.getInt(data.getColumnIndex(day.getColumnName()));
-            if (hasMeet == ScheduleContract.Meetings.HAS_MEETING) {
-                meetDays.add(day);
-            }
-        }
-        String startTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
-                .START_TIME));
-        String endTime = data.getString(data.getColumnIndex(ScheduleContract.Meetings
-                .END_TIME));
-        String timespan = startTime + "-" + endTime;
-        String location = data.getString(data.getColumnIndex(ScheduleContract.Meetings.LOCATION));
-        Meeting.Builder builder = new Meeting.Builder(meetDays, timespan);
-        return builder.location(location).build();
-    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(ScheduleFragment.class.getSimpleName(), "Loader resetting");
+        mCourseMap = new TreeMap<String, Course>();
+        mColorMap = new HashMap<Course, Integer>();
     }
 
     @Override
@@ -191,13 +160,11 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
                 TypedArray colors = getResources().obtainTypedArray(R.array.colors);
                 int colorIndex = 0;
                 if (data.getCount() > 0) {
-                    data.moveToFirst();
-                    while (!data.isAfterLast()) {
-                        Course course = courseInstance(data);
+                    while (data.moveToNext()) {
+                        Course course = Course.fromCursor(data);
                         mCourseMap.put(course.getSln(), course);
                         mColorMap.put(course, colors.getColor(colorIndex++, 0));
                         slnList.add(course.getSln());
-                        data.moveToNext();
                     }
                     Bundle slnBundle = new Bundle();
                     slnBundle.putStringArrayList(BUNDLE_SLNS_KEY, (ArrayList<String>) slnList);
@@ -211,12 +178,10 @@ public class ScheduleTableFragment extends Fragment implements LoaderManager
             }
             case MEETING_CURSOR_LOADER: {
                 if (data.getCount() > 0) {
-                    data.moveToFirst();
-                    while (!data.isAfterLast()) {
-                        Meeting meeting = meetingInstance(data);
+                    while (data.moveToNext()) {
+                        Meeting meeting = Meeting.fromCursor(data);
                         String sln = data.getString(data.getColumnIndex(ScheduleContract.Meetings.SLN));
                         mCourseMap.get(sln).getMeetings().add(meeting);
-                        data.moveToNext();
                     }
 
                     Timetable timetable = new Timetable(new ArrayList<Course>(mCourseMap.values()));

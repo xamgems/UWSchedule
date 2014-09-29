@@ -2,10 +2,11 @@ package com.amgems.uwschedule.model;
 
 import android.support.annotation.NonNull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * @author Sherman Pay
- * @version 0.1, 9/6/14.
  * A special kind of TimetableEvent that represents a specific Meeting of a UW course.
+ * @author Sherman Pay
  */
 public class PaddedCourseMeeting implements TimetableEvent {
     private int beforePadding;
@@ -13,11 +14,13 @@ public class PaddedCourseMeeting implements TimetableEvent {
     private boolean firstEvent;
     private Event courseMeeting;
 
-    public PaddedCourseMeeting(CourseMeeting courseMeeting) {
+    public PaddedCourseMeeting(@NonNull CourseMeeting courseMeeting) {
+        checkNotNull(courseMeeting);
         this.courseMeeting = courseMeeting;
     }
 
-    public PaddedCourseMeeting(CourseMeeting courseMeeting, int beforePadding) {
+    public PaddedCourseMeeting(@NonNull CourseMeeting courseMeeting, int beforePadding) {
+        checkNotNull(courseMeeting);
         this.courseMeeting = courseMeeting;
         this.beforePadding = beforePadding;
     }
@@ -49,7 +52,7 @@ public class PaddedCourseMeeting implements TimetableEvent {
         return courseMeeting;
     }
 
-    public void setCourseMeeting(CourseMeeting courseMeeting) {
+    public void setCourseMeeting(@NonNull CourseMeeting courseMeeting) {
         this.courseMeeting = courseMeeting;
     }
 
