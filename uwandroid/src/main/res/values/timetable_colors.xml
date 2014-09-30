@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="colors">
+        <item name="red">@color/red</item>
+        <item name="pink">@color/pink</item>
+        <item name="purple">@color/purple</item>
+        <item name="deep_purple">@color/deep_purple</item>
+        <item name="indigo">@color/indigo</item>
+        <item name="blue">@color/blue</item>
+        <item name="light_blue">@color/light_blue</item>
+        <item name="cyan">@color/cyan</item>
+        <item name="teal">@color/teal</item>
+        <item name="green">@color/green</item>
+        <item name="light_green">@color/light_green</item>
+        <item name="lime">@color/lime</item>
+        <item name="yellow">@color/yellow</item>
+        <item name="amber">@color/amber</item>
+        <item name="orange">@color/orange</item>
+        <item name="deep_orange">@color/deep_orange</item>
+        <item name="brown">@color/brown</item>
+        <item name="gray">@color/gray</item>
+        <item name="blue_gray">@color/blue_gray</item>
+
+        <item name="white">@color/white</item>
+        <item name="silver">@color/silver</item>
+        <item name="dark_gray">@color/dark_gray</item>
+        <item name="light_gray">@color/light_gray</item>
+        <item name="offwhite">@color/offwhite</item>
+        <item name="black">@color/black</item>
+    </array>
+</resources>

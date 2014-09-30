@@ -20,6 +20,7 @@
 package com.amgems.uwschedule.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.amgems.uwschedule.provider.ScheduleContract;
@@ -34,11 +35,10 @@ import java.util.List;
  *
  * <p> This class is specified to be consistent with the various representations
  * of class schedules available from either the UW Registration or Time Schedule.</p>
+ *
+ * @author Sherman Pay
   */
-public class Course implements Parcelable {
-
-    // TODO: Expose the fields
-    // TODO: Customize GSON for Meetings
+public class Course implements Parcelable, EventGroup {
 
     @Expose
     @SerializedName("sln")
@@ -91,6 +91,15 @@ public class Course implements Parcelable {
             mTypeText = typeText;
         }
 
+        public static Type fromTypeText(String name) {
+            for (Type t : Type.values()) {
+                if (t.mTypeText.equals(name)) {
+                    return t;
+                }
+            }
+            throw new IllegalArgumentException("Course Type: " + name + " does not exist!");
+        }
+
         @Override
         public String toString() {
             return mTypeText;
@@ -110,8 +119,8 @@ public class Course implements Parcelable {
         }
     };
 
-    Course(String sln, String departmentCode, int courseNumber, String sectionId, int credits,
-           String title, Type type, List<Meeting> meetings) {
+    Course(String sln, String departmentCode, int courseNumber, String sectionId,
+           int credits, String title, Type type, List<Meeting> meetings) {
         mSln = sln;
         mDepartmentCode = departmentCode;
         mCourseNumber = courseNumber;
@@ -217,6 +226,20 @@ public class Course implements Parcelable {
         return contentValues;
     }
 
+    public static Course fromCursor(Cursor data) {
+        String sln = data.getString(data.getColumnIndex(ScheduleContract.Courses.SLN));
+        String departmentCode = data.getString(data.getColumnIndex(
+                ScheduleContract.Courses.DEPARTMENT_CODE));
+        int courseNumber = data.getInt(data.getColumnIndex(ScheduleContract.Courses.COURSE_NUMBER));
+        String sectionId = data.getString(data.getColumnIndex(ScheduleContract.Courses.SECTION_ID));
+        int credits = data.getInt(data.getColumnIndex(ScheduleContract.Courses.CREDITS));
+        String title = data.getString(data.getColumnIndex(ScheduleContract.Courses.TITLE));
+        Course.Type type = Course.Type.fromTypeText(data.getString(data.getColumnIndex(ScheduleContract
+                .Courses.TYPE)));
+        return  Course.newInstance(sln, departmentCode, courseNumber, sectionId, credits, title,
+                type, new ArrayList<Meeting>());
+    }
+
     public String getSln() {
         return mSln;
     }
@@ -249,6 +272,11 @@ public class Course implements Parcelable {
         return mMeetings;
     }
 
+    @Override
+    public String getUniqueId() {
+        return getSln();
+    }
+
     /**
      * Returns a brief description of this {@link Course}. The exact details
      * of this representation are unspecified and subject to change,
@@ -267,9 +295,10 @@ public class Course implements Parcelable {
                 " deptcode : " + getDepartmentCode() + ",\n" +
                 " coursenum : " + getCourseNumber() + "\n" +
                 " sectid : " + getSectionId() + "\n" +
-                " type: " + getType() + "\n" +
+                " type : " + getType() + "\n" +
                 " title : " + getTitle() + "\n" +
                 " credits : " + getCredits() + "\n" +
+                " meetings :" + getMeetings() + "\n" +
                 "}";
 
     }

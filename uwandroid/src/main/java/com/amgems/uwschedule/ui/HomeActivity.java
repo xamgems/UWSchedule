@@ -41,6 +41,9 @@ import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.local.AsyncDataHandler;
 import com.amgems.uwschedule.api.local.WebService;
 import com.amgems.uwschedule.api.uw.CookieStore;
+import com.amgems.uwschedule.model.Account;
+import com.amgems.uwschedule.model.Course;
+import com.amgems.uwschedule.provider.ScheduleDatabaseHelper;
 import com.amgems.uwschedule.loaders.GetSlnLoader;
 import com.amgems.uwschedule.model.Course;
 import com.amgems.uwschedule.provider.ScheduleContract;
@@ -144,7 +147,6 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     private void enableDeathThreadPolicy() {
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
-                .penaltyLog()
                 .penaltyDeath()
                 .build());
     }
@@ -233,7 +235,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
      */
     private static class CoursesFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private static int TAB_COUNT = 2;
+        private static int TAB_COUNT = 3;
 
         public CoursesFragmentPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -243,6 +245,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         public Fragment getItem(int i) {
             if (i == 0) {
                 return ScheduleFragment.newInstance();
+            } else if (i == 1) {
+                return ScheduleTableFragment.newInstance();
             } else {
                 DebugFragment debugFragment = DebugFragment.newInstance();
                 mPublisher.register(debugFragment);
