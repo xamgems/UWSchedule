@@ -7,7 +7,8 @@ import com.google.common.primitives.Ints;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Represents a concrete occurence of a Meeting for a particular Course at a particular time span.
+ * Represents a concrete occurrence of a Meeting for a particular Course at a particular time span.
+ *
  * @author Sherman Pay.
  */
 public class CourseMeeting implements Event {

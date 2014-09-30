@@ -20,6 +20,7 @@ import java.util.Queue;
  * </p>
  * Various Collection views of the Timetable can be obtained via its methods.
  * @see com.amgems.uwschedule.model.TimetableEvent
+ *
  * @author Sherman Pay
  */
 public class Timetable {

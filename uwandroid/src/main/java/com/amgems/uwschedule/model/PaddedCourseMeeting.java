@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A special kind of TimetableEvent that represents a specific Meeting of a UW course.
+ *
  * @author Sherman Pay
  */
 public class PaddedCourseMeeting implements TimetableEvent {

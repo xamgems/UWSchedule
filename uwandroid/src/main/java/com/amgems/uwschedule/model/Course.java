@@ -35,6 +35,8 @@ import java.util.List;
  *
  * <p> This class is specified to be consistent with the various representations
  * of class schedules available from either the UW Registration or Time Schedule.</p>
+ *
+ * @author Sherman Pay
   */
 public class Course implements Parcelable, EventGroup {
 

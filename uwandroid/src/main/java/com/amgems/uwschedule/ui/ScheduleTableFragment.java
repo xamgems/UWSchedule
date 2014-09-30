@@ -37,6 +37,8 @@ import java.util.TreeMap;
 
 /**
  * A {@link Fragment} that displays a particular list of courses as a timetable.
+ *
+ * @author Sherman Pay.
  */
 public class ScheduleTableFragment extends Fragment implements LoaderManager
         .LoaderCallbacks<Cursor> {

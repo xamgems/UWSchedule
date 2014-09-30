@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
  *
  * Meetings expose information about the time, location and instructor
  * for any given course.
+ *
+ * @author Sherman Pay
  */
 public class Meeting implements Parcelable {
     public static final int EARLIEST = 730;
