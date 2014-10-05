@@ -36,7 +36,13 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
 import com.amgems.uwschedule.R;
 import com.amgems.uwschedule.api.Response;
 import com.amgems.uwschedule.api.uw.CookieStore;
@@ -83,29 +89,13 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.login_activity);
-
-        mRootGroup = (ViewGroup) findViewById(R.id.login_root);
-        mLogoImage = (ImageView) findViewById(R.id.husky_logo);
-        mPasswordEditText = (EditText) findViewById(R.id.password);
-        mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
-        mUsernameEditText = (EditText) findViewById(R.id.username);
-        mRememberMeBox = (CheckBox) findViewById(R.id.remember_me);
-
-        int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_LARGE,
-                getResources().getDisplayMetrics());
-        mLogoParamsInputGone = new RelativeLayout.LayoutParams(logoPixelSizeSmall, logoPixelSizeSmall);
-        mLogoParamsInputGone.addRule(RelativeLayout.CENTER_HORIZONTAL);
-
-        int logoPixelSizeLarge = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_SMALL,
-                getResources().getDisplayMetrics());
-        mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
-        mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        setupViews();
 
         // Initialize CookieStore for persisting and writing cookie data
         mCookieStore = CookieStore.getInstance(getApplicationContext());
 
         // Initialize SharedPreferences for persisting safe login data
-        mLoginPreferences = getPreferences(MODE_PRIVATE);
+        mLoginPreferences = getPreferences(Context.MODE_PRIVATE);
         String defaultUsername = mLoginPreferences.getString(PREFS_LOGIN_USERNAME,
                 mUsernameEditText.getText().toString());
         mUsernameEditText.setText(defaultUsername);
@@ -175,8 +165,26 @@ public class LoginActivity extends Activity
         mCookieStore.flushActiveCookie();
     }
 
-    public void disableLoginInput() {
+    private void setupViews() {
+        mRootGroup = (ViewGroup) findViewById(R.id.login_root);
+        mLogoImage = (ImageView) findViewById(R.id.husky_logo);
+        mPasswordEditText = (EditText) findViewById(R.id.password);
+        mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
+        mUsernameEditText = (EditText) findViewById(R.id.username);
+        mRememberMeBox = (CheckBox) findViewById(R.id.remember_me);
 
+        int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_LARGE,
+                getResources().getDisplayMetrics());
+        mLogoParamsInputGone = new RelativeLayout.LayoutParams(logoPixelSizeSmall, logoPixelSizeSmall);
+        mLogoParamsInputGone.addRule(RelativeLayout.CENTER_HORIZONTAL);
+
+        int logoPixelSizeLarge = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_SMALL,
+                getResources().getDisplayMetrics());
+        mLogoParamsInputVisible = new RelativeLayout.LayoutParams(logoPixelSizeLarge, logoPixelSizeLarge);
+        mLogoParamsInputVisible.addRule(RelativeLayout.CENTER_HORIZONTAL);
+    }
+
+    public void disableLoginInput() {
         mProgressBarGroup.setVisibility(View.VISIBLE);
         mUsernameEditText.setVisibility(View.GONE);
         mPasswordEditText.setVisibility(View.GONE);

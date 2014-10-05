@@ -84,6 +84,7 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
+        setupViews();
 
         getContentResolver().delete(ScheduleContract.Courses.CONTENT_URI, null, null);
         getContentResolver().delete(ScheduleContract.Meetings.CONTENT_URI, null, null);
@@ -92,16 +93,8 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         mUsername = getIntent().getStringExtra(EXTRAS_HOME_USERNAME);
         mCookieStore = CookieStore.getInstance(getApplicationContext());
 
-        // Initialize view references
-        mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayoutRoot, R.drawable.ic_drawer,
-                                                  R.string.drawer_open, R.string.drawer_closed);
-        mDrawerLayoutRoot.setDrawerListener(mDrawerToggle);
-        mCoursesViewPager = (ViewPager) findViewById(R.id.courses_pager);
-        mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
-        mDrawerEmailTextView = (TextView) findViewById(R.id.home_drawer_email);
-
         // Set up navigation drawer items
+        mDrawerLayoutRoot.setDrawerListener(mDrawerToggle);
         List<DrawerListAdapter.Group> drawerGroups = new ArrayList<DrawerListAdapter.Group>();
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_home, R.drawable.ic_nav_home));
         drawerGroups.add(new DrawerListAdapter.Group(R.string.drawer_group_friends, R.drawable.ic_nav_friends));
@@ -141,10 +134,19 @@ public class HomeActivity extends FragmentActivity implements LoaderManager.Load
         };
      }
 
+    private void setupViews() {
+        mDrawerLayoutRoot = (DrawerLayout) findViewById(R.id.home_drawer_root);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayoutRoot, R.drawable.ic_drawer,
+                R.string.drawer_open, R.string.drawer_closed);
+        mCoursesViewPager = (ViewPager) findViewById(R.id.courses_pager);
+        mDrawerListView = (ExpandableListView) findViewById(R.id.home_drawer_listview);
+        mDrawerEmailTextView = (TextView) findViewById(R.id.home_drawer_email);
+    }
+
     /**
      * Helper method for enabling death penalty on strict mode.
      */
-    private void enableDeathThreadPolicy() {
+    private static void enableDeathThreadPolicy() {
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyDeath()
