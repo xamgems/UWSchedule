@@ -104,8 +104,7 @@ public class LoginActivity extends Activity
                 mPasswordEditText.getText().toString());
         mPasswordEditText.setText(defaultPassword);
 
-        boolean checked = mLoginPreferences.getBoolean(PREFS_LOGIN_REMEMBER,
-                false);
+        boolean checked = mLoginPreferences.getBoolean(PREFS_LOGIN_REMEMBER, false);
         mRememberMeBox.setChecked(checked);
 
         // Initialize LoaderManager for async authentication
@@ -129,7 +128,6 @@ public class LoginActivity extends Activity
             }
         });
 
-        mSyncButton = (Button) findViewById(R.id.sync_button);
         mSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -172,6 +170,7 @@ public class LoginActivity extends Activity
         mProgressBarGroup = (ViewGroup) findViewById(R.id.login_progress_group);
         mUsernameEditText = (EditText) findViewById(R.id.username);
         mRememberMeBox = (CheckBox) findViewById(R.id.remember_me);
+        mSyncButton = (Button) findViewById(R.id.sync_button);
 
         int logoPixelSizeSmall = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, LOGO_PIXSIZE_LARGE,
                 getResources().getDisplayMetrics());
